@@ -1,4 +1,4 @@
-# This does MCMC, either using raw statistic, or using NN transform,
+# This does MLE and then MCMC, either using raw statistic, or using NN transform,
 # depending on the argument usenn
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
 using BSON:@load

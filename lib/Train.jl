@@ -3,19 +3,16 @@ using Base.Iterators
 using BSON: @load
 using BSON: @save
 
-# smoothed QR objective
-function SmoothQRobj(yhat, y, τ, α=0.02)
-    ξ = y .- yhat
-    sum(τ.*ξ .+ α.*log.(1.0 .+ exp.(-1.0 .* ξ./α)))
-end
-
 function Train(TrainingTestingSize)
-    # find out how many parameters
+    # basic configuration
+    #find out how many parameters
     lb, ub = PriorSupport()
     nParams = size(lb,1)
     # size of training/testing
     TrainingProportion = 0.5
     Epochs = 1000 # passes through entire training set
+    
+    # read the training/testing data, and define the splits
     @load "cooked_data.bson" params statistics
     params = Float32.(params)
     statistics = Float32.(statistics)
@@ -25,30 +22,31 @@ function Train(TrainingTestingSize)
     yout = params[trainsize+1:end, :]'
     xin = statistics[1:trainsize, :]'
     xout = statistics[trainsize+1:end, :]'
-    # model
+    
+    # define the neural net
     nStats = size(xin,1)
     model = Chain(
-        Dense(nStats,3*nStats, tanh),
-        Dense(3*nStats,3*nParams, tanh),
+        Dense(nStats,3*nStats, leakyrelu),
+        Dense(3*nStats,3*nParams, leakyrelu),
         Dense(3*nParams, nParams)
     )
     θ = Flux.params(model)
     opt = AdaMax()
-    # weight by inverse std. dev. of params, to put equal weight
+    
+    # Define the loss function
+    # weight by inverse std. dev. of params in sample from prior, to put equal weight
     s = Float32.(std(params,dims=1)')
-    # Select the objective here: ordinary regression or (smoothed) quantile regression
     rmse(x,y) = sqrt.(Flux.mse(model(x)./s,y./s)) 
-    # set the weight relative to RMSE
+    # set the penalty weight relative to RMSE
     weight = 0.01*rmse(xin,yin)/norm(θ) 
-    @show weight 
     loss(x,y) = sqrt.(Flux.mse(model(x)./s,y./s)) .+ weight.*norm(θ)
     
-    #τ = 0.5  # choose the quantile you want
-    #loss(x,y) = QRobj(model(x),y, τ)
-    #loss(x,y) = SmoothQRobj(model(x)./s,y./s, τ)
+    # monitor training
     function monitor(e)
         println("epoch $(lpad(e, 4)): (training) loss = $(round(loss(xin,yin); digits=4)) (testing) loss = $(round(loss(xout,yout); digits=4))| ")
     end
+
+    # do the training
     bestsofar = 1.0e10
     pred = 0.0 # define it here to have it outside the for loop
     batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 128)];
@@ -62,7 +60,7 @@ function Train(TrainingTestingSize)
             yy = yout
             println("________________________________________________________________________________________________")
             monitor(i)
-            pred = model(xx) # map pred to param space
+            pred = model(xx)
             error = yy .- pred
             results = [pred;error]
             rmse = sqrt.(mean(error.^Float32(2.0),dims=2))

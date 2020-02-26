@@ -1,3 +1,5 @@
+# makes the training and testing data
+
 using Econometrics, StatsBase
 using BSON: @load
 using BSON: @save
@@ -13,16 +15,15 @@ function MakeData(S)
         while ok != 1.0
             v = rand(size(lb,1))
             θ = v.*(ub-lb) + lb
-            ok = Prior(θ)
+            ok = Prior(θ) # note: some draws in bounds may not be in support
             if ok != 1.0
             end    
         end    
-        m = ILSNM_model(θ)
+        W = ILSNM_model(θ) # draw the raw statistics
         if s == 1
-            data = zeros(S, size(vcat(θ, m),1))
+            data = zeros(S, size(vcat(θ, W),1))
         end
-        #data[s,:] = vcat(-log.(1.0./v .- 1.0), m)
-        data[s,:] = vcat(θ, m)
+        data[s,:] = vcat(θ, W)
     end
     # save needed items with standard format
     @save "raw_data.bson" data

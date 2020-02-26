@@ -1,3 +1,6 @@
+# this function transforms the input statistics
+# to limit outliers, using quantiles
+
 using Econometrics, StatsBase, DelimitedFiles
 using BSON: @load
 using BSON: @save
