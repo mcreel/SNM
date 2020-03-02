@@ -1,17 +1,17 @@
 using Pkg
 Pkg.activate("../")
 
-run_title = "no_Jacobian"
-useJacobian = false
-mcreps = 100
+run_title = "raw_statistic"
+useJacobian = true
+mcreps = 500
 
 # this is the code for the DFM model
-#include("DFM/DFMlib.jl")
-#global const θtrue = [0.95, 0.5, 1.0]
+include("DFM/DFMlib.jl")
+global const θtrue = [0.95, 0.5, 1.0]
 
 # this is the code for the DPD model
-include("DPD/DPDlib.jl")
-global const θtrue = [0.6, 1.0, 2.0]
+#include("DPD/DPDlib.jl")
+#global const θtrue = [0.6, 1.0, 2.0]
 
 # this is the code for the SV  model
 #include("SV/SVlib.jl")
@@ -39,29 +39,29 @@ writedlm("info", info)
 # when this is done, can delete raw_data.bson
 
 # train the net using the transformed training/testing data
-Train(TrainingTestingSize)
+#Train(TrainingTestingSize)
 # when this is done, can delete cooked_data.bson
 
-#results_raw = zeros(mcreps,6*nParams)
-results_NN = zeros(mcreps,6*nParams)
+results_raw = zeros(mcreps,6*nParams)
+#results_NN = zeros(mcreps,6*nParams)
 info = readdlm("info")
 for mcrep = 1:mcreps
     # generate a draw at true params
     m = ILSNM_model(θtrue)    
     # do full statistic MSM Bayesian estimation
-#    @time chain, θmile = MCMC(m, false, info, useJacobian)
-#    results_raw[mcrep,:] = vcat(θmile, Analyze(chain))
+    @time chain, θmile = MCMC(m, false, info, useJacobian)
+    results_raw[mcrep,:] = vcat(θmile, Analyze(chain))
     # do NN statistic MSM Bayesian estimation
-    @time chain, θmile = MCMC(m, true, info, useJacobian)
-    results_NN[mcrep,:] = vcat(θmile, Analyze(chain))
+#    @time chain, θmile = MCMC(m, true, info, useJacobian)
+#    results_NN[mcrep,:] = vcat(θmile, Analyze(chain))
     println("__________ replication: ", mcrep, "_______________")
-#    println("Results so far, raw stat")
-#    dstats(results_raw[1:mcrep,:])
-    println("Results so far, NN stat")
-    dstats(results_NN[1:mcrep,:])
+    println("Results so far, raw stat")
+    dstats(results_raw[1:mcrep,:])
+#    println("Results so far, NN stat")
+#    dstats(results_NN[1:mcrep,:])
     println("____________________________")
 end
-#writedlm(run_title*"_raw", results_raw)
-writedlm(run_title*"_NN", results_NN)
+writedlm(run_title*"_raw", results_raw)
+#writedlm(run_title*"_NN", results_NN)
 end
 RunProject()
