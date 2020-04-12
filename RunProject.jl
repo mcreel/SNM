@@ -1,12 +1,12 @@
 using Pkg
 Pkg.activate("../")
 
-run_title = "baseline"
+run_title = "4_X_sample"
 useJacobian = true
 mcreps = 500
 
 # this is the code for the DFM model
-include("ARMS/ARMAlib.jl")
+include("ARMA/ARMAlib.jl")
 global const θtrue = [0.95, 0.5, 1.0]
 
 # this is the code for the DPD model
@@ -27,7 +27,7 @@ include("lib/MCMC.jl")
 function RunProject()
 lb, ub = PriorSupport()
 nParams = size(lb,1)
-TrainingTestingSize = Int64(nParams*2*1e4) # 10,000 training and testing for each param
+TrainingTestingSize = Int64(nParams*2*1e4) # 25,000 training and testing for each param
 # find out number of parameters
 lb, ub = PriorSupport()
 nParams = size(lb,1)

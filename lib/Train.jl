@@ -26,20 +26,19 @@ function Train(TrainingTestingSize)
     # define the neural net
     nStats = size(xin,1)
     model = Chain(
-        Dense(nStats,3*nStats, leakyrelu),
-        Dense(3*nStats,3*nParams, leakyrelu),
-        Dense(3*nParams, nParams)
+        Dense(nStats, 100*nParams, relu),
+        Dense(100*nParams, nParams)
     )
     θ = Flux.params(model)
-    opt = AdaMax()
+    opt = ADAM()
     
     # Define the loss function
     # weight by inverse std. dev. of params in sample from prior, to put equal weight
     s = Float32.(std(params,dims=1)')
-    rmse(x,y) = sqrt.(Flux.mse(model(x)./s,y./s)) 
+    mse(x,y) = Flux.mse(model(x)./s,y./s) 
     # set the penalty weight relative to RMSE
-    weight = 0.01*rmse(xin,yin)/norm(θ) 
-    loss(x,y) = sqrt.(Flux.mse(model(x)./s,y./s)) .+ weight.*norm(θ)
+    #weight = 0.01*mse(xin,yin)/sum(norm,θ) 
+    loss(x,y) = mse(x,y) #.+ weight.*sum(norm,θ)
     
     # monitor training
     function monitor(e)
@@ -49,7 +48,7 @@ function Train(TrainingTestingSize)
     # do the training
     bestsofar = 1.0e10
     pred = 0.0 # define it here to have it outside the for loop
-    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 128)];
+    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 1024)];
     for i = 1:Epochs
         Flux.train!(loss, θ, batches, opt)
         current = loss(xout,yout)

@@ -40,15 +40,15 @@ function MCMC(m, usenn, info, useJacobian=true)
     # define things for MCMC
     verbosity = false
     ChainLength = 1000
-    MCMCburnin = 10
-    tuning = 0.1/sqrt(12.0)*(ub-lb) # one-tenth of a standard. dev. of prior
+    MCMCburnin = 100
+    tuning = 0.2/sqrt(12.0)*(ub-lb) # two tenths of a standard. dev. of prior
     Proposal = θ -> proposal1(θ, tuning)
     chain = mcmc(θmile, ChainLength, MCMCburnin, prior, lnL, Proposal, verbosity)
     # now use a MVN random walk proposal with updates of covariance and longer chain
     # on final loop
     Σ = NeweyWest(chain[:,1:nParams])
     tuning = 1.0
-    MC_loops = 2 # one round to adjust covariance, then the final
+    MC_loops = 4
     @inbounds for j = 1:MC_loops
         P = try
             P = (cholesky(Σ)).U
@@ -68,7 +68,7 @@ function MCMC(m, usenn, info, useJacobian=true)
             elseif accept < 0.25
                 tuning *= 0.25
             end
-            Σ = 0.5*Σ + 0.5*NeweyWest(chain[:,1:nParams])
+            Σ = NeweyWest(chain[:,1:nParams])
         end    
     end
     chain = chain[:,1:nParams]

@@ -25,16 +25,18 @@ end
 
 function ILSNM_model(θ)
     x = arma11(θ)
-    x = x .- mean(x)
+    s = std(x)
+    #x = x ./s
+    c = cor(x[2:end,:],x[1:end-1])
     n = size(x,1)
-    αols, junk, f = lsfit(x[2:end,:], x[1:end-1,:])
-    βols, junk, u = lsfit(f[2:end], f[1:end-1])
-    σols = std(u)
-    # cov and autocov
-    aols = std(f)
-    bols = cor(f[2:end],f[1:end-1])
-    # acf and pacf
-    vcat(std(x), αols, βols, σols, aols, bols, pacf(x,collect(1:4)), autocor(x,collect(1:4)))
+    b, junk, u, junk, junk = tsls(x[4:end,:], x[3:end-1,:],[x[1:end-3,:] x[2:end-2]]; silent=true)
+    ϕ, junk, u = lsfit(u[2:end,:], u[1:end-1,:])
+    σ = std(u)
+    b2, junk, u = lsfit(x[2:end,:], x[1:end-1,:])
+    ϕ2, junk, u = lsfit(u[2:end,:], u[1:end-1,:])
+    σ2 = std(u)
+#    vcat(std(x), c, b, ϕ, σ,b2, ϕ2, σ2)#, pacf(x,collect(1:4)), autocor(x,collect(1:4)))
+    vcat(c, b, ϕ, σ, b2, ϕ2, σ2, pacf(x,collect(1:4)))
 end    
 
 function PriorSupport()
@@ -52,8 +54,6 @@ function PriorDraw()
     lb, ub = PriorSupport()
     (ub - lb) .* rand(3) + lb
 end
-
-
 
 # prior just checks that we're in the bounds
 function Prior(theta)
