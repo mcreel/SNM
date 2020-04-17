@@ -1,8 +1,8 @@
 using Pkg
 Pkg.activate("../")
 
-run_title = "4_X_sample"
-useJacobian = true
+run_title = "no_Jacobian"
+useJacobian = false
 mcreps = 500
 
 # this is the code for the DFM model
@@ -28,40 +28,36 @@ function RunProject()
 lb, ub = PriorSupport()
 nParams = size(lb,1)
 TrainingTestingSize = Int64(nParams*2*1e4) # 25,000 training and testing for each param
-# find out number of parameters
-lb, ub = PriorSupport()
-nParams = size(lb,1)
+
 # generate the raw training data
 MakeData(TrainingTestingSize)
 # transform the raw statistics, and split out params and stats
 info = Transform()
 writedlm("info", info)
 # when this is done, can delete raw_data.bson
-
 # train the net using the transformed training/testing data
 Train(TrainingTestingSize)
 # when this is done, can delete cooked_data.bson
-
-results_raw = zeros(mcreps,6*nParams)
+#results_raw = zeros(mcreps,6*nParams)
 results_NN = zeros(mcreps,6*nParams)
 info = readdlm("info")
 for mcrep = 1:mcreps
     # generate a draw at true params
     m = ILSNM_model(θtrue)    
     # do full statistic MSM Bayesian estimation
-    @time chain, θmile = MCMC(m, false, info, useJacobian)
-    results_raw[mcrep,:] = vcat(θmile, Analyze(chain))
+#    @time chain, θmile = MCMC(m, false, info, useJacobian)
+#    results_raw[mcrep,:] = vcat(θmile, Analyze(chain))
     # do NN statistic MSM Bayesian estimation
     @time chain, θmile = MCMC(m, true, info, useJacobian)
     results_NN[mcrep,:] = vcat(θmile, Analyze(chain))
     println("__________ replication: ", mcrep, "_______________")
-    println("Results so far, raw stat")
-    dstats(results_raw[1:mcrep,:])
+#    println("Results so far, raw stat")
+#    dstats(results_raw[1:mcrep,:])
     println("Results so far, NN stat")
     dstats(results_NN[1:mcrep,:])
     println("____________________________")
 end
-writedlm(run_title*"_raw", results_raw)
+#writedlm(run_title*"_raw", results_raw)
 writedlm(run_title*"_NN", results_NN)
 end
 RunProject()

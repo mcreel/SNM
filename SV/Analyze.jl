@@ -4,8 +4,9 @@ using Econometrics, DelimitedFiles, Statistics
 θtrue = [exp(-0.736/2.0), 0.9, 0.363]
 files = [
     "baseline_NN",
+    "baseline_raw",
     "no_Jacobian_NN"];
-for j = 1:2
+for j = 1:3
     d = readdlm(files[j])
     error = d[:,1:3] .- θtrue'
     b = mean(error, dims=1) ./θtrue'

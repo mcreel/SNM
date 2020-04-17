@@ -1,5 +1,6 @@
 [deps]
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Econometrics = "4d6a76a9-bfbc-5492-8924-cf6ed7875f06"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
