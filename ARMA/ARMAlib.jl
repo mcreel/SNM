@@ -26,17 +26,12 @@ end
 function ILSNM_model(θ)
     x = arma11(θ)
     s = std(x)
-    #x = x ./s
     c = cor(x[2:end,:],x[1:end-1])
     n = size(x,1)
-    b, junk, u, junk, junk = tsls(x[4:end,:], x[3:end-1,:],[x[1:end-3,:] x[2:end-2]]; silent=true)
-    ϕ, junk, u = lsfit(u[2:end,:], u[1:end-1,:])
+    b, varb, u, junk1, rsq  = ols(x[2:end,:], x[1:end-1,:], silent=true)
+    ϕ, varϕ, u, junk2, rsq2 = ols(u[2:end,:], u[1:end-1,:], silent=true)
     σ = std(u)
-    b2, junk, u = lsfit(x[2:end,:], x[1:end-1,:])
-    ϕ2, junk, u = lsfit(u[2:end,:], u[1:end-1,:])
-    σ2 = std(u)
-#    vcat(std(x), c, b, ϕ, σ,b2, ϕ2, σ2)#, pacf(x,collect(1:4)), autocor(x,collect(1:4)))
-    vcat(c, b, ϕ, σ, b2, ϕ2, σ2, pacf(x,collect(1:4)))
+    vcat(c, b, varb, rsq, ϕ, varϕ, rsq2, σ, pacf(x,collect(1:4)))
 end    
 
 function PriorSupport()
