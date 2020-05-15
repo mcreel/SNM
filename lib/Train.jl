@@ -11,7 +11,6 @@ function Train(TrainingTestingSize)
     # size of training/testing
     TrainingProportion = 0.5
     Epochs = 1000 # passes through entire training set
-    
     # read the training/testing data, and define the splits
     @load "cooked_data.bson" params statistics
     params = Float32.(params)
@@ -22,24 +21,19 @@ function Train(TrainingTestingSize)
     yout = params[trainsize+1:end, :]'
     xin = statistics[1:trainsize, :]'
     xout = statistics[trainsize+1:end, :]'
-    
     # define the neural net
     nStats = size(xin,1)
     model = Chain(
-        Dense(nStats, 100*nParams, relu),
-        Dense(100*nParams, nParams)
+        Dense(nStats, 10*nParams, tanh),
+        Dense(10*nParams, nParams)
     )
     θ = Flux.params(model)
-    opt = ADAM()
-    
+    opt = ADAGrad()
     # Define the loss function
     # weight by inverse std. dev. of params in sample from prior, to put equal weight
     s = Float32.(std(params,dims=1)')
-    mse(x,y) = Flux.mse(model(x)./s,y./s) 
-    # set the penalty weight relative to RMSE
-    #weight = 0.01*mse(xin,yin)/sum(norm,θ) 
-    loss(x,y) = mse(x,y) #.+ weight.*sum(norm,θ)
-    
+    #loss(x,y) = sqrt.(Flux.mse(model(x)./s,y./s))
+    loss(x,y) = Flux.mse(model(x),y)
     # monitor training
     function monitor(e)
         println("epoch $(lpad(e, 4)): (training) loss = $(round(loss(xin,yin); digits=4)) (testing) loss = $(round(loss(xout,yout); digits=4))| ")

@@ -48,7 +48,7 @@ function MCMC(m, usenn, info, useJacobian=true)
     # on final loop
     Σ = NeweyWest(chain[:,1:nParams])
     tuning = 1.0
-    MC_loops = 4
+    MC_loops = 5
     @inbounds for j = 1:MC_loops
         P = try
             P = (cholesky(Σ)).U
@@ -57,7 +57,7 @@ function MCMC(m, usenn, info, useJacobian=true)
         end    
         Proposal = θ -> proposal2(θ,tuning*P)
         if j == MC_loops
-            ChainLength = 5000
+            ChainLength = 10000
         end    
         θinit = mean(chain[:,1:3],dims=1)[:]
         chain = mcmc(θinit, ChainLength, 0, prior, lnL, Proposal, verbosity)
@@ -68,7 +68,7 @@ function MCMC(m, usenn, info, useJacobian=true)
             elseif accept < 0.25
                 tuning *= 0.25
             end
-            Σ = NeweyWest(chain[:,1:nParams])
+            Σ = 0.5*Σ + 0.5*NeweyWest(chain[:,1:nParams])
         end    
     end
     chain = chain[:,1:nParams]

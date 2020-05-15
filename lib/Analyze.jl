@@ -2,8 +2,8 @@ using Statistics, Econometrics
 function Analyze(chain)
     lb,ub = PriorSupport()
     nParams = size(lb,1)
-    posmean = vec(mean(chain,dims=1))
-    posmedian = vec(median(chain,dims=1))
+    #posmean = vec(mean(chain,dims=1))
+    #posmedian = vec(median(chain,dims=1))
     inci01 = zeros(nParams)
     inci05 = zeros(nParams)
     inci10 = zeros(nParams)
@@ -20,6 +20,7 @@ function Analyze(chain)
         upper[i] = quantile(chain[:,i],0.95)
         inci10[i] = θtrue[i] >= lower[i] && θtrue[i] <= upper[i]
     end
-    return vcat(posmean[:], posmedian[:], inci01[:], inci05[:], inci10[:])
+    #return vcat(posmean[:], posmedian[:], inci01[:], inci05[:], inci10[:])
+    return vcat(inci01[:], inci05[:], inci10[:])
 end   
 
