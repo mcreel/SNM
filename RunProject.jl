@@ -5,12 +5,12 @@ run_title = "baseline"
 mcreps = 500
 
 # this is the code for the DFM model
-include("ARMA/ARMAlib.jl")
-global const θtrue = [0.95, 0.5, 1.0]
+#include("ARMA/ARMAlib.jl")
+#global const θtrue = [0.95, 0.5, 1.0]
 
 # this is the code for the DPD model
-#include("DPD/DPDlib.jl")
-#global const θtrue = [0.6, 1.0, 2.0]
+include("DPD/DPDlib.jl")
+global const θtrue = [0.6, 1.0, 2.0]
 
 # this is the code for the SV  model
 #include("SV/SVlib.jl")
