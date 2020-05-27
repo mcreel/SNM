@@ -3,8 +3,8 @@ Pkg.activate("../")
 using Econometrics, DelimitedFiles, Statistics
 θtrue = [0.95,0.5,1.0]
 files = [
-    "baseline_NN",
     "baseline_raw",
+    "baseline_NN",
     "baseline_no_Jacobian"];
 for j = 1:3
     d = readdlm(files[j])
