@@ -3,9 +3,10 @@ Pkg.activate(".")
 using Econometrics, DelimitedFiles, Statistics
 
 files = [
+    "baseline_GMM",
     "baseline_NN",
-    "baseline_no_Jacobian",
-    "baseline_raw"]
+    "baseline_no_Jacobian"]
+
 
 function getresults()
     for i = 1:3
