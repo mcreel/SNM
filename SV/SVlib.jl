@@ -8,11 +8,12 @@ function ILSNM_model(θ)
     y = abs.(y)
     m = mean(y)
     s2 = std(y)
-    k = std((y.-m).^2.0)
+    y = (y .- m) ./s2
+    k = std((y).^2.0)
     c = cor(y[1:end-1],y[2:end])
     # ratios of quantiles of moving averages to detect clustering
     q = try
-        q = quantile(ma(y./s2,2), [0.25, 0.75])
+        q = quantile((ma(y,3)[3:end]), [0.25, 0.75])
     catch
         q = [1.0, 0.0]
     end
