@@ -32,7 +32,7 @@ function getresults()
             d = readdlm(dir*files[j])
             error = d[:,1:3] .- θtrue'
             b[:,j] = mean(error, dims=1) #./θtrue'
-            r[:,j] = sqrt.(mean(error.^2.0, dims=1)) #./θtrue'
+            r[:,j] = sqrt.(mean(error.^2.0, dims=1))# ./θtrue'
             c99[:,j] = mean(d[:,4:6], dims=1)
             c95[:,j] = mean(d[:,7:9], dims=1)
             c90[:,j] = mean(d[:,10:12], dims=1)
