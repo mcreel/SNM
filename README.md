@@ -1,5 +1,7 @@
 # SNM
-Code to accompany the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>
+Release v1.0 is the code to accompany the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>
+
+code in master is in development
 
 ![example](https://github.com/mcreel/SNM/blob/master/abstract.png)
 
