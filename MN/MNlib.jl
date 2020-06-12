@@ -1,22 +1,14 @@
-using Distributions, KissABC
-
 function ILSNM_model(θ)
     n = 5000
-    data=mixture_model(θ,5000)
-    sqrt(Float64(n)).*aux_stat(data)
-end    
-
-
-function mixture_model(P,N)
-    μ_1, μ_2, σ_1, σ_2, prob=P
-    d1=randn(N).*σ_1 .+ μ_1
-    d2=randn(N).*σ_2 .+ μ_2
-    ps=rand(N).<prob
-    data=zeros(N)
+    μ_1, μ_2, σ_1, σ_2, prob = θ
+    d1=randn(n).*σ_1 .+ μ_1
+    d2=randn(n).*σ_2 .+ μ_2
+    ps=rand(n).<prob
+    data=zeros(n)
     data[ps].=d1[ps]
     data[.!ps].=d2[.!ps]
-    data
-end
+    sqrt(Float64(n)).*aux_stat(data)
+end    
 
 function aux_stat(data)
     r=0:0.01:1

@@ -59,7 +59,7 @@ function Train(TrainingTestingSize)
             rmse = sqrt.(mean(error.^Float32(2.0),dims=2))
             println(" ")
             println("RMSE for model parameters ")
-            prettyprint(reshape(round.(rmse,digits=3),1,3))
+            prettyprint(reshape(round.(rmse,digits=3),1,nParams))
             println(" ")
             println("dstats prediction of parameters:")
             dstats(pred');

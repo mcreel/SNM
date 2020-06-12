@@ -1,12 +1,18 @@
 using Pkg
-Pkg.activate("../")
+#Pkg.activate("../")
 
-run_title = "experiment"
-mcreps = 100
+run_title = "working"
+mcreps = 1000
 
 # this code only estimates the selected version,
-# e.g., with neural net and without Jacobian
+# which is by default with neural net and without Jacobian
 # the code in v1.0 estimates all 4 versions
+# 
+# also, this uses the extemum estimator
+# to compute an estimate of the covariance
+# of the moments, which is fixed over the 
+# MCMC iterations, like a 2 step GMM esimator,
+# rather than a CUE estimator. This is faster.
 
 # this is the code for the DFM model
 #include("ARMA/ARMAlib.jl")
@@ -17,12 +23,12 @@ mcreps = 100
 #global const θtrue = [0.6, 1.0, 2.0]
 
 # this is the code for the SV  model
-#include("SV/SVlib.jl")
-#global const θtrue = [exp(-0.736/2.0), 0.9, 0.363]
+include("SV/SVlib.jl")
+global const θtrue = [exp(-0.736/2.0), 0.9, 0.363]
 
 # this is the code for the mixture of normals model
-include("MN/MNlib.jl")
-global const θtrue = [1.0, 0.0, 0.2, 2.0, 0.4]
+#include("MN/MNlib.jl")
+#global const θtrue = [1.0, 0.0, 0.2, 2.0, 0.4]
 
 
 include("lib/MakeData.jl")
@@ -43,7 +49,7 @@ info = Transform()
 writedlm("info", info)
 # when this is done, can delete raw_data.bson
 # train the net using the transformed training/testing data
-Train(TrainingTestingSize)
+#Train(TrainingTestingSize)
 # when this is done, can delete cooked_data.bson
 results = zeros(mcreps,4*nParams)
 info = readdlm("info")

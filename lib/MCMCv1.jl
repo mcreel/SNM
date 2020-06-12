@@ -19,19 +19,23 @@ function proposal2(current, cholV)
 end
 
 function MCMC(m, usenn, info, useJacobian=true)
+    S = 100 # number of simulations
     lb, ub = PriorSupport()
     nParams = size(lb,1)
     # get the trained net
-    @load "best.bson" model
-    m = transform(m', info)
-    m = model(m')
-    θinit = PriorMean() # prior mean as initial θ
-    lnL = θ -> LL_with_fixed_Σ(θ, m, 10, model, info, eye(nParams))
+    if usenn
+        @load "best.bson" model
+        m = transform(m', info)
+        m = Float64.(model(m'))
+        θinit = PriorMean() # prior mean as initial θ
+        lnL = θ -> LL(θ, m, S, model, info, useJacobian)
+    else          
+        θinit = PriorMean() # prior mean as initial θ
+        lnL = θ -> LL(θ, m, S, useJacobian)
+    end
     # use a rapid SAMIN to get good initialization values for chain
     obj = θ -> -1.0*lnL(θ)
-    θmile, junk, junk, junk = samin(obj, θinit, lb, ub; coverage_ok=0, maxevals=100000, verbosity = 1, rt = 0.5)
-    Σinv = inv(EstimateΣ(θmile, m, 200, model, info))
-    lnL = θ -> LL_with_fixed_Σ(θ, m, 10, model, info, Σinv)
+    θmile, junk, junk, junk = samin(obj, θinit, lb, ub; coverage_ok=0, maxevals=100000, verbosity = 0, rt = 0.5)
     prior = θ -> Prior(θ) # uniform, doesn't matter
     # define things for MCMC
     verbosity = false
