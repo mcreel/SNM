@@ -1,4 +1,4 @@
-using Pkg
+#using Pkg
 #Pkg.activate("../")
 
 run_title = "working"
@@ -43,10 +43,10 @@ nParams = size(lb,1)
 TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each param
 
 # generate the raw training data
-MakeData(TrainingTestingSize)
+#MakeData(TrainingTestingSize)
 # transform the raw statistics, and split out params and stats
-info = Transform()
-writedlm("info", info)
+#info = Transform()
+#writedlm("info", info)
 # when this is done, can delete raw_data.bson
 # train the net using the transformed training/testing data
 #Train(TrainingTestingSize)
@@ -56,11 +56,15 @@ info = readdlm("info")
 for mcrep = 1:mcreps
     # generate a draw at true params
     m = ILSNM_model(θtrue)    
-    @time chain, θmile = MCMC(m, true, info, false)
+    @time chain, θmile = MCMC(m, true, info)
     results[mcrep,:] = vcat(θmile, Analyze(chain))
     println("__________ replication: ", mcrep, "_______________")
     println("Results so far")
-    dstats(results[1:mcrep,:])
+    println("parameter estimates")
+    dstats(results[1:mcrep,1:nParams]; short=true)
+    println("CI coverage")
+    clabels = ["99%","95%","90%"]
+    prettyprint(reshape(mean(results[1:mcrep,nParams+1:end],dims=1),nParams,3),clabels)
     println("____________________________")
 end
 writedlm(run_title, results)

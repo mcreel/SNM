@@ -18,25 +18,23 @@ function proposal2(current, cholV)
     current + cholV'*randn(size(current))
 end
 
-function MCMC(m, usenn, info, useJacobian=true)
+function MCMC(m, usenn, info)
     lb, ub = PriorSupport()
     nParams = size(lb,1)
     # get the trained net
     @load "best.bson" model
-    m = transform(m', info)
-    m = model(m')
-    θinit = PriorMean() # prior mean as initial θ
-    lnL = θ -> LL_with_fixed_Σ(θ, m, 10, model, info, eye(nParams))
+    m = Float64.(model(transform(m', info)'))
     # use a rapid SAMIN to get good initialization values for chain
-    obj = θ -> -1.0*lnL(θ)
-    θmile, junk, junk, junk = samin(obj, θinit, lb, ub; coverage_ok=0, maxevals=100000, verbosity = 1, rt = 0.5)
-    Σinv = inv(EstimateΣ(θmile, m, 200, model, info))
+    obj = θ -> -1.0*LL_with_fixed_Σ(θ, m, 10, model, info, eye(nParams))
+    θmile, junk, junk, junk = samin(obj, PriorMean(), lb, ub; coverage_ok=0, maxevals=100000, verbosity = 0, rt = 0.5)
+    # get covariance estimate
+    Σinv = inv(EstimateΣ(θmile, m, 100, model, info))
+    # define things for MCMC
     lnL = θ -> LL_with_fixed_Σ(θ, m, 10, model, info, Σinv)
     prior = θ -> Prior(θ) # uniform, doesn't matter
-    # define things for MCMC
     verbosity = false
     ChainLength = 1000
-    MCMCburnin = 100
+    MCMCburnin = 0
     tuning = 0.2/sqrt(12.0)*(ub-lb) # two tenths of a standard. dev. of prior
     Proposal = θ -> proposal1(θ, tuning)
     chain = mcmc(θmile, ChainLength, MCMCburnin, prior, lnL, Proposal, verbosity)
