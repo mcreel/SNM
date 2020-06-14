@@ -1,6 +1,7 @@
 using Statistics, Econometrics
 function Analyze(chain)
     lb,ub = PriorSupport()
+    θtrue = TrueParameters()
     nParams = size(lb,1)
     #posmean = vec(mean(chain,dims=1))
     #posmedian = vec(median(chain,dims=1))

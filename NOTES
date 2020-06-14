@@ -1,1 +1,2 @@
-combined MakeData..Train into one function that
+add a neuralmoments function to SVlib, etc., which directly
+gives the output of the net.

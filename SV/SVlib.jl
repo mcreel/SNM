@@ -1,6 +1,6 @@
 using Econometrics, Statistics, Random
 
-function ILSNM_model(θ)
+function auxstat(θ)
     n = 500
     burnin = 100
     y = SVmodel(θ, n, burnin)
@@ -53,6 +53,10 @@ function HAR(y)
     βhat = X\y
     σhat = std(y-X*βhat)     
     vcat(βhat,σhat)
+end
+
+function TrueParameters()
+    [exp(-0.736/2.0), 0.9, 0.363]
 end
 
 function PriorSupport()

@@ -1,8 +1,7 @@
 # This does MLE and then MCMC, either using raw statistic, or using NN transform,
 # depending on the argument usenn
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
-using BSON:@load
-include("transform.jl")
+include("TransformStats.jl")
 include("lnL.jl")
 
 # uniform random walk in one dimension
@@ -18,26 +17,23 @@ function proposal2(current, cholV)
     current + cholV'*randn(size(current))
 end
 
-function MCMC(m, usenn, info)
+function MCMC(m, NNmodel, info)
     lb, ub = PriorSupport()
     nParams = size(lb,1)
-    # get the trained net
-    @load "best.bson" model
-    m = Float64.(model(transform(m', info)'))
+    m = Float64.(NNmodel(TransformStats(m', info)'))
     # use a rapid SAMIN to get good initialization values for chain
-    obj = θ -> -1.0*LL_with_fixed_Σ(θ, m, 10, model, info, eye(nParams))
-    θmile, junk, junk, junk = samin(obj, PriorMean(), lb, ub; coverage_ok=0, maxevals=100000, verbosity = 0, rt = 0.5)
+    obj = θ -> -1.0*LL(θ, m, 10, NNmodel, info)
+    θhat, junk, junk, junk = samin(obj, PriorMean(), lb, ub; coverage_ok=0, maxevals=100000, verbosity = 0, rt = 0.5)
     # get covariance estimate
-    Σinv = inv(EstimateΣ(θmile, m, 100, model, info))
+    Σinv = inv(EstimateΣ(θhat, m, 100, NNmodel, info))
     # define things for MCMC
-    lnL = θ -> LL_with_fixed_Σ(θ, m, 10, model, info, Σinv)
-    prior = θ -> Prior(θ) # uniform, doesn't matter
+    lnL = θ -> LL(θ, m, 10, NNmodel, info, Σinv)
     verbosity = false
     ChainLength = 1000
     MCMCburnin = 0
     tuning = 0.2/sqrt(12.0)*(ub-lb) # two tenths of a standard. dev. of prior
     Proposal = θ -> proposal1(θ, tuning)
-    chain = mcmc(θmile, ChainLength, MCMCburnin, prior, lnL, Proposal, verbosity)
+    chain = mcmc(θhat, ChainLength, MCMCburnin, Prior, lnL, Proposal, verbosity)
     # now use a MVN random walk proposal with updates of covariance and longer chain
     # on final loop
     Σ = NeweyWest(chain[:,1:nParams])
@@ -54,7 +50,7 @@ function MCMC(m, usenn, info)
             ChainLength = 10000
         end    
         θinit = mean(chain[:,1:nParams],dims=1)[:]
-        chain = mcmc(θinit, ChainLength, 0, prior, lnL, Proposal, verbosity)
+        chain = mcmc(θinit, ChainLength, 0, Prior, lnL, Proposal, verbosity)
         if j < MC_loops
             accept = mean(chain[:,end])
             if accept > 0.35
@@ -66,5 +62,5 @@ function MCMC(m, usenn, info)
         end    
     end
     chain = chain[:,1:nParams]
-    return chain, θmile
+    return chain, θhat
 end

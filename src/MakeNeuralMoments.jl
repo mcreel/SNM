@@ -1,21 +1,54 @@
-using Econometrics, Statistics, Flux, Random, LinearAlgebra
-using Base.Iterators
-using BSON: @load
-using BSON: @save
+# makes the training and testing data
 
-function Train(TrainingTestingSize)
-    # basic configuration
-    #find out how many parameters
-    lb, ub = PriorSupport()
+using Econometrics, StatsBase, Statistics, Flux, Random, LinearAlgebra
+using BSON: @save
+using Base.Iterators
+include("TransformStats.jl")
+
+function MakeNeuralMoments(auxstat, S)
+    data = 0.0
+    datadesign = 0.0
+    lb,ub = PriorSupport()
     nParams = size(lb,1)
+    # training and testing
+    for s = 1:S
+        ok = 0.0
+        θ = lb # initialize
+        while ok != 1.0
+            v = rand(size(lb,1))
+            θ = v.*(ub-lb) + lb
+            ok = Prior(θ) # note: some draws in bounds may not be in support
+            if ok != 1.0
+            end    
+        end    
+        W = auxstat(θ) # draw the raw statistics
+        if s == 1
+            data = zeros(S, size(vcat(θ, W),1))
+        end
+        data[s,:] = vcat(θ, W)
+    end
+    params = data[:,1:nParams]
+    statistics = data[:,nParams+1:end]
+    # transform stats to robustify against outliers
+    q50 = zeros(size(statistics,2))
+    q01 = similar(q50)
+    q99 = similar(q50)
+    iqr = similar(q50)
+    for i = 1:size(statistics,2)
+        q = quantile(statistics[:,i],[0.01, 0.25, 0.5, 0.75, 0.99])
+        q01[i] = q[1]
+        q50[i] = q[3]
+        q99[i] = q[5]
+        iqr[i] = q[4] - q[2]
+    end
+    transform_stats_info = (q01, q50, q99, iqr) 
+    statistics = TransformStats(statistics, transform_stats_info)
+    # train net
     # size of training/testing
     TrainingProportion = 0.5
     Epochs = 1000 # passes through entire training set
-    # read the training/testing data, and define the splits
-    @load "cooked_data.bson" params statistics
     params = Float32.(params)
     statistics = Float32.(statistics)
-    S = TrainingTestingSize # number of draws from prior
     trainsize = Int(TrainingProportion*S)
     yin = params[1:trainsize, :]'
     yout = params[trainsize+1:end, :]'
@@ -23,37 +56,31 @@ function Train(TrainingTestingSize)
     xout = statistics[trainsize+1:end, :]'
     # define the neural net
     nStats = size(xin,1)
-    model = Chain(
+    NNmodel = Chain(
         Dense(nStats, 10*nParams, tanh),
         Dense(10*nParams, nParams)
     )
-    θ = Flux.params(model)
-    opt = ADAGrad()
-    # Define the loss function
-    # weight by inverse std. dev. of params in sample from prior, to put equal weight
-    s = Float32.(std(params,dims=1)')
-    #loss(x,y) = sqrt.(Flux.mse(model(x)./s,y./s))
-    loss(x,y) = Flux.mse(model(x),y)
+    opt = ADAGrad() # the optimizer 
+    loss(x,y) = Flux.mse(NNmodel(x),y) # Define the loss function
     # monitor training
     function monitor(e)
         println("epoch $(lpad(e, 4)): (training) loss = $(round(loss(xin,yin); digits=4)) (testing) loss = $(round(loss(xout,yout); digits=4))| ")
     end
-
     # do the training
     bestsofar = 1.0e10
     pred = 0.0 # define it here to have it outside the for loop
     batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 1024)];
     for i = 1:Epochs
-        Flux.train!(loss, θ, batches, opt)
+        Flux.train!(loss, Flux.params(NNmodel), batches, opt)
         current = loss(xout,yout)
         if current < bestsofar
             bestsofar = current
-            @save "best.bson" model
+            @save "neural_moments.bson" NNmodel transform_stats_info
             xx = xout
             yy = yout
             println("________________________________________________________________________________________________")
             monitor(i)
-            pred = model(xx)
+            pred = NNmodel(xx)
             error = yy .- pred
             results = [pred;error]
             rmse = sqrt.(mean(error.^Float32(2.0),dims=2))
@@ -69,4 +96,4 @@ function Train(TrainingTestingSize)
         end
     end
     return nothing
-end 
+end

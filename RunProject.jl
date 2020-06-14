@@ -4,11 +4,12 @@
 run_title = "working"
 mcreps = 1000
 
-# this code only estimates the selected version,
-# which is by default with neural net and without Jacobian
-# the code in v1.0 estimates all 4 versions
+# This code only estimates using the GMM form, with the
+# neural net. The code in release v1.0 estimates
+# the alternative versions discussed in the working
+# paper.
 # 
-# also, this uses the extemum estimator
+# Also, this uses the extemum estimator
 # to compute an estimate of the covariance
 # of the moments, which is fixed over the 
 # MCMC iterations, like a 2 step GMM esimator,
@@ -24,40 +25,34 @@ mcreps = 1000
 
 # this is the code for the SV  model
 include("SV/SVlib.jl")
-global const θtrue = [exp(-0.736/2.0), 0.9, 0.363]
 
 # this is the code for the mixture of normals model
 #include("MN/MNlib.jl")
 #global const θtrue = [1.0, 0.0, 0.2, 2.0, 0.4]
 
-
-include("lib/MakeData.jl")
-include("lib/Transform.jl")
-include("lib/Train.jl")
-include("lib/Analyze.jl")
-include("lib/MCMC.jl")
+# this makes the simulated data, trains net,
+# and saves all information needed to compute
+# the neural moments
+include("src/MakeNeuralMoments.jl")
+# computes the confidence intervals, etc
+include("src/Analyze.jl")
+# the specialized MCMC using net 
+include("src/MCMC.jl")
+using BSON:@load
 
 function RunProject()
 lb, ub = PriorSupport()
 nParams = size(lb,1)
-TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each param
-
+TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
 # generate the raw training data
-#MakeData(TrainingTestingSize)
-# transform the raw statistics, and split out params and stats
-#info = Transform()
-#writedlm("info", info)
-# when this is done, can delete raw_data.bson
-# train the net using the transformed training/testing data
-#Train(TrainingTestingSize)
-# when this is done, can delete cooked_data.bson
+MakeNeuralMoments(auxstat, TrainingTestingSize)
 results = zeros(mcreps,4*nParams)
-info = readdlm("info")
+@load "neural_moments.bson" NNmodel transform_stats_info
 for mcrep = 1:mcreps
     # generate a draw at true params
-    m = ILSNM_model(θtrue)    
-    @time chain, θmile = MCMC(m, true, info)
-    results[mcrep,:] = vcat(θmile, Analyze(chain))
+    m = auxstat(TrueParameters())    
+    @time chain, θhat = MCMC(m, NNmodel, transform_stats_info)
+    results[mcrep,:] = vcat(θhat, Analyze(chain))
     println("__________ replication: ", mcrep, "_______________")
     println("Results so far")
     println("parameter estimates")
@@ -70,3 +65,4 @@ end
 writedlm(run_title, results)
 end
 RunProject()
+
