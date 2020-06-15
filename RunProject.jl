@@ -26,7 +26,7 @@ include("MN/MNlib.jl")
 # this makes the simulated data, trains net,
 # and saves all information needed to compute
 # the neural moments
-include("src/MakeNeuralMoments.jl")
+#include("src/MakeNeuralMoments.jl")
 # computes the confidence intervals, etc
 include("src/Analyze.jl")
 # the specialized MCMC using net 
@@ -36,10 +36,9 @@ using BSON:@load
 function RunProject()
 lb, ub = PriorSupport()
 nParams = size(lb,1)
-TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
 # generate the raw training data
-MakeNeuralMoments(auxstat, TrainingTestingSize)
-#=
+#TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
+#MakeNeuralMoments(auxstat, TrainingTestingSize)
 results = zeros(mcreps,4*nParams)
 @load "neural_moments.bson" NNmodel transform_stats_info
 for mcrep = 1:mcreps
@@ -57,7 +56,6 @@ for mcrep = 1:mcreps
     println("____________________________")
 end
 writedlm(run_title, results)
-=#
 end
 RunProject()
 
