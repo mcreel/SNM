@@ -33,7 +33,7 @@ function dgp_agent(θ)
     return data, datadm
 end
 
-function ILSNM_model(θ)
+function auxstat(θ)
     ρ = θ[1]
     β = θ[2]
     σ = θ[3]
@@ -55,6 +55,10 @@ function ILSNM_model(θ)
     b2, junk, u = lsfit(y, [ones(n) x ylag])
     s2 = sqrt(mean(u.*u))
     10.0*vcat(b1, s1, b2, s2)
+end    
+
+function TrueParameters()
+    [0.6, 1.0, 2.0]
 end    
 
 function PriorSupport()

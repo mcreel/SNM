@@ -23,7 +23,7 @@ function arma11(θ)
     data
 end
 
-function ILSNM_model(θ)
+function auxstat(θ)
     x = arma11(θ)
     s = std(x)
     c = cor(x[2:end,:],x[1:end-1])
@@ -31,7 +31,11 @@ function ILSNM_model(θ)
     b, varb, u, junk1, rsq  = ols(x[2:end,:], x[1:end-1,:], silent=true)
     ϕ, varϕ, u, junk2, rsq2 = ols(u[2:end,:], u[1:end-1,:], silent=true)
     σ = std(u)
-    vcat(s, c, b, varb, rsq, ϕ, varϕ, rsq2, σ, pacf(x,collect(1:4)))
+    z = vcat(s, c, b, varb, rsq, ϕ, varϕ, rsq2, σ, pacf(x,collect(1:4)))[:]
+end    
+
+function TrueParameters()
+    [0.95, 0.5, 1.0]
 end    
 
 function PriorSupport()

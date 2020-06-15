@@ -1,4 +1,5 @@
-function ILSNM_model(θ)
+using Statistics
+function auxstat(θ)
     n = 5000
     μ_1, μ_2, σ_1, σ_2, prob = θ
     d1=randn(n).*σ_1 .+ μ_1
@@ -7,15 +8,16 @@ function ILSNM_model(θ)
     data=zeros(n)
     data[ps].=d1[ps]
     data[.!ps].=d2[.!ps]
-    sqrt(Float64(n)).*aux_stat(data)
+    r=0:0.01:1
+    sqrt(Float64(n)).* quantile.(Ref(data),r)
 end    
 
 function aux_stat(data)
-    r=0:0.01:1
-    quantile.(Ref(data),r)
 end
 
-
+function TrueParameters()
+    [1.0, 0.0, 0.2, 2.0, 0.4]
+end    
 
 function PriorSupport()
     lb = [0.0, -2.0, 0.0, 0.0, 0.0]

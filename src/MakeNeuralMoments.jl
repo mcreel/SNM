@@ -11,7 +11,9 @@ function MakeNeuralMoments(auxstat, S)
     lb,ub = PriorSupport()
     nParams = size(lb,1)
     # training and testing
-    for s = 1:S
+    W = auxstat(lb) # draw the raw statistics
+    data = zeros(S,size(vcat(lb, W),1))
+    Threads.@threads for s = 1:S
         ok = 0.0
         θ = lb # initialize
         while ok != 1.0
@@ -21,11 +23,7 @@ function MakeNeuralMoments(auxstat, S)
             if ok != 1.0
             end    
         end    
-        W = auxstat(θ) # draw the raw statistics
-        if s == 1
-            data = zeros(S, size(vcat(θ, W),1))
-        end
-        data[s,:] = vcat(θ, W)
+        data[s,:] = vcat(θ, auxstat(θ))
     end
     params = data[:,1:nParams]
     statistics = data[:,nParams+1:end]
@@ -70,12 +68,13 @@ function MakeNeuralMoments(auxstat, S)
     bestsofar = 1.0e10
     pred = 0.0 # define it here to have it outside the for loop
     batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 1024)];
+    bestmodel = 0.0
     for i = 1:Epochs
         Flux.train!(loss, Flux.params(NNmodel), batches, opt)
         current = loss(xout,yout)
         if current < bestsofar
             bestsofar = current
-            @save "neural_moments.bson" NNmodel transform_stats_info
+            bestmodel = NNmodel
             xx = xout
             yy = yout
             println("________________________________________________________________________________________________")
@@ -95,5 +94,7 @@ function MakeNeuralMoments(auxstat, S)
             dstats(error');
         end
     end
+    NNmodel = bestmodel
+    @save "neural_moments.bson" NNmodel transform_stats_info
     return nothing
 end

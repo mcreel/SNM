@@ -15,20 +15,13 @@ mcreps = 1000
 # MCMC iterations, like a 2 step GMM esimator,
 # rather than a CUE estimator. This is faster.
 
-# this is the code for the DFM model
+#_____________________ Choose the model _____________________#
 #include("ARMA/ARMAlib.jl")
-#global const θtrue = [0.95, 0.5, 1.0]
-
-# this is the code for the DPD model
 #include("DPD/DPDlib.jl")
-#global const θtrue = [0.6, 1.0, 2.0]
+#include("SV/SVlib.jl")
+include("MN/MNlib.jl")
+#_____________________ Choose the model _____________________#
 
-# this is the code for the SV  model
-include("SV/SVlib.jl")
-
-# this is the code for the mixture of normals model
-#include("MN/MNlib.jl")
-#global const θtrue = [1.0, 0.0, 0.2, 2.0, 0.4]
 
 # this makes the simulated data, trains net,
 # and saves all information needed to compute
@@ -46,6 +39,7 @@ nParams = size(lb,1)
 TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
 # generate the raw training data
 MakeNeuralMoments(auxstat, TrainingTestingSize)
+#=
 results = zeros(mcreps,4*nParams)
 @load "neural_moments.bson" NNmodel transform_stats_info
 for mcrep = 1:mcreps
@@ -63,6 +57,8 @@ for mcrep = 1:mcreps
     println("____________________________")
 end
 writedlm(run_title, results)
+=#
 end
 RunProject()
+
 
