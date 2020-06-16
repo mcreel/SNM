@@ -27,9 +27,9 @@ include("examples/SV/SVlib.jl")
 # the neural moments
 #include("src/MakeNeuralMoments.jl")
 # computes the confidence intervals, etc
-include("src/Analyze.jl")
+#include("src/Analyze.jl")
 # the specialized MCMC using net 
-include("src/MCMC.jl")
+#include("src/MCMC.jl")
 using BSON:@load
 
 function RunProject()
