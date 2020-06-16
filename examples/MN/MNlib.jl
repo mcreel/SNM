@@ -12,9 +12,6 @@ function auxstat(θ)
     sqrt(Float64(n)).* quantile.(Ref(data),r)
 end    
 
-function aux_stat(data)
-end
-
 function TrueParameters()
     [1.0, 0.0, 0.2, 2.0, 0.4]
 end    
