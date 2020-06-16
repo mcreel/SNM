@@ -1,8 +1,7 @@
 # This does MLE and then MCMC, either using raw statistic, or using NN transform,
 # depending on the argument usenn
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
-include("TransformStats.jl")
-include("lnL.jl")
+include("SNM.jl")
 
 # uniform random walk in one dimension
 function proposal1(current, tuning)
@@ -20,12 +19,11 @@ end
 function MCMC(m, NNmodel, info)
     lb, ub = PriorSupport()
     nParams = size(lb,1)
-    m = Float64.(NNmodel(TransformStats(m', info)'))
     # use a rapid SAMIN to get good initialization values for chain
     obj = θ -> -1.0*H(θ, m, 10, NNmodel, info)
     θhat, junk, junk, junk = samin(obj, PriorMean(), lb, ub; coverage_ok=0, maxevals=100000, verbosity = 0, rt = 0.5)
     # get covariance estimate
-    Σinv = inv(EstimateΣ(θhat, m, 100, NNmodel, info))
+    Σinv = inv(EstimateΣ(θhat, 100, NNmodel, info))
     # define things for MCMC
     lnL = θ -> H(θ, m, 10, NNmodel, info, Σinv)
     verbosity = false

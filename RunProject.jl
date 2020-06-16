@@ -1,6 +1,6 @@
 #using Pkg
 #Pkg.activate("../")
-using SNM
+#using SNM
 run_title = "working"
 mcreps = 1000
 
@@ -25,24 +25,22 @@ include("examples/SV/SVlib.jl")
 # this makes the simulated data, trains net,
 # and saves all information needed to compute
 # the neural moments
-#include("src/MakeNeuralMoments.jl")
-# computes the confidence intervals, etc
-#include("src/Analyze.jl")
-# the specialized MCMC using net 
-#include("src/MCMC.jl")
+include("src/SNM.jl")
+include("src/Analyze.jl") # computes the confidence intervals, etc
+include("src/MCMC.jl") # the specialized MCMC using net 
 using BSON:@load
 
 function RunProject()
 lb, ub = PriorSupport()
 nParams = size(lb,1)
-# generate the raw training data
+# generate the trained net
 #TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
-#MakeNeuralMoments(auxstat, TrainingTestingSize)
+#MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
 results = zeros(mcreps,4*nParams)
 @load "neural_moments.bson" NNmodel transform_stats_info
 for mcrep = 1:mcreps
-    # generate a draw at true params
-    m = auxstat(TrueParameters())    
+    # generate a draw of neural moments at true params
+    m = NeuralMoments(TrueParameters(), NNmodel, transform_stats_info)    
     @time chain, θhat = MCMC(m, NNmodel, transform_stats_info)
     results[mcrep,:] = vcat(θhat, Analyze(chain))
     println("__________ replication: ", mcrep, "_______________")
