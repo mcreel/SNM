@@ -22,12 +22,12 @@ function MCMC(m, NNmodel, info)
     nParams = size(lb,1)
     m = Float64.(NNmodel(TransformStats(m', info)'))
     # use a rapid SAMIN to get good initialization values for chain
-    obj = θ -> -1.0*LL(θ, m, 10, NNmodel, info)
+    obj = θ -> -1.0*H(θ, m, 10, NNmodel, info)
     θhat, junk, junk, junk = samin(obj, PriorMean(), lb, ub; coverage_ok=0, maxevals=100000, verbosity = 0, rt = 0.5)
     # get covariance estimate
     Σinv = inv(EstimateΣ(θhat, m, 100, NNmodel, info))
     # define things for MCMC
-    lnL = θ -> LL(θ, m, 10, NNmodel, info, Σinv)
+    lnL = θ -> H(θ, m, 10, NNmodel, info, Σinv)
     verbosity = false
     ChainLength = 1000
     MCMCburnin = 0

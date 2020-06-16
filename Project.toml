@@ -1,3 +1,5 @@
+name = "SNM"
+uuid = "d5cddabd-d3ac-42b1-a7bd-ec79448140e8"
 [deps]
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 Econometrics = "4d6a76a9-bfbc-5492-8924-cf6ed7875f06"

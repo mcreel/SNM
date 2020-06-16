@@ -1,6 +1,6 @@
 #using Pkg
 #Pkg.activate("../")
-
+using SNM
 run_title = "working"
 mcreps = 1000
 
