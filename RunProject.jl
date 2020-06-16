@@ -16,11 +16,10 @@ mcreps = 1000
 # rather than a CUE estimator. This is faster.
 
 #_____________________ Choose the model _____________________#
-#include("ARMA/ARMAlib.jl")
-#include("DPD/DPDlib.jl")
-#include("SV/SVlib.jl")
-include("MN/MNlib.jl")
-#_____________________ Choose the model _____________________#
+#include("examples/ARMA/ARMAlib.jl")
+#include("examples(DPD/DPDlib.jl")
+include("examples/SV/SVlib.jl")
+#include("examples/MN/MNlib.jl")
 
 
 # this makes the simulated data, trains net,

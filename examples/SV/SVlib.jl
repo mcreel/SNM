@@ -70,7 +70,7 @@ function PriorMean()
     (ub - lb) ./ 2.0
 end
 
-# prior just checks that we're in the bounds, and that the unconditional std. dev. of log vol is not too high
+# prior checks that we're in the bounds, and that the unconditional std. dev. of log vol is not too high
 # returns 1 if this is true, zero otherwise. Value is not important, as it's constant
 function Prior(θ)
     lb,ub = PriorSupport()
