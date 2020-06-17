@@ -8,12 +8,29 @@ The project is motivated by results in the working paper <a href=https://www.bar
 # Worked example
 The following is an explanation of how to use the code in the master branch.
 
-1. git clone the project into a directory. Go to that directory, set the appropriate number of Julia threads given your hardware (e.g. ```export JULIA_NUM_THREADS=10```)
-2. start Julia, and do ```activate .``` to set up the dependencies correctly. This will take quite a while, as the project relies on a number of packages.
+1. git clone the project into a directory. Go to that directory, set the appropriate number of Julia threads, given your hardware, e.g. ```export JULIA_NUM_THREADS=10```
+2. start Julia, and do ```]activate .``` to set up the dependencies correctly. This will take quite a while the first time you do it, as the project relies on a number of packages.
 3. do ```include("RunProject()```  to run a simple example based on a mixture of normals. 
 
-Here is an explanation of the contents of ```RunProject.jl```
+The mixture of normals model draws statistics using the function
+```function auxstat(θ)
+    n = 1000
+    μ_1, μ_2, σ_1, σ_2, prob = θ
+    d1=randn(n).*σ_1 .+ μ_1
+    d2=randn(n).*σ_2 .+ μ_2
+    ps=rand(n).<prob
+    data=zeros(n)
+    data[ps].=d1[ps]
+    data[.!ps].=d2[.!ps]
+    r=0:0.1:1
+    sqrt(Float64(n)).* quantile.(Ref(data),r)
+end```    
 
+S
+
+```function TrueParameters()
+    [1.0, 0.0, 0.2, 2.0, 0.4]
+end```    
 
 
 
