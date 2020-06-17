@@ -10,7 +10,7 @@ The following is an explanation of how to use the code in the master branch.
 
 1. git clone the project into a directory. Go to that directory, set the appropriate number of Julia threads, given your hardware, e.g. ```export JULIA_NUM_THREADS=10```
 2. start Julia, and do ```]activate .``` to set up the dependencies correctly. This will take quite a while the first time you do it, as the project relies on a number of packages.
-3. do ```include("RunProject()```  to run a Monte Calro study of simple example based on a mixture of normals.
+3. do ```include("RunProject.jl)```  to run a Monte Carlo study of simple example based on a mixture of normals.
 
 The mixture of normals model (see the file [MNlib.jl](https://github.com/mcreel/SNM/blob/master/examples/MN/MNlib.jl) for details) draws statistics using the function
 ```
@@ -35,11 +35,18 @@ function TrueParameters()
     [1.0, 0.0, 0.2, 2.0, 0.4]
 end
 ```    
-When we run ```RunProject()``` as above, we obtain output similar to the following:
+
+When we run ```RunProject()```, as above, we obtain output similar to the following results, for 1000 Monte Carlo replications:
 ![MCresults](https://github.com/mcreel/SNM/blob/master/MCresults.png)
+
+The parameters are estimated with little bias, and good precision, and confidence interval coverages are close to the nominal levels, for each of the 5 parameters.
 
 
 4. do ```include("examples/MN/EstimateMN.jl")``` to do a single estimation of the mixture of normals model. We can visualize the posterior densities for the parameters, and the tail quantiles which define a 90% confidence interval.
 
 ![MNp1](https://github.com/mcreel/SNM/blob/master/MNp1.png)
+![MNp2](https://github.com/mcreel/SNM/blob/master/MNp2.png)
+![MNp3](https://github.com/mcreel/SNM/blob/master/MNp3.png)
+![MNp4](https://github.com/mcreel/SNM/blob/master/MNp4.png)
+![MNp5](https://github.com/mcreel/SNM/blob/master/MNp5.png)
 
