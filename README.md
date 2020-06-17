@@ -38,7 +38,7 @@ end
 When we run ```RunProject()```, as above, we obtain output similar to the following results, for 1000 Monte Carlo replications:
 ![MCresults](https://github.com/mcreel/SNM/blob/master/MCresults.png)
 
-The parameters are estimated with little bias, and good precision, and confidence interval coverages are close to the nominal levels, for each of the 5 parameters.
+The parameters are estimated with little bias, and good precision, and confidence interval coverages are close to the nominal levels, for each of the 5 parameters. One can observe that the model is estimated in about 10 seconds.
 
 
 4. do ```include("examples/MN/EstimateMN.jl")``` to do a single estimation of the mixture of normals model. We can visualize the posterior densities for the parameters, and the tail quantiles which define a 90% confidence interval.
