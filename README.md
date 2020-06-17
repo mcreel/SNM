@@ -1,5 +1,5 @@
 # SNM
-This is a project to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments though use of neural nets. The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior, using MCMC (simple version provided in the project), SMC (not provided), or other methods. 
+This is a project to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments though use of neural nets. The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior, using MCMC (simple version provided in the project), SMC (not provided), or other methods. The results reported in the paper and below are a product of two main features: the use of neural moments to reduce the dimension of the summary statistics, and the use of the indirect likelihood function as the criterion or distance measure. The code for these two features is [here](https://github.com/mcreel/SNM/blob/master/src/SNM.jl)
 
 The project allows for Monte Carlo investigation of the performance of estimators and the reliability of confidence intervals obtained from the quantiles samples from the posterior distribution.
 
@@ -29,7 +29,6 @@ end
 ```    
 
 So, there are five parameters, and 11 summary statistics. Samples of 1000 observations are used to compute the statistics. The "true" parameter values we will use to evaluate performance and confidence interval coverage are from
-
 ```
 function TrueParameters()
     [1.0, 0.0, 0.2, 2.0, 0.4]
@@ -44,9 +43,9 @@ The parameters are estimated with little bias, and good precision, and confidenc
 
 4. do ```include("examples/MN/EstimateMN.jl")``` to do a single estimation of the mixture of normals model. We can visualize the posterior densities for the parameters, and the tail quantiles which define a 90% confidence interval.
 
-![MNp1](https://github.com/mcreel/SNM/blob/master/MNp1.png)
-![MNp2](https://github.com/mcreel/SNM/blob/master/MNp2.png)
-![MNp3](https://github.com/mcreel/SNM/blob/master/MNp3.png)
-![MNp4](https://github.com/mcreel/SNM/blob/master/MNp4.png)
-![MNp5](https://github.com/mcreel/SNM/blob/master/MNp5.png)
+![MNp1](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp1.png)
+![MNp2](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp2.png)
+![MNp3](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp3.png)
+![MNp4](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp4.png)
+![MNp5](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp5.png)
 
