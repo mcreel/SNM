@@ -1,5 +1,5 @@
 # SNM
-This is a project to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments though use of neural nets. The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior, using MCMC (provided) or SMC (not provided).
+This is a project to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments though use of neural nets. The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior, using MCMC (simple version provided in the project), SMC (not provided), or other methods. 
 
 The project allows for Monte Carlo investigation of the performance of estimators and the reliability of confidence intervals obtained from the quantiles samples from the posterior distribution.
 
@@ -10,10 +10,11 @@ The following is an explanation of how to use the code in the master branch.
 
 1. git clone the project into a directory. Go to that directory, set the appropriate number of Julia threads, given your hardware, e.g. ```export JULIA_NUM_THREADS=10```
 2. start Julia, and do ```]activate .``` to set up the dependencies correctly. This will take quite a while the first time you do it, as the project relies on a number of packages.
-3. do ```include("RunProject()```  to run a simple example based on a mixture of normals. 
+3. do ```include("RunProject()```  to run a Monte Calro study of simple example based on a mixture of normals.
 
-The mixture of normals model draws statistics using the function
-```function auxstat(θ)
+The mixture of normals model (see the file [MNlib.jl](https://github.com/mcreel/SNM/blob/master/examples/MN/MNlib.jl) for details) draws statistics using the function
+```
+function auxstat(θ)
     n = 1000
     μ_1, μ_2, σ_1, σ_2, prob = θ
     d1=randn(n).*σ_1 .+ μ_1
@@ -24,13 +25,21 @@ The mixture of normals model draws statistics using the function
     data[.!ps].=d2[.!ps]
     r=0:0.1:1
     sqrt(Float64(n)).* quantile.(Ref(data),r)
-end```    
+end
+```    
 
-S
+So, there are five parameters, and 11 summary statistics. Samples of 1000 observations are used to compute the statistics. The "true" parameter values we will use to evaluate performance and confidence interval coverage are from
 
-```function TrueParameters()
+```
+function TrueParameters()
     [1.0, 0.0, 0.2, 2.0, 0.4]
-end```    
+end
+```    
+When we run ```RunProject()``` as above, we obtain output similar to the following:
+![MCresults](https://github.com/mcreel/SNM/blob/master/MCresults.png)
 
 
+4. do ```include("examples/MN/EstimateMN.jl")``` to do a single estimation of the mixture of normals model. We can visualize the posterior densities for the parameters, and the tail quantiles which define a 90% confidence interval.
+
+![MNp1](https://github.com/mcreel/SNM/blob/master/MNp1.png)
 
