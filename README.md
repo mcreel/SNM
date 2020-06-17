@@ -1,9 +1,19 @@
 # SNM
-The branch WP has the code to used to create the results reported in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a> The code in that branch allows estimating using plain and neural moments, and using as the criterion the full indirect likelihood (L in the paper) or the GMM form (H in the paper). 
+This is a project to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments though use of neural nets. The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior, using MCMC (provided) or SMC (not provided).
 
-The paper finds that the GMM-form works as well as the full form, so the code in the master branch focuses on that. To use the code, first, set JULIA_NUM_THREADS. Then edit RunProject.jl to select one of the examples, by uncommenting the relevant lines. CD to the directory of the chosen example, start Julia, and execute include("../RunProject.jl"). Running the SV example using 10 threads, on a fairly old server, I can estimate the SV model in about 20 seconds. That does not count the time to train the net, but training the net is a process that is independent of the real data, so including its time as part of the time to estimate does not make much sense.
+The project allows for Monte Carlo investigation of the performance of estimators and the reliability of confidence intervals obtained from the quantiles samples from the posterior distribution.
 
-![example](https://github.com/mcreel/SNM/blob/master/abstract.png)
+The project is motivated by results in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a> The code in the WP branch of this archive allows for replication of the results in that paper. The master branch builds on the results of the paper to focus on the best performing methods.
+
+# Worked example
+The following is an explanation of how to use the code in the master branch.
+
+1. git clone the project into a directory. Go to that directory, set the appropriate number of Julia threads given your hardware (e.g. ```export JULIA_NUM_THREADS=10```)
+2. start Julia, and do ```activate .``` to set up the dependencies correctly. This will take quite a while, as the project relies on a number of packages.
+3. do ```include("RunProject()```  to run a simple example based on a mixture of normals. 
+
+Here is an explanation of the contents of ```RunProject.jl```
+
 
 
 
