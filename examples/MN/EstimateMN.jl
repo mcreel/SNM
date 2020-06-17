@@ -16,10 +16,10 @@ function EstimateMN()
 end
 chain, θhat = EstimateMN()
 writedlm("chain", chain)
-savefig(npdensity(chain[:,1]), "param1.svg")
-savefig(npdensity(chain[:,2]), "param2.svg")
-savefig(npdensity(chain[:,3]), "param3.svg")
-savefig(npdensity(chain[:,4]), "param4.svg")
-savefig(npdensity(chain[:,5]), "param5.svg")
+savefig(npdensity(chain[:,1]), "MNp1.png")
+savefig(npdensity(chain[:,2]), "MNp2.png")
+savefig(npdensity(chain[:,3]), "MNp3.png")
+savefig(npdensity(chain[:,4]), "MNp4.png")
+savefig(npdensity(chain[:,5]), "MNp5.png")
 
 
