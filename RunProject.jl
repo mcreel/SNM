@@ -18,14 +18,15 @@ mcreps = 1000
 #_____________________ Choose the model _____________________#
 #include("examples/ARMA/ARMAlib.jl")
 #include("examples(DPD/DPDlib.jl")
-include("examples/SV/SVlib.jl")
-#include("examples/MN/MNlib.jl")
+#include("examples/SV/SVlib.jl")
+include("examples/MN/MNlib.jl")
 
 
 # this makes the simulated data, trains net,
 # and saves all information needed to compute
 # the neural moments
 include("src/SNM.jl")
+include("src/MakeNeuralMoments.jl") # the specialized MCMC using net 
 include("src/Analyze.jl") # computes the confidence intervals, etc
 include("src/MCMC.jl") # the specialized MCMC using net 
 using BSON:@load
