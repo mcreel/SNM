@@ -1,3 +1,6 @@
+# example of using trained net to do a single
+# Baysian estimation using MCMC
+
 include("../../src/SNM.jl")
 include("../../src/MCMC.jl") # the specialized MCMC using net 
 include("MNlib.jl")
@@ -12,6 +15,7 @@ function EstimateMN()
     chain, θhat
 end
 chain, θhat = EstimateMN()
+writedlm("chain", chain)
 savefig(npdensity(chain[:,1]), "param1.svg")
 savefig(npdensity(chain[:,2]), "param2.svg")
 savefig(npdensity(chain[:,3]), "param3.svg")

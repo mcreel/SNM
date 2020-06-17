@@ -1,6 +1,6 @@
 using Statistics
 function auxstat(θ)
-    n = 500
+    n = 1000
     μ_1, μ_2, σ_1, σ_2, prob = θ
     d1=randn(n).*σ_1 .+ μ_1
     d2=randn(n).*σ_2 .+ μ_2

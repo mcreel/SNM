@@ -1,3 +1,5 @@
+using Flux, Statistics
+
 # bounds by quantiles, and standardizes and normalizes around median
 function TransformStats(data, info)
     q01,q50,q99,iqr = info
@@ -23,7 +25,8 @@ end
 
 # method with identity weight
 function H(θ, m, S, NNmodel, info)
-    invΣ = eye(size(θ,1))
+    k = size(θ,1)
+    invΣ = Matrix(1.0I, k, k)
     H(θ, m, S, NNmodel, info, invΣ)
 end    
 
@@ -36,5 +39,3 @@ function H(θ, m, S, NNmodel, info, invΣ)
     x = m - mbar/S
     -0.5*dot(x,invΣ*x)
 end
-
-
