@@ -1,6 +1,6 @@
 using Statistics
 function auxstat(θ)
-    n = 5000
+    n = 500
     μ_1, μ_2, σ_1, σ_2, prob = θ
     d1=randn(n).*σ_1 .+ μ_1
     d2=randn(n).*σ_2 .+ μ_2
@@ -8,7 +8,7 @@ function auxstat(θ)
     data=zeros(n)
     data[ps].=d1[ps]
     data[.!ps].=d2[.!ps]
-    r=0:0.01:1
+    r=0:0.1:1
     sqrt(Float64(n)).* quantile.(Ref(data),r)
 end    
 

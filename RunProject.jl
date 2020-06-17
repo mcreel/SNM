@@ -35,9 +35,10 @@ function RunProject()
 lb, ub = PriorSupport()
 nParams = size(lb,1)
 # generate the trained net
-#TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
-#MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
+TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
+MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
 results = zeros(mcreps,4*nParams)
+#=
 @load "neural_moments.bson" NNmodel transform_stats_info
 for mcrep = 1:mcreps
     # generate a draw of neural moments at true params
@@ -54,6 +55,7 @@ for mcrep = 1:mcreps
     println("____________________________")
 end
 writedlm(run_title, results)
+=#
 end
 RunProject()
 
