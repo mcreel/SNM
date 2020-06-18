@@ -1,5 +1,7 @@
 # SNM
-This is a project to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments though use of neural nets. The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior, using MCMC (simple version provided in the project), SMC (not provided), or other methods. The results reported in the paper and below are a product of two main features: the use of neural moments to reduce the dimension of the summary statistics, and the use of the indirect likelihood function as the criterion or distance measure. The code for these two features is [here](https://github.com/mcreel/SNM/blob/master/src/SNM.jl).
+This is a project to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments though use of neural nets. This leads to more reliable inference: confidence intervals derived from quantiles of samples from the posterior are found to be more reliable when the statistics are filtered through a neural net.
+
+The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior, using MCMC (simple version provided in the project), SMC (not provided), or other methods. The results reported below are a product of two main features: the use of neural moments to reduce the dimension of the summary statistics, and the use of the indirect likelihood function as the criterion or distance measure. The code for these two features is [here](https://github.com/mcreel/SNM/blob/master/src/SNM.jl).
 
 The project allows for Monte Carlo investigation of the performance of estimators and the reliability of confidence intervals obtained from the quantiles samples from the posterior distribution.
 
@@ -35,7 +37,7 @@ function TrueParameters()
 end
 ```    
 
-When we run ```RunProject()```, as above, we obtain output similar to the following results, for 1000 Monte Carlo replications:
+When we run ```RunProject()```, as above, a Monte Carlo study of 1000 replications of estimation of the model is done. For each replication, confidence intervals for each of the parameters are computed, and we can observe whether or not the true parameters lie in the respective confidence intervals. We obtain output similar to the following results, for 1000 Monte Carlo replications:
 ![MCresults](https://github.com/mcreel/SNM/blob/master/MCresults.png)
 
 The parameters are estimated with little bias, and good precision, and confidence interval coverages are close to the nominal levels, for each of the 5 parameters. One can observe that the model is estimated in about 10 seconds.
