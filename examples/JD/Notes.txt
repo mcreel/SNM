@@ -1,0 +1,4 @@
+Monte Carlo tools (additional features)
+Finance-specific domain tools: Heston model
+
+use MC to run a number of Hestons in parallel, to get the statistics?
