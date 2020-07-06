@@ -47,12 +47,16 @@ The parameters are estimated with little bias, and good precision, and confidenc
 
 For the first parameter, the true value is 1.0 (see above). The density plot of the posterior is
 ![MNp1](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp1.png)
-For the first parameter, the true value is 0.0 (see above). The density plot of the posterior is
+
+For the second parameter, the true value is 0.0 (see above). The density plot of the posterior is
 ![MNp2](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp2.png)
-For the first parameter, the true value is 0.2 (see above). The density plot of the posterior is
+
+For the third parameter, the true value is 0.2 (see above). The density plot of the posterior is
 ![MNp3](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp3.png)
-For the first parameter, the true value is 2.0 (see above). The density plot of the posterior is
+
+For the fourth parameter, the true value is 2.0 (see above). The density plot of the posterior is
 ![MNp4](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp4.png)
-For the first parameter, the true value is 0.4 (see above). The density plot of the posterior is
+
+For the fifth parameter, the true value is 0.4 (see above). The density plot of the posterior is
 ![MNp5](https://github.com/mcreel/SNM/blob/master/examples/MN/MNp5.png)
 
