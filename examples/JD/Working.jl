@@ -17,19 +17,13 @@ end
 
 
 function dgp()
-# trading days, closing, etc
-
-# assume trading period is 1/3 of day (8 hours) 
-# but that latent price evolves continuously
-# observed return is daily difference of log price at
-# closing time
 TradingDays = 1000 # total days in sample
-Days = Int(ceil(TradingDays*7/5))+3  # calendar days
+Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
 MinPerDay = 1440 # minutes per day
 MinPerTic = 5 # minutes between tics, lower for better accuracy
 tics = Int(MinPerDay/MinPerTic) # number of tics in day
 dt = 1/tics # divisions per day
-closing = Int(floor(tics/3)) # closing tic: closing happens after 1/3 of day
+closing = Int(round(6.5*60/MinPerTic)) # tic at closing
 # parameters
 μ0 = 0.0
 μ1 = 0.0
@@ -41,56 +35,65 @@ closing = Int(floor(tics/3)) # closing tic: closing happens after 1/3 of day
 λ1 = 4.0 # scaling factor st. dev. of jumps
 u0 = [0.0;α]
 prob = Diffusion(μ0, μ1, κ, α, σ, ρ, u0, (0.0,Days))
-
-## jump in price
+## jump in log price
 rate(u,p,t) = λ0
 # jump is normal with st. dev. equal to λ1 times current st. dev.
 affect1!(integrator) = (integrator.u[1] = integrator.u[1].+randn(size(integrator.u[1])).*λ1.*exp(integrator.u[2]./2.0))
-#affect1!(integrator) = (integrator.u[1] = λ1*integrator.u[1])    
 jump = ConstantRateJump(rate,affect1!)
 jump_prob = JumpProblem(prob,Direct(), jump)
 sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false)
-# get lnP at each tic
-lnP = [sol(t)[1] for t in 0:dt:(Days-1)]
-# get log price at end of trading days
-z = zeros(TradingDays+1)
+t = sol.t
+# find when jumps occur
+jump = t[2:end].==t[1:end-1] # find times where jumps occur
+jump[1] = 0 # this is always true, for some reason, set it false
+jump = vcat(false,jump) # 
+jumptimes = t[jump] # the times the jumps occur (verified)
+lnPs = [sol(t)[1] for t in dt:dt:Days]
+# get log price at end of trading days. We will compute lag, so loose first
+lnPtrading = zeros(TradingDays+1)
 RV = zeros(TradingDays+1)
-global DayofWeek = 0 # counter for day of week
-global TradingDay = 0 # counter for trading days
-global Day = 0
-while TradingDay<=TradingDays
-    # set day of week, and record if it's a trading day
+MedRV = zeros(TradingDays+1)
+DayofWeek = 0 # counter for day of week
+TradingDay = 0 # counter for trading days
+Day = 0
+t1 = 0.0
+t2 = 0.0
+t3 = 0.0
+lnPlag = 0.0
+while TradingDay < TradingDays+1
     Day +=1
     DayofWeek +=1
+    # set day of week, and record if it's a trading day
     if DayofWeek<6
         TradingDay +=1 # advance trading day
         # compute realized measures
-        for tic = 2:closing
-            RV[TradingDay]+=(lnP[Day*tics+tic]-lnP[Day*tics+tic-1])^2.0
+        # reset to zero to using only intra-day rets to compute realized (traditional, but misses jumps during non-trading)
+        #t1 = 0.0
+        #t2 = 0.0
+        #t3 = 0.0
+        for tic = 1:closing
+            lnP = lnPs[(Day-1)*tics+tic]
+            ret = lnP - lnPlag 
+            lnPlag = lnP # update lag, this is inter-day for the first
+            t3 = t2
+            t2 = t1
+            t1 = abs(ret)
+            RV[TradingDay]+=(ret^2.0)
+            MedRV[TradingDay] += median([t1,t2,t3])^2.0
         end    
-        z[TradingDay] = lnP[Day*tics+closing]
+        lnPtrading[TradingDay] = lnPs[(Day-1)*tics+closing]
     end
     if DayofWeek==7 # restart the week if Sunday
         DayofWeek = 0
-    end   
+    end
 end
-rets = z[2:end]-z[1:end-1]
+rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
 RV = RV[2:end]
-
-# checking the jump rate
-t = sol.t
-jump = t[2:end].==t[1:end-1] # find where time does not change
-jump[1]=0 # there is alway a "jump" at beginning, drop it
-println("number of jumps: ", sum(jump), " in ", TradingDays, " days")
-println("empirical jump rate (?): ", sum(jump)/TradingDays)
-println("nominal jump rate: ", λ0)
-return z, jump, sol, rets, RV;
+MedRV = MedRV[2:end]
+MedRV = pi/(6.0-4.0*sqrt(3.0) + pi).*MedRV
+return rets, RV, MedRV, jumptimes, sol
 end
-z, jump, sol, rets, RV = dgp();
-t = sol.t;
-t = t[2:end]
-u = sol(t[jump]).u
-jumpvals = [u[i][1] for i in 1:sum(jump)]
+rets, RV, MedRV, jumptimes, sol = dgp();
 plot(rets, label="returns");
-vline!(t[jump].*1000/1400, label="jumps")
+vline!(jumptimes .* 1000/1400, label="jumps")
 

@@ -1,3 +1,4 @@
 [deps]
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+Econometrics = "4d6a76a9-bfbc-5492-8924-cf6ed7875f06"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
