@@ -1,4 +1,4 @@
-using DifferentialEquations, Plots, Statistics
+using DifferentialEquations, Statistics
 
 function Diffusion(μ0,μ1,κ,α,σ,ρ,u0,tspan)
     f = function (du,u,p,t)
@@ -15,29 +15,28 @@ function Diffusion(μ0,μ1,κ,α,σ,ρ,u0,tspan)
     SDEProblem(sde_f,g,u0,tspan,noise=noise)
 end
 
+function TrueParameters()
+    μ0 = 0.0
+    μ1 = 0.0
+    κ = 0.1
+    α = 0.15
+    σ = 0.15
+    ρ = -0.7
+    λ0 = 0.005 # jump rate per day
+    λ1 = 4.0 # scaling factor st. dev. of jumps
+    return [μ0, μ1, κ, α, σ, ρ, λ0, λ1]
+end
 
-function dgp()
-# trading days, closing, etc
-# assume trading period is 1/3 of day (8 hours) 
-# but that latent price evolves continuously
-# observed return is daily difference of log price at
-# closing time
+function dgp(θ)
 TradingDays = 1000 # total days in sample
-Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day to allow for lags
+Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
 MinPerDay = 1440 # minutes per day
 MinPerTic = 5 # minutes between tics, lower for better accuracy
 tics = Int(MinPerDay/MinPerTic) # number of tics in day
 dt = 1/tics # divisions per day
 closing = Int(round(6.5*60/MinPerTic)) # tic at closing
 # parameters
-μ0 = 0.0
-μ1 = 0.0
-κ = 0.1
-α = 0.15
-σ = 0.15
-ρ = -0.7
-λ0 = 0.005 # jump rate per day
-λ1 = 4.0 # scaling factor st. dev. of jumps
+μ0, μ1, κ, α, σ, ρ, λ0, λ1 = θ
 u0 = [0.0;α]
 prob = Diffusion(μ0, μ1, κ, α, σ, ρ, u0, (0.0,Days))
 ## jump in log price
@@ -47,57 +46,75 @@ affect1!(integrator) = (integrator.u[1] = integrator.u[1].+randn(size(integrator
 jump = ConstantRateJump(rate,affect1!)
 jump_prob = JumpProblem(prob,Direct(), jump)
 sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false)
-# get lnP at each tic
-#
-# Need to check timing carefully if we want to identify jumps correctly
-# We need diff in RV and MedRV to coincide with the jump
-#
-#lnP = [sol(t)[1] for t in 0:dt:(Days-1)]
-lnP = [sol(t)[1] for t in 0:dt:(Days)]
-# get log price at end of trading days
-z = zeros(TradingDays+1)
+t = sol.t
+# find when jumps occur
+jump = t[2:end].==t[1:end-1] # find times where jumps occur
+jump[1] = 0 # this is always true, for some reason, set it false
+jump = vcat(false,jump) 
+jumptimes = t[jump] .* TradingDays ./ Days 
+lnPs = [sol(t)[1] for t in dt:dt:Days]
+vol = [sol(t)[2] for t in dt:dt:Days]
+# get log price at end of trading days. We will compute lag, so loose first
+lnPtrading = zeros(TradingDays+1)
+Volatility = zeros(TradingDays+1)
 RV = zeros(TradingDays+1)
 MedRV = zeros(TradingDays+1)
-global DayofWeek = 0 # counter for day of week
-global TradingDay = 0 # counter for trading days
-global Day = 0
-while TradingDay<=TradingDays
-    # set day of week, and record if it's a trading day
+RVinter = zeros(TradingDays+1)
+MedRVinter = zeros(TradingDays+1)
+Monday = zeros(TradingDays+1)
+DayofWeek = 0 # counter for day of week
+TradingDay = 0 # counter for trading days
+Day = 0
+t1 = 0.0
+t2 = 0.0
+t3 = 0.0
+lnPlag = 0.0
+while TradingDay < TradingDays+1
     Day +=1
     DayofWeek +=1
+    # set day of week, and record if it's a trading day
     if DayofWeek<6
         TradingDay +=1 # advance trading day
         # compute realized measures
-        t1 = 0.0
-        t2 = 0.0
-        t3 = 0.0
-        for tic = 2:closing
-            ret = lnP[Day*tics+tic]-lnP[Day*tics+tic-1] 
-            t3 = t2
-            t2 = t1
-            t1 = abs(ret)
-            RV[TradingDay]+=(ret^2.0)
-            MedRV[TradingDay] += median([t1,t2,t3])^2.0
+        # reset to zero to using only intra-day rets to compute realized (traditional, but misses jumps during non-trading)
+        #t1 = 0.0
+        #t2 = 0.0
+        #t3 = 0.0
+        for tic = 1:closing
+            lnP = lnPs[(Day-1)*tics+tic]
+            ret = lnP - lnPlag 
+            lnPlag = lnP # update lag, this is inter-day for the first
+            t3 = t2 # two lags
+            t2 = t1 # one lag
+            t1 = abs(ret) # current
+            RVinter[TradingDay]+=(ret^2.0)
+            MedRVinter[TradingDay] += median([t1,t2,t3])^2.0
+            if tic > 2
+                RV[TradingDay]+=(ret^2.0)
+                MedRV[TradingDay] += median([t1,t2,t3])^2.0
+            end
         end    
-        z[TradingDay] = lnP[Day*tics+closing]
+        lnPtrading[TradingDay] = lnPs[(Day-1)*tics+closing]
+        Volatility[TradingDay] = exp(0.5*vol[(Day-1)*tics+closing]) # true volatility
+        Monday[TradingDay] = (DayofWeek == 1)
     end
     if DayofWeek==7 # restart the week if Sunday
         DayofWeek = 0
-    end   
+    end
 end
-rets = z[2:end]-z[1:end-1] # inter-day returns
+rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
 RV = RV[2:end]
+MedRV = pi/(6.0-4.0*sqrt(3.0) + pi).*MedRV
 MedRV = MedRV[2:end]
+RVinter = RVinter[2:end]
+MedRVinter = pi/(6.0-4.0*sqrt(3.0) + pi).*MedRVinter
+MedRVinter = MedRVinter[2:end]
+Volatility = Volatility[2:end]
+Monday = Monday[2:end]
 
-# checking the jump rate
-t = sol.t
-jump = t[2:end].==t[1:end-1] # find where time does not change
-jump[1]=0 # there is alway a "jump" at beginning, drop it
-t = t[2:end]
-jumptime = Int.(round.(t[jump] .* TradingDays ./ Days))
-return rets, RV, MedRV, jumptime;
+return rets, Volatility, jumptimes, RV, MedRV, RVinter, MedRVinter, Monday
 end
-rets, RV, MedRV, jumptime = dgp();
-plot(rets, label="returns");
-vline!(jumptime, label="jumps")
 
+function auxstat(rets, RV, MedRV, RVinter, MedRVinter, Monday)
+    RVinter = lsfit(RVinter, [ones(1000)  Monday])[3] # filter out weekend effect
+end    
