@@ -18,14 +18,43 @@ end
 function TrueParameters()
     μ0 = 0.0
     μ1 = 0.0
-    κ = 0.1
-    α = 0.15
-    σ = 0.15
+    κ = 0.3
+    α = 0.3
+    σ = 0.7
     ρ = -0.7
     λ0 = 0.005 # jump rate per day
     λ1 = 4.0 # scaling factor st. dev. of jumps
     return [μ0, μ1, κ, α, σ, ρ, λ0, λ1]
 end
+
+
+function PriorSupport()
+    lb = [-0.1, -0.1, 0.0, -1.0, 0.01, -0.999, 0.0,  3.0]
+    ub = [0.1,   0.1,  0.5, 3.0, 3.0,  0.0, 0.05, 5.0]
+    lb,ub
+end    
+
+function PriorMean()
+    lb,ub = PriorSupport()
+    (ub - lb) ./ 2.0
+end
+
+function PriorDraw()
+    lb, ub = PriorSupport()
+    θ = (ub-lb).*rand(size(lb,1)) + lb
+end    
+
+# prior checks that we're in the bounds, and that the unconditional std. dev. of log vol is not too high
+# returns 1 if this is true, zero otherwise. Value is not important, as it's constant
+function Prior(θ)
+    lb,ub = PriorSupport()
+    a = 0.0
+    if (all(θ .>= lb) & all(θ .<= ub))
+        a = 1.0
+    end
+    return a
+end
+
 
 function dgp(θ)
 TradingDays = 1000 # total days in sample
@@ -41,8 +70,8 @@ u0 = [0.0;α]
 prob = Diffusion(μ0, μ1, κ, α, σ, ρ, u0, (0.0,Days))
 ## jump in log price
 rate(u,p,t) = λ0
-# jump is normal with st. dev. equal to λ1 times current st. dev.
-affect1!(integrator) = (integrator.u[1] = integrator.u[1].+randn(size(integrator.u[1])).*λ1.*exp(integrator.u[2]./2.0))
+# jump is random sign times  λ1 times current st. dev.
+affect1!(integrator) = (integrator.u[1] = integrator.u[1].+rand([-1.0,1.0]).*λ1.*exp(integrator.u[2]./2.0))
 jump = ConstantRateJump(rate,affect1!)
 jump_prob = JumpProblem(prob,Direct(), jump)
 sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false)
@@ -56,18 +85,14 @@ lnPs = [sol(t)[1] for t in dt:dt:Days]
 vol = [sol(t)[2] for t in dt:dt:Days]
 # get log price at end of trading days. We will compute lag, so loose first
 lnPtrading = zeros(TradingDays+1)
-Volatility = zeros(TradingDays+1)
+Volatility = zeros(TradingDays+1) # real latent volatility
 RV = zeros(TradingDays+1)
 MedRV = zeros(TradingDays+1)
-RVinter = zeros(TradingDays+1)
-MedRVinter = zeros(TradingDays+1)
+ret0 = zeros(TradingDays+1) # returns at open
 Monday = zeros(TradingDays+1)
 DayofWeek = 0 # counter for day of week
 TradingDay = 0 # counter for trading days
 Day = 0
-t1 = 0.0
-t2 = 0.0
-t3 = 0.0
 lnPlag = 0.0
 while TradingDay < TradingDays+1
     Day +=1
@@ -76,10 +101,9 @@ while TradingDay < TradingDays+1
     if DayofWeek<6
         TradingDay +=1 # advance trading day
         # compute realized measures
-        # reset to zero to using only intra-day rets to compute realized (traditional, but misses jumps during non-trading)
-        #t1 = 0.0
-        #t2 = 0.0
-        #t3 = 0.0
+        t1 = 0.0
+        t2 = 0.0
+        t3 = 0.0
         for tic = 1:closing
             lnP = lnPs[(Day-1)*tics+tic]
             ret = lnP - lnPlag 
@@ -87,8 +111,11 @@ while TradingDay < TradingDays+1
             t3 = t2 # two lags
             t2 = t1 # one lag
             t1 = abs(ret) # current
-            RVinter[TradingDay]+=(ret^2.0)
-            MedRVinter[TradingDay] += median([t1,t2,t3])^2.0
+            # compute interday initial return
+            if tic == 1
+                ret0[TradingDay] = ret
+            end
+            # RV measures
             if tic > 2
                 RV[TradingDay]+=(ret^2.0)
                 MedRV[TradingDay] += median([t1,t2,t3])^2.0
@@ -106,15 +133,14 @@ rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
 RV = RV[2:end]
 MedRV = pi/(6.0-4.0*sqrt(3.0) + pi).*MedRV
 MedRV = MedRV[2:end]
-RVinter = RVinter[2:end]
-MedRVinter = pi/(6.0-4.0*sqrt(3.0) + pi).*MedRVinter
-MedRVinter = MedRVinter[2:end]
 Volatility = Volatility[2:end]
 Monday = Monday[2:end]
+ret0 = ret0[2:end]
 
-return rets, Volatility, jumptimes, RV, MedRV, RVinter, MedRVinter, Monday
+return rets, Volatility, jumptimes, RV, MedRV, ret0, Monday
 end
 
-function auxstat(rets, RV, MedRV, RVinter, MedRVinter, Monday)
-    RVinter = lsfit(RVinter, [ones(1000)  Monday])[3] # filter out weekend effect
+function auxstat(rets, RV, MedRV, ret0, Monday)
+    # Ret0: this spikes when there is a jump in a non-trading period
+    ret0 = lsfit(abs.(ret0), [ones(1000)  Monday])[3] # filter out weekend effect
 end    
