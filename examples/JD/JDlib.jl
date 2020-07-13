@@ -55,7 +55,6 @@ function Prior(θ)
     return a
 end
 
-
 function dgp(θ)
 TradingDays = 1000 # total days in sample
 Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
@@ -75,12 +74,11 @@ affect1!(integrator) = (integrator.u[1] = integrator.u[1].+rand([-1.0,1.0]).*λ1
 jump = ConstantRateJump(rate,affect1!)
 jump_prob = JumpProblem(prob,Direct(), jump)
 sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false)
-t = sol.t
 # find when jumps occur
-jump = t[2:end].==t[1:end-1] # find times where jumps occur
+jump = sol.t[2:end].==sol.t[1:end-1] # find times where jumps occur
 jump[1] = 0 # this is always true, for some reason, set it false
 jump = vcat(false,jump) 
-jumptimes = t[jump] .* TradingDays ./ Days 
+jumptimes = sol.t[jump] .* TradingDays ./ Days 
 lnPs = [sol(t)[1] for t in dt:dt:Days]
 vol = [sol(t)[2] for t in dt:dt:Days]
 # get log price at end of trading days. We will compute lag, so loose first
@@ -136,11 +134,30 @@ MedRV = MedRV[2:end]
 Volatility = Volatility[2:end]
 Monday = Monday[2:end]
 ret0 = ret0[2:end]
-
 return rets, Volatility, jumptimes, RV, MedRV, ret0, Monday
 end
 
-function auxstat(rets, RV, MedRV, ret0, Monday)
-    # Ret0: this spikes when there is a jump in a non-trading period
-    ret0 = lsfit(abs.(ret0), [ones(1000)  Monday])[3] # filter out weekend effect
-end    
+function auxstat(θ)
+    rets, Volatility, jumptimes, RV, MedRV, ret0, Monday = dgp(θ)
+    βret0,junk,ret0  = lsfit(abs.(ret0), [ones(1000)  Monday]) # filter out weekend effect
+    # drift: μ0 and μ1, also ρ
+    n = size(rets,1)
+    X = [ones(n,1) rets MedRV]
+    X = X[1:end-1,:]
+    y = rets[2:end]
+    βrets = X\y
+    ϵrets = y-X*βrets
+    σrets = std(ϵrets)
+    # volatility
+    y = MedRV[2:end]
+    βvol = X\y
+    ϵvol = y-X*βvol
+    σvol = std(ϵvol)
+    # leverage
+    leverage = cor(ϵvol, ϵrets)
+    # dstats
+    #d = vec(dstats([rets RV MedRV ret0], silent=true))
+    return vcat(βret0, βrets, βvol, σrets, σvol, leverage) #, d) 
+end
+
+

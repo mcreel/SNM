@@ -241,9 +241,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "ConsoleProgressMonitor", "DataStructures", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LabelledArrays", "LinearAlgebra", "Logging", "LoggingExtras", "MuladdMacro", "Parameters", "Printf", "ProgressLogging", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TerminalLoggers", "TreeViews", "ZygoteRules"]
-git-tree-sha1 = "1c977b0c5219e1a4e3ae1ee16b2f29ccc3bd43b7"
+git-tree-sha1 = "e7e31a36de80ff2f94bdacd4d956cb6b67fcf0ef"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.40.4"
+version = "6.40.7"
 
 [[DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "NLsolve", "OrdinaryDiffEq", "RecipesBase", "RecursiveArrayTools", "StaticArrays"]
@@ -325,7 +325,7 @@ version = "0.8.2"
 
 [[Econometrics]]
 deps = ["CSV", "Calculus", "DataFrames", "DataFramesMeta", "Distances", "Distributions", "GR", "KernelDensity", "LinearAlgebra", "NLopt", "Optim", "Plots", "PrettyTables", "Printf", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "StatsModels", "StatsPlots", "Test"]
-git-tree-sha1 = "341948e3463850920eb83db27ed7cf310dfb2928"
+git-tree-sha1 = "6d9fb85039fdf92a98069699039eade722ad22cf"
 repo-rev = "master"
 repo-url = "/home/michael/Mystuff/Econometrics"
 uuid = "4d6a76a9-bfbc-5492-8924-cf6ed7875f06"
@@ -780,10 +780,10 @@ uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.9.12"
 
 [[ParameterizedFunctions]]
-deps = ["DataStructures", "DiffEqBase", "Latexify", "LinearAlgebra", "ModelingToolkit"]
-git-tree-sha1 = "86ca1fa2f37f20945a742d50ed12e314b11dfa62"
+deps = ["DataStructures", "DiffEqBase", "Latexify", "LinearAlgebra", "ModelingToolkit", "Reexport"]
+git-tree-sha1 = "458f179b2bcb8071a2dbcf92cafd2c1cbd44e8e1"
 uuid = "65888b18-ceab-5e60-b2b9-181511a3b968"
-version = "5.3.0"
+version = "5.4.0"
 
 [[Parameters]]
 deps = ["OrderedCollections", "UnPack"]
@@ -860,9 +860,9 @@ version = "0.1.3"
 
 [[ProgressMeter]]
 deps = ["Distributed", "Printf"]
-git-tree-sha1 = "3e1784c27847bba115815d4d4e668b99873985e5"
+git-tree-sha1 = "2de4cddc0ceeddafb6b143b5b6cd9c659b64507c"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
-version = "1.3.1"
+version = "1.3.2"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
