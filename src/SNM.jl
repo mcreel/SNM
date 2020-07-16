@@ -10,32 +10,26 @@ function TransformStats(data, info)
 end
 
 # a draw of neural moments
-function NeuralMoments(θ, NNmodel, info)
-    Float64.(NNmodel(TransformStats(auxstat(θ)', info)'))
+function NeuralMoments(θ, auxstat, reps, NNmodel, info)
+    z = auxstat(θ, reps)
+    Float64.(NNmodel(TransformStats(z, info)'))
 end        
 
 # estimate covariance
-function EstimateΣ(θ, S, NNmodel, info)
-    ms = zeros(S, size(θ,1))
-    Threads.@threads for s = 1:S
-        @inbounds ms[s,:] = NeuralMoments(θ, NNmodel, info)
-    end
-    Σ = cov(ms)
+function EstimateΣ(θ, reps, auxstat, NNmodel, info)
+    ms = NeuralMoments(θ, auxstat, reps, NNmodel, info)
+    Σ = cov(ms')
 end
 
 # method with identity weight
-function H(θ, m, S, NNmodel, info)
+function H(θ, m, reps, auxstat, NNmodel, info)
     k = size(θ,1)
     invΣ = Matrix(1.0I, k, k)
-    H(θ, m, S, NNmodel, info, invΣ)
+    H(θ, m, reps, auxstat, NNmodel, info, invΣ)
 end    
 
 # log likelihood (GMM-form) with fixed weight matrix
-function H(θ, m, S, NNmodel, info, invΣ)
-    mbar = zeros(size(m))
-    Threads.@threads for s = 1:S
-        mbar .+= NeuralMoments(θ, NNmodel, info)
-    end
-    x = m - mbar/S
+function H(θ, m, reps, auxstat, NNmodel, info, invΣ)
+    x = m - vec(mean(NeuralMoments(θ, auxstat, reps, NNmodel, info), dims=2))
     -0.5*dot(x,invΣ*x)
 end

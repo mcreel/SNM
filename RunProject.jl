@@ -14,8 +14,9 @@ function RunProject()
 
 # generate the trained net: comment out when done for the chosen model
 nParams = size(PriorSupport()[1],1)
-TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
-MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
+TrainingTestingSize = Int64(nParams*2*1e3) # 20,000 training and testing for each parameter
+#auxstat2 = θ-> auxstat(θ,1)
+#MakeNeuralMoments(auxstat2, TrainingTestingSize) # already done for the 4 examples
 
 # Monte Carlo study of confidence interval coverage for chosen model
 results = zeros(mcreps,4*nParams)
@@ -24,8 +25,9 @@ results = zeros(mcreps,4*nParams)
 @load "neural_moments.bson" NNmodel transform_stats_info
 for mcrep = 1:mcreps
     # generate a draw of neural moments at true params
-    m = NeuralMoments(TrueParameters(), NNmodel, transform_stats_info)    
-    @time chain, θhat = MCMC(m, NNmodel, transform_stats_info)
+    m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)    
+    @show m
+    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info)
     results[mcrep,:] = vcat(θhat, Analyze(chain))
     println("__________ replication: ", mcrep, "_______________")
     println("Results so far")

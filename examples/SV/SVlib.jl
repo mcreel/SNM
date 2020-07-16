@@ -83,4 +83,15 @@ function Prior(θ)
     return a
 end
 
+function PriorDraw()
+    lb, ub = PriorSupport()
+    ok = false
+    θ = 0.0
+    while !ok
+        θ = (ub-lb).*rand(size(lb,1)) + lb
+        ok = Prior(θ)==1.0
+    end
+    return θ
+end    
+
 
