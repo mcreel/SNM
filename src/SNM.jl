@@ -12,7 +12,8 @@ end
 # a draw of neural moments
 function NeuralMoments(θ, auxstat, reps, NNmodel, info)
     z = auxstat(θ, reps)
-    Float64.(NNmodel(TransformStats(z, info)'))
+    lb, ub = PriorSupport()
+    min.(max.(Float64.(NNmodel(TransformStats(z, info)')),lb),ub)
 end        
 
 # estimate covariance

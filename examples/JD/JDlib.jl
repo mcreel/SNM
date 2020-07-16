@@ -3,7 +3,7 @@ using DifferentialEquations, Statistics, Econometrics
 function Diffusion(μ0,μ1,κ,α,σ,ρ,u0,tspan)
     f = function (du,u,p,t)
         du[1] = μ0 + μ1*(u[2]-α)/σ # drift in log prices
-        du[2] = κ*(α-u[2]) # mean reversion in shocks
+        du[2] = κ.*(α.-u[2]) # mean reversion in shocks
     end
     g = function (du,u,p,t)
         du[1] = exp(u[2]/2.0)

@@ -11,7 +11,7 @@ function MakeNeuralMoments(auxstat, S)
     lb,ub = PriorSupport()
     nParams = size(lb,1)
     # training and testing
-    W = auxstat(PriorMean())' # draw the raw statistics
+    W = auxstat(PriorMean(),1)' # draw the raw statistics
     data = zeros(S,size(vcat(lb, W),1))
     @inbounds Threads.@threads for s = 1:S
         ok = false
@@ -19,7 +19,7 @@ function MakeNeuralMoments(auxstat, S)
         z = 0.0
         while !ok
             θ = PriorDraw()
-            z = auxstat(θ)'
+            z = auxstat(θ,1)'
             ok = any(isnan.(z))==false 
         end    
         data[s,:] = vcat(θ, z)

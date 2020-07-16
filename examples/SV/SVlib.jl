@@ -1,24 +1,28 @@
 using Econometrics, Statistics, Random
 
-function auxstat(θ)
-    n = 500
-    burnin = 100
-    y = SVmodel(θ, n, burnin)
-    s = std(y)
-    y = abs.(y)
-    m = mean(y)
-    s2 = std(y)
-    y = y ./ s2
-    k = std((y).^2.0)
-    c = cor(y[1:end-1],y[2:end])
-    # ratios of quantiles of moving averages to detect clustering
-    q = try
-        q = quantile((ma(y,3)[3:end]), [0.25, 0.75])
-    catch
-        q = [1.0, 0.0]
+function auxstat(θ, reps)
+    stats = zeros(reps,11)
+    @inbounds Threads.@threads for rep = 1:reps
+        n = 500
+        burnin = 100
+        y = SVmodel(θ, n, burnin)
+        s = std(y)
+        y = abs.(y)
+        m = mean(y)
+        s2 = std(y)
+        y = y ./ s2
+        k = std((y).^2.0)
+        c = cor(y[1:end-1],y[2:end])
+        # ratios of quantiles of moving averages to detect clustering
+        q = try
+            q = quantile((ma(y,3)[3:end]), [0.25, 0.75])
+        catch
+            q = [1.0, 0.0]
+        end
+        c1 = log(q[2]/q[1])
+        stats[rep,:] = sqrt(Float64(n))*vcat(m, s, s2, k, c, c1, HAR(y))'
     end
-    c1 = log(q[2]/q[1])
-    result = sqrt(Float64(n))*vcat(m, s, s2, k, c, c1, HAR(y))
+    return stats
 end
 
 

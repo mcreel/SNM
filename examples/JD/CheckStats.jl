@@ -5,9 +5,6 @@ mcreps = 1000 # how many reps?
 # load code
 include("examples/"*project*"/"*project*"lib.jl")
 include("src/SNM.jl")
-include("src/MakeNeuralMoments.jl") # the specialized MCMC using net 
-include("src/Analyze.jl") # computes the confidence intervals, etc
-include("src/MCMC.jl") # the specialized MCMC using net 
 using BSON:@load
 
 function main()
@@ -17,7 +14,7 @@ function main()
 for mcrep = 1:mcreps
     θ = PriorDraw()
     m = NeuralMoments(θ, auxstat, 1, NNmodel, transform_stats_info)    
-    prettyprint([θ'; m'])
+    prettyprint([θ m],["true" "estimated"],"")
 end
 end
 main()

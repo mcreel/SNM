@@ -1,4 +1,4 @@
-project="JD"  # set to one of the projects in examples: SV, DPD, ARMA, MN
+project="SV"  # set to one of the projects in examples: SV, DPD, ARMA, MN
 run_title = "working" # Monte Carlo results written to this file
 mcreps = 1000 # how many reps?
 
@@ -15,8 +15,7 @@ function RunProject()
 # generate the trained net: comment out when done for the chosen model
 nParams = size(PriorSupport()[1],1)
 TrainingTestingSize = Int64(nParams*2*1e3) # 20,000 training and testing for each parameter
-#auxstat2 = θ-> auxstat(θ,1)
-#MakeNeuralMoments(auxstat2, TrainingTestingSize) # already done for the 4 examples
+MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
 
 # Monte Carlo study of confidence interval coverage for chosen model
 results = zeros(mcreps,4*nParams)
