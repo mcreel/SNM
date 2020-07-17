@@ -11,20 +11,20 @@ function MakeNeuralMoments(auxstat, S)
     lb,ub = PriorSupport()
     nParams = size(lb,1)
     # training and testing
-    W = auxstat(lb) # draw the raw statistics
+    W = auxstat(PriorMean(),1)' # draw the raw statistics
     data = zeros(S,size(vcat(lb, W),1))
-    Threads.@threads for s = 1:S
-        ok = 0.0
+    @inbounds Threads.@threads for s = 1:S
+        ok = false
         θ = lb # initialize
-        while ok != 1.0
-            v = rand(size(lb,1))
-            θ = v.*(ub-lb) + lb
-            ok = Prior(θ) # note: some draws in bounds may not be in support
-            if ok != 1.0
-            end    
+        z = 0.0
+        while !ok
+            θ = PriorDraw()
+            z = auxstat(θ,1)'
+            ok = any(isnan.(z))==false 
         end    
-        data[s,:] = vcat(θ, auxstat(θ))
+        data[s,:] = vcat(θ, z)
     end
+    # remove NaNs
     params = data[:,1:nParams]
     statistics = data[:,nParams+1:end]
     # transform stats to robustify against outliers

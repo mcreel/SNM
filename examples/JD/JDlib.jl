@@ -1,9 +1,9 @@
-using DifferentialEquations, Statistics
+using DifferentialEquations, Statistics, Econometrics
 
 function Diffusion(μ0,μ1,κ,α,σ,ρ,u0,tspan)
     f = function (du,u,p,t)
         du[1] = μ0 + μ1*(u[2]-α)/σ # drift in log prices
-        du[2] = κ*(α-u[2]) # mean reversion in shocks
+        du[2] = κ.*(α.-u[2]) # mean reversion in shocks
     end
     g = function (du,u,p,t)
         du[1] = exp(u[2]/2.0)
@@ -36,7 +36,7 @@ end
 
 function PriorMean()
     lb,ub = PriorSupport()
-    (ub - lb) ./ 2.0
+    (ub + lb) ./ 2.0
 end
 
 function PriorDraw()
@@ -55,8 +55,8 @@ function Prior(θ)
     return a
 end
 
-function dgp(θ)
-TradingDays = 1000 # total days in sample
+function dgp(θ,reps)
+TradingDays = 1000*reps    
 Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
 MinPerDay = 1440 # minutes per day
 MinPerTic = 5 # minutes between tics, lower for better accuracy
@@ -75,15 +75,15 @@ jump = ConstantRateJump(rate,affect1!)
 jump_prob = JumpProblem(prob,Direct(), jump)
 sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false)
 # find when jumps occur
-jump = sol.t[2:end].==sol.t[1:end-1] # find times where jumps occur
-jump[1] = 0 # this is always true, for some reason, set it false
-jump = vcat(false,jump) 
-jumptimes = sol.t[jump] .* TradingDays ./ Days 
+#jump = sol.t[2:end].==sol.t[1:end-1] # find times where jumps occur
+#jump[1] = 0 # this is always true, for some reason, set it false
+#jump = vcat(false,jump) 
+#jumptimes = sol.t[jump] .* TradingDays ./ Days 
 lnPs = [sol(t)[1] for t in dt:dt:Days]
-vol = [sol(t)[2] for t in dt:dt:Days]
+#vol = [sol(t)[2] for t in dt:dt:Days]
 # get log price at end of trading days. We will compute lag, so loose first
 lnPtrading = zeros(TradingDays+1)
-Volatility = zeros(TradingDays+1) # real latent volatility
+#Volatility = zeros(TradingDays+1) # real latent volatility
 RV = zeros(TradingDays+1)
 MedRV = zeros(TradingDays+1)
 ret0 = zeros(TradingDays+1) # returns at open
@@ -92,7 +92,7 @@ DayofWeek = 0 # counter for day of week
 TradingDay = 0 # counter for trading days
 Day = 0
 lnPlag = 0.0
-while TradingDay < TradingDays+1
+@inbounds while TradingDay < TradingDays+1
     Day +=1
     DayofWeek +=1
     # set day of week, and record if it's a trading day
@@ -120,7 +120,7 @@ while TradingDay < TradingDays+1
             end
         end    
         lnPtrading[TradingDay] = lnPs[(Day-1)*tics+closing]
-        Volatility[TradingDay] = exp(0.5*vol[(Day-1)*tics+closing]) # true volatility
+        #Volatility[TradingDay] = exp(0.5*vol[(Day-1)*tics+closing]) # true volatility
         Monday[TradingDay] = (DayofWeek == 1)
     end
     if DayofWeek==7 # restart the week if Sunday
@@ -131,33 +131,40 @@ rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
 RV = RV[2:end]
 MedRV = pi/(6.0-4.0*sqrt(3.0) + pi).*MedRV
 MedRV = MedRV[2:end]
-Volatility = Volatility[2:end]
+#Volatility = Volatility[2:end]
 Monday = Monday[2:end]
 ret0 = ret0[2:end]
-return rets, Volatility, jumptimes, RV, MedRV, ret0, Monday
+#return rets, Volatility, jumptimes, RV, MedRV, ret0, Monday
+return rets, RV, MedRV, ret0, Monday
 end
 
-function auxstat(θ)
-    rets, Volatility, jumptimes, RV, MedRV, ret0, Monday = dgp(θ)
-    βret0,junk,ret0  = lsfit(abs.(ret0), [ones(1000)  Monday]) # filter out weekend effect
-    # drift: μ0 and μ1, also ρ
-    n = size(rets,1)
-    X = [ones(n,1) rets MedRV]
-    X = X[1:end-1,:]
-    y = rets[2:end]
-    βrets = X\y
-    ϵrets = y-X*βrets
-    σrets = std(ϵrets)
-    # volatility
-    y = MedRV[2:end]
-    βvol = X\y
-    ϵvol = y-X*βvol
-    σvol = std(ϵvol)
-    # leverage
-    leverage = cor(ϵvol, ϵrets)
-    # dstats
-    #d = vec(dstats([rets RV MedRV ret0], silent=true))
-    return vcat(βret0, βrets, βvol, σrets, σvol, leverage) #, d) 
+# returns reps replications of the statistics
+function auxstat(θ, reps)
+    rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
+    RV = log.(RV)
+    MedRV = log.(MedRV)
+    n = Int(size(rets,1)/reps)
+    stats = zeros(reps,13)
+    @inbounds Threads.@threads for rep = 1:reps
+        included = n*rep-n+1:n*rep
+        βret0,junk,junk  = lsfit(abs.(ret0[included]), [ones(n)  Monday[included]]) # filter out weekend effect
+        # drift: μ0 and μ1, also ρ
+        X = [ones(n,1) rets[included] MedRV[included]][1:end-1,:]
+        y = rets[included][2:end]
+        βrets = X\y
+        ϵrets = y-X*βrets
+        σrets = std(ϵrets)
+        # volatility
+        y = MedRV[included][2:end]
+        βvol = X\y
+        ϵvol = y-X*βvol
+        σvol = std(ϵvol)
+        # leverage
+        leverage = cor(ϵvol, ϵrets)
+        # dstats
+        stats[rep,:] = vcat(βret0, βrets, βvol, σrets, σvol, leverage, mean(RV[included]), mean(MedRV[included]))'
+    end
+    return stats
 end
 
 
