@@ -1,15 +1,18 @@
 using Statistics
-function auxstat(θ)
-    n = 1000
-    μ_1, μ_2, σ_1, σ_2, prob = θ
-    d1=randn(n).*σ_1 .+ μ_1
-    d2=randn(n).*σ_2 .+ μ_2
-    ps=rand(n).<prob
-    data=zeros(n)
-    data[ps].=d1[ps]
-    data[.!ps].=d2[.!ps]
-    r=0:0.1:1
-    sqrt(Float64(n)).* quantile.(Ref(data),r)
+function auxstat(θ, reps)
+    stats = zeros(reps,11)
+    @inbounds Threads.@threads for rep = 1:reps
+        n = 1000
+        μ_1, μ_2, σ_1, σ_2, prob = θ
+        d1=randn(n).*σ_1 .+ μ_1
+        d2=randn(n).*σ_2 .+ μ_2
+        ps=rand(n).<prob
+        data=zeros(n)
+        data[ps].=d1[ps]
+        data[.!ps].=d2[.!ps]
+        r=0:0.1:1
+        stats[rep,:] = sqrt(Float64(n)).* quantile.(Ref(data),r)'
+    end        
 end    
 
 function TrueParameters()
