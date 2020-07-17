@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 project="MN"  # set to one of the projects in examples: SV, DPD, ARMA, MN
-=======
-project="SV"  # set to one of the projects in examples: SV, DPD, ARMA, MN
->>>>>>> JD
 run_title = "working" # Monte Carlo results written to this file
 mcreps = 1000 # how many reps?
 
