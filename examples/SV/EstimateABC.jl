@@ -3,7 +3,7 @@
 using Distributions, KissABC
 include("../../src/SNM.jl")
 include("../../src/MCMC.jl") # the specialized MCMC using net 
-include("JDlib.jl")
+include("SVlib.jl")
 using BSON:@load
 using DelimitedFiles
 using Plots:savefig
@@ -14,28 +14,24 @@ m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)
 println("neural moments: ", m)
 
 prior = Factored(
-    Uniform(-0.1, 0.1),
-    Uniform(-0.1, 0.1),
-    Uniform(0.0, 0.5),
-    Uniform(-1.0, 3.0),
-    Uniform(0.01, 3.0),
-    Uniform(-0.999, 0.0),
-    Uniform(0.0, 0.05),
-    Uniform(3.0, 5.0));
+    Uniform(0.05, 2.0),
+    Uniform(0.0, 0.999),
+    Uniform(0.05, 1.0));
 
-# method with identity weight
-D(θ) = -1.0*H(θ, m, 1, auxstat, NNmodel, transform_stats_info, Matrix(1.0I, size(θ,1), size(θ,1)))
+# estimate covariance
+Σinv = inv(EstimateΣ(m, 100, auxstat, NNmodel, transform_stats_info))
+D(θ) = -1.0*H(θ, m, 10, auxstat, NNmodel, transform_stats_info, Σinv)
 
 approx_density = ApproxPosterior(prior, D, 0.0)
 res = sample(
     approx_density,
-    AIS(50),
+    AIS(10),
     MCMCThreads(),
-    100,
+    1000,
     10,
-    burnin = 10,
+    burnin = 100,
     ntransitions = 10,
-    progress = true,
+    progress = false
 )
 @show res
 

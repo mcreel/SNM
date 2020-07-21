@@ -13,6 +13,7 @@ function auxstat(θ, reps)
         r=0:0.1:1
         stats[rep,:] = sqrt(Float64(n)).* quantile.(Ref(data),r)'
     end        
+    return stats
 end    
 
 function TrueParameters()

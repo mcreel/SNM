@@ -1,4 +1,4 @@
-using Flux, Statistics
+using Flux, Statistics, LinearAlgebra
 
 # bounds by quantiles, and standardizes and normalizes around median
 function TransformStats(data, info)
