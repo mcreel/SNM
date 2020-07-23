@@ -2,7 +2,7 @@
 # Baysian estimation using MCMC
 
 include("../../src/SNM.jl")
-include("../../src/MCMC.jl") # the specialized MCMC using net 
+include("MCMC.jl") # the specialized MCMC using net 
 include("JDlib.jl")
 using BSON:@load
 using DelimitedFiles
@@ -11,8 +11,7 @@ using Plots:savefig
 function main()
     @load "neural_moments.bson" NNmodel transform_stats_info
     m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)
-    println("neural moments: ", m)
-    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true)
+    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=10)
     chain, θhat
 end
 chain, θhat = main()
