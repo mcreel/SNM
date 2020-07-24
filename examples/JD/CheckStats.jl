@@ -3,8 +3,8 @@ run_title = "working" # Monte Carlo results written to this file
 mcreps = 1000 # how many reps?
 
 # load code
-include("examples/"*project*"/"*project*"lib.jl")
-include("src/SNM.jl")
+include("JDlib.jl")
+include("../../src/SNM.jl")
 using BSON:@load
 
 function main()

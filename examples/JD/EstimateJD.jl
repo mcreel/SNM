@@ -2,7 +2,6 @@
 # Baysian estimation using MCMC
 
 include("../../src/SNM.jl")
-include("MCMC.jl") # the specialized MCMC using net 
 include("JDlib.jl")
 using BSON:@load
 using DelimitedFiles

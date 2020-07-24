@@ -16,7 +16,7 @@ function proposal2(current, cholV)
     current + cholV'*randn(size(current))
 end
 
-function MCMC(m, auxstat, NNmodel, info; verbosity = false)
+function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1)
     lb, ub = PriorSupport()
     nParams = size(lb,1)
     # use a rapid SAMIN to get good initialization values for chain
@@ -26,7 +26,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false)
     else
         sa_verbosity = 0
     end    
-    θhat, junk, junk, junk = samin(obj, PriorMean(), lb, ub; coverage_ok=0, maxevals=100000, verbosity = sa_verbosity, rt = 0.5)
+    θhat, junk, junk, junk = samin(obj, m, lb, ub; coverage_ok=0, maxevals=100000, verbosity = sa_verbosity, rt = 0.5)
     # get covariance estimate
     Σinv = inv(EstimateΣ(θhat, 100, auxstat, NNmodel, info))
     # define things for MCMC
@@ -35,7 +35,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false)
     MCMCburnin = 0
     tuning = 0.2/sqrt(12.0)*(ub-lb) # two tenths of a standard. dev. of prior
     Proposal = θ -> proposal1(θ, tuning)
-    chain = mcmc(θhat, ChainLength, MCMCburnin, Prior, lnL, Proposal, verbosity)
+    chain = mcmc(θhat, ChainLength, MCMCburnin, Prior, lnL, Proposal, verbosity, nthreads)
     # now use a MVN random walk proposal with updates of covariance and longer chain
     # on final loop
     Σ = NeweyWest(chain[:,1:nParams])
@@ -52,7 +52,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false)
             ChainLength = 10000
         end    
         θinit = mean(chain[:,1:nParams],dims=1)[:]
-        chain = mcmc(θinit, ChainLength, 0, Prior, lnL, Proposal, verbosity)
+        chain = mcmc(θinit, ChainLength, 0, Prior, lnL, Proposal, verbosity, nthreads)
         if j < MC_loops
             accept = mean(chain[:,end])
             if accept > 0.35
