@@ -140,11 +140,11 @@ end
 
 # returns reps replications of the statistics
 function auxstat(θ, reps)
+    stats = zeros(reps,13)
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
     n = Int(size(rets,1)/reps)
-    stats = zeros(reps,13)
     @inbounds Threads.@threads for rep = 1:reps
         included = n*rep-n+1:n*rep
         βret0,junk,junk  = lsfit(abs.(ret0[included]), [ones(n)  Monday[included]]) # filter out weekend effect
