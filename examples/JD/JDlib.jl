@@ -1,8 +1,8 @@
 using DifferentialEquations, Statistics, Econometrics
 
-function Diffusion(μ0,μ1,κ,α,σ,ρ,u0,tspan)
+function Diffusion(μ,κ,α,σ,ρ,u0,tspan)
     f = function (du,u,p,t)
-        du[1] = μ0 + μ1*(u[2]-α)/σ # drift in log prices
+        du[1] = μ # drift in log prices
         du[2] = κ.*(α.-u[2]) # mean reversion in shocks
     end
     g = function (du,u,p,t)
@@ -16,21 +16,20 @@ function Diffusion(μ0,μ1,κ,α,σ,ρ,u0,tspan)
 end
 
 function TrueParameters()
-    μ0 = 0.0
-    μ1 = 0.0
+    μ = 0.0
     κ = 0.3
     α = 0.3
     σ = 0.7
     ρ = -0.7
     λ0 = 0.005 # jump rate per day
     λ1 = 4.0 # scaling factor st. dev. of jumps
-    return [μ0, μ1, κ, α, σ, ρ, λ0, λ1]
+    return [μ, κ, α, σ, ρ, λ0, λ1]
 end
 
 
 function PriorSupport()
-    lb = [-0.1, -0.1, 0.0, -1.0, 0.01, -0.999, 0.0,  3.0]
-    ub = [0.1,   0.1,  0.5, 3.0, 3.0,  0.0, 0.05, 5.0]
+    lb = [-0.1, 0.0, -1.0, 0.01, -0.999, 0.0,  3.0]
+    ub = [0.1,  0.5, 3.0, 3.0,  0.0, 0.05, 5.0]
     lb,ub
 end    
 
@@ -64,9 +63,9 @@ tics = Int(MinPerDay/MinPerTic) # number of tics in day
 dt = 1/tics # divisions per day
 closing = Int(round(6.5*60/MinPerTic)) # tic at closing
 # parameters
-μ0, μ1, κ, α, σ, ρ, λ0, λ1 = θ
+μ, κ, α, σ, ρ, λ0, λ1 = θ
 u0 = [0.0;α]
-prob = Diffusion(μ0, μ1, κ, α, σ, ρ, u0, (0.0,Days))
+prob = Diffusion(μ, κ, α, σ, ρ, u0, (0.0,Days))
 ## jump in log price
 rate(u,p,t) = λ0
 # jump is random sign times  λ1 times current st. dev.
@@ -86,7 +85,7 @@ lnPtrading = zeros(TradingDays+1)
 #Volatility = zeros(TradingDays+1) # real latent volatility
 RV = zeros(TradingDays+1)
 MedRV = zeros(TradingDays+1)
-ret0 = zeros(TradingDays+1) # returns at open
+ret0 = zeros(TradingDays+1) # returns at open (
 Monday = zeros(TradingDays+1)
 DayofWeek = 0 # counter for day of week
 TradingDay = 0 # counter for trading days
@@ -140,31 +139,42 @@ end
 
 # returns reps replications of the statistics
 function auxstat(θ, reps)
-    stats = zeros(reps,13)
+    stats = zeros(reps,23)
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
     n = Int(size(rets,1)/reps)
-    @inbounds Threads.@threads for rep = 1:reps
-        included = n*rep-n+1:n*rep
-        βret0,junk,junk  = lsfit(abs.(ret0[included]), [ones(n)  Monday[included]]) # filter out weekend effect
-        # drift: μ0 and μ1, also ρ
-        X = [ones(n,1) rets[included] MedRV[included]][1:end-1,:]
+    @inbounds Threads.@threads for rep = 1:reps # the data is for reps samples, so split them
+        included = n*rep-n+1:n*rep # data for this sample
+
+        # look at opening returns, for overnight/weekend jumps
+        X = [ones(n-1,1) (MedRV[included])[1:end-1] (Monday[included])[2:end]]
+        y = abs.(ret0[included][2:end])
+        βret0 = X\y
+        u = y - X*βret0
+        σ0 = std(u) # larger variance means more frequent jumps
+        κ0 = std(u.^2.0) 
+
+        # drift: μ, also ρ
+        X = [ones(n-1,1) ret0[included][2:end] (rets[included])[1:end-1] (MedRV[included])[2:end] (MedRV[included])[1:end-1] (Monday[included])[2:end]]
         y = rets[included][2:end]
         βrets = X\y
         ϵrets = y-X*βrets
         σrets = std(ϵrets)
+        κrets = std(ϵrets.^2.0)
         # volatility
+        X = [ones(n-1,1) (rets[included])[1:end-1] (MedRV[included])[1:end-1] (Monday[included])[2:end]]
         y = MedRV[included][2:end]
         βvol = X\y
         ϵvol = y-X*βvol
         σvol = std(ϵvol)
+        κvol = std(ϵvol.^2.0)
         # leverage
         leverage = cor(ϵvol, ϵrets)
-        # dstats
-        stats[rep,:] = vcat(βret0, βrets, βvol, σrets, σvol, leverage, mean(RV[included]), mean(MedRV[included]))'
+        leverage2 = cor(MedRV, rets)
+        leverage3 = cor(RV, rets)
+        stats[rep,:] = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage, leverage2, leverage3, mean(RV[included]) - mean(MedRV[included]))'
     end
     return stats
 end
-
 
