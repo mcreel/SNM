@@ -11,7 +11,12 @@ end
 
 # a draw of neural moments
 function NeuralMoments(θ, auxstat, reps, NNmodel, info)
-    z = auxstat(θ, reps)
+    z = 0.0
+    ok = false
+    while !ok
+        z = auxstat(θ, reps)
+        ok = any(isnan.(z))==false
+    end    
     lb, ub = PriorSupport()
     min.(max.(Float64.(NNmodel(TransformStats(z, info)')),lb),ub)
 end        
