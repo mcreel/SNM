@@ -85,7 +85,7 @@ lnPtrading = zeros(TradingDays+1)
 #Volatility = zeros(TradingDays+1) # real latent volatility
 RV = zeros(TradingDays+1)
 MedRV = zeros(TradingDays+1)
-ret0 = zeros(TradingDays+1) # returns at open (
+ret0 = zeros(TradingDays+1) # returns at open
 Monday = zeros(TradingDays+1)
 DayofWeek = 0 # counter for day of week
 TradingDay = 0 # counter for trading days
@@ -139,14 +139,13 @@ end
 
 # returns reps replications of the statistics
 function auxstat(θ, reps)
-    stats = zeros(reps,23)
+    stats = zeros(reps,25)
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
     n = Int(size(rets,1)/reps)
     @inbounds Threads.@threads for rep = 1:reps # the data is for reps samples, so split them
         included = n*rep-n+1:n*rep # data for this sample
-
         # look at opening returns, for overnight/weekend jumps
         X = [ones(n-1,1) (MedRV[included])[1:end-1] (Monday[included])[2:end]]
         y = abs.(ret0[included][2:end])
@@ -154,7 +153,6 @@ function auxstat(θ, reps)
         u = y - X*βret0
         σ0 = std(u) # larger variance means more frequent jumps
         κ0 = std(u.^2.0) 
-
         # drift: μ, also ρ
         X = [ones(n-1,1) ret0[included][2:end] (rets[included])[1:end-1] (MedRV[included])[2:end] (MedRV[included])[1:end-1] (Monday[included])[2:end]]
         y = rets[included][2:end]
@@ -173,7 +171,10 @@ function auxstat(θ, reps)
         leverage = cor(ϵvol, ϵrets)
         leverage2 = cor(MedRV, rets)
         leverage3 = cor(RV, rets)
-        stats[rep,:] = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage, leverage2, leverage3, mean(RV[included]) - mean(MedRV[included]))'
+        jumps = RV .> 3.0.*MedRV
+        jumpsize = mean(abs.(rets[jumps]))
+        jumps = mean(jumps)
+        stats[rep,:] = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage, leverage2, leverage3, mean(RV[included]) - mean(MedRV[included]), jumps, jumpsize)'
     end
     return stats
 end
