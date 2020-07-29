@@ -28,7 +28,7 @@ end
 
 
 function PriorSupport()
-    lb = [-0.1, 0.0, -1.0, 0.01, -0.999, 0.0,  3.0]
+    lb = [-0.1, 0.0, -1.0, 0.01, -0.999, -0.02,  3.0]
     ub = [0.1,  0.5, 3.0, 3.0,  0.0, 0.05, 5.0]
     lb,ub
 end    
@@ -67,7 +67,7 @@ closing = Int(round(6.5*60/MinPerTic)) # tic at closing
 u0 = [0.0;α]
 prob = Diffusion(μ, κ, α, σ, ρ, u0, (0.0,Days))
 ## jump in log price
-rate(u,p,t) = λ0
+rate(u,p,t) = λ0.*(λ0>0.0) # the prior allows for negative rate, to allow an accumulation at zero
 # jump is random sign times  λ1 times current st. dev.
 affect1!(integrator) = (integrator.u[1] = integrator.u[1].+rand([-1.0,1.0]).*λ1.*exp(integrator.u[2]./2.0))
 jump = ConstantRateJump(rate,affect1!)
