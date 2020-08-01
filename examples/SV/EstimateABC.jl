@@ -1,5 +1,5 @@
 # example of using trained net to do a single
-# Baysian estimation using MCMC
+# Baysian estimation using ABC
 using Distributions, KissABC
 include("../../src/SNM.jl")
 include("../../src/MCMC.jl") # the specialized MCMC using net 

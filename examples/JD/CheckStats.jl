@@ -1,7 +1,5 @@
 using Plots
-project="JD"  # set to one of the projects in examples: SV, DPD, ARMA, MN
-run_title = "working" # Monte Carlo results written to this file
-mcreps = 1000 # how many reps?
+mcreps = 10 # how many reps?
 
 # load code
 include("JDlib.jl")
@@ -15,14 +13,15 @@ function main()
 trueθ = zeros(mcreps,7)
 θhat = zeros(mcreps,7)
 for mcrep = 1:mcreps
+    println("mc rep: ", mcrep)
     θ = PriorDraw()
     trueθ[mcrep,:] = θ
-    m = NeuralMoments(θ, auxstat, 1, NNmodel, transform_stats_info) 
-    θhat[mcrep,:] = m
-end
+    θhat[mcrep,:] = mean(NeuralMoments(θ, auxstat, 10, NNmodel, transform_stats_info), dims=2)
+end    
 return trueθ, θhat
 end
+
 trueθ, θhat = main()
-scatter(trueθ[:,1], θhat[:,1])
+scatter(trueθ[:,2], θhat[:,2])
 
 
