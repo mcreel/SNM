@@ -3,8 +3,10 @@ using Econometrics
 include("JDlib.jl")
 θ = TrueParameters()
 #θ = PriorDraw()
+rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
 rets, Volatility, jumptimes, RV, MedRV, ret0, Monday = dgp(θ);
-stats = auxstat(rets, RV, MedRV, ret0, Monday)
+stats = auxstat(θ,1)
+
 #=
 #Ret0 = lsfit(abs.(Ret0),[ones(1000) Monday])[3]
 plot(layout=(4,1))

@@ -1,5 +1,3 @@
-DONE: compute RV and MedRV using intra-day plus inter-day spot returns,
-because most jumps occur during non-trading periods, and only intra-day
-measures will not detect them.
+need to revise stats to eliminate duds, and more carefully identify jump size
 
 use NN for forecasting volatility give RV, etc.
