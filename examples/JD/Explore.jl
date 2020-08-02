@@ -1,11 +1,12 @@
+using Pkg
+Pkg.activate("../../")
 using Plots
 using Econometrics
 include("JDlib.jl")
 θ = TrueParameters()
 #θ = PriorDraw()
-rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
-rets, Volatility, jumptimes, RV, MedRV, ret0, Monday = dgp(θ);
-stats = auxstat(θ,1)
+rets, RV, MedRV, ret0, Monday = dgp(θ,10)
+
 
 #=
 #Ret0 = lsfit(abs.(Ret0),[ones(1000) Monday])[3]

@@ -1,13 +1,13 @@
 # check for 45º true-fitted plots for all parameters
 # to verify that stats give good identification
 using Pkg
-Pkg.activate("../../../")
+Pkg.activate("../../")
 using Plots, Econometrics
 mcreps = 20 # how many reps?
 
 # load code
 include("JDlib.jl")
-include("../../../src/SNM.jl")
+include("../../src/SNM.jl")
 using BSON:@load
 
 function main()
