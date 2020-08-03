@@ -139,19 +139,19 @@ end
 
 # returns reps replications of the statistics
 function auxstat(θ, reps)
-    stats = zeros(reps,21) # dropped 6 from initial run, added mean of rets, ret0
+    stats = zeros(reps,20) # dropped 6 from initial run, added mean of rets, ret0
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
-    jump = RV .> 1.1 .* MedRV
+    jump = RV .> (1.2 .* MedRV)
     nojump = jump .== false
     n = Int(size(rets,1)/reps)
     @inbounds Threads.@threads for rep = 1:reps # the data is for reps samples, so split them
         included = n*rep-n+1:n*rep # data for this sample
-
-        jumpsize = std(rets[jump[included]]) - std(rets[nojump[included]])
+        rets2 = rets[included]
+        jumpsize = std(rets2[jump[included]]) - std(rets2[nojump[included]])
+        if isnan(jumpsize) jumpsize = 0.0; end
         njumps = mean(jump[included])
-
         # look at opening returns, for overnight/weekend jumps
         X = [ones(n-1,1) (MedRV[included])[1:end-1] (Monday[included])[2:end]]
         y = abs.(ret0[included][2:end])
@@ -159,7 +159,6 @@ function auxstat(θ, reps)
         u = y - X*βret0
         σ0 = std(u) # larger variance means more frequent jumps
         κ0 = std(u.^2.0) 
-        
         # ρ
         X = [(MedRV[included])[2:end] (MedRV[included])[1:end-1]]
         y = rets[included][2:end]
@@ -175,10 +174,9 @@ function auxstat(θ, reps)
         σvol = std(ϵvol)
         κvol = std(ϵvol.^2.0)
         # leverage
-        leverage = cor(ϵvol, ϵrets)
-        leverage2 = cor(MedRV[included], rets[included])
-        leverage3 = cor(RV[included], rets[included])
-        stats[rep,:] = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage, leverage2, leverage3, mean(RV[included]) - mean(MedRV[included]), jumpsize, njumps, mean(rets), mean(ret0))'
+        leverage1 = cor(MedRV[included], rets[included])
+        leverage2 = cor(RV[included], rets[included])
+        stats[rep,:] = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage1, leverage2, mean(RV[included]) - mean(MedRV[included]), jumpsize, njumps, mean(rets), mean(ret0))'
     end
     return stats
 end

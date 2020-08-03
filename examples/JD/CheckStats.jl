@@ -19,11 +19,10 @@ for mcrep = 1:mcreps
     θ = PriorDraw()
     trueθ[mcrep,:] = θ
     θhat[mcrep,:] = mean(NeuralMoments(θ, auxstat, 10, NNmodel, transform_stats_info), dims=2)
-
 end    
 return trueθ, θhat
 end
-trueθ, θhat = main()
+#trueθ, θhat = main()
 savefig(scatter(trueθ[:,1], θhat[:,1]),"mu.svg")
 savefig(scatter(trueθ[:,2], θhat[:,2]),"kappa.svg")
 savefig(scatter(trueθ[:,3], θhat[:,3]),"alpha.svg")
