@@ -143,15 +143,14 @@ function auxstat(θ, reps)
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
+    jump = RV .> 1.1 .* MedRV
+    nojump = jump .== false
     n = Int(size(rets,1)/reps)
     @inbounds Threads.@threads for rep = 1:reps # the data is for reps samples, so split them
         included = n*rep-n+1:n*rep # data for this sample
 
-        # detect jumps, get stats for λ0 and λ1, and delete jump obsns
-        jump = RV[included] .> (1.1 .* MedRV[included])
-        nojump = jump .== false
-        jumpsize = std(rets[jump]) - std(rets[nojump])
-        njumps = mean(jump)
+        jumpsize = std(rets[jump[included]]) - std(rets[nojump[included]])
+        njumps = mean(jump[included])
 
         # look at opening returns, for overnight/weekend jumps
         X = [ones(n-1,1) (MedRV[included])[1:end-1] (Monday[included])[2:end]]
@@ -178,7 +177,7 @@ function auxstat(θ, reps)
         # leverage
         leverage = cor(ϵvol, ϵrets)
         leverage2 = cor(MedRV[included], rets[included])
-        leverage3 = cor(RV[include], rets[included])
+        leverage3 = cor(RV[included], rets[included])
         stats[rep,:] = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage, leverage2, leverage3, mean(RV[included]) - mean(MedRV[included]), jumpsize, njumps, mean(rets), mean(ret0))'
     end
     return stats
