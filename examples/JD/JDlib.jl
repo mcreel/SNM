@@ -143,14 +143,14 @@ function auxstat(θ, reps)
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
-    jump = RV .> (2.0 .* MedRV)
+    jump = RV .> (1.5 .* MedRV)
     nojump = jump .== false
     n = Int(size(rets,1)/reps)
     @inbounds Threads.@threads for rep = 1:reps # the data is for reps samples, so split them
         included = n*rep-n+1:n*rep # data for this sample
-        rets2 = rets[included]
-        jumpsize = mean(RV[jump[included]]) - mean(RV[nojump[included]])
-        if isnan(jumpsize) jumpsize = 0.0; end
+        jumpsize = mean(RV[included][jump[included]]) - mean(RV[included][nojump[included]])
+        jumpsize2 = std(rets[included][jump[included]]) - std(rets[included][nojump[included]])
+        if isnan(jumpsize2) jumpsize2 = 0.0; end
         njumps = mean(jump[included])
         # look at opening returns, for overnight/weekend jumps
         X = [ones(n-1,1) (MedRV[included])[1:end-1] (Monday[included])[2:end]]
