@@ -14,7 +14,7 @@ function main()
 @load "neural_moments.bson" NNmodel transform_stats_info
 trueθ = zeros(mcreps,7)
 θhat = zeros(mcreps,7)
-for mcrep = 1:mcreps
+Threads.@threads for mcrep = 1:mcreps
     println("mc rep: ", mcrep)
     θ = PriorDraw()
     trueθ[mcrep,:] = θ
