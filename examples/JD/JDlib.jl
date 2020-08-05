@@ -139,7 +139,7 @@ end
 
 # returns reps replications of the statistics
 function auxstat(θ, reps)
-    stats = zeros(reps,20) # dropped 6 from initial run, added mean of rets, ret0
+    stats = zeros(reps,21) # dropped 6 from initial run, added mean of rets, ret0
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
@@ -176,7 +176,7 @@ function auxstat(θ, reps)
         # leverage
         leverage1 = cor(MedRV[included], rets[included])
         leverage2 = cor(RV[included], rets[included])
-        stats[rep,:] = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage1, leverage2, mean(RV[included]) - mean(MedRV[included]), jumpsize, njumps, mean(rets), mean(ret0))'
+        stats[rep,:] = sqrt(1000.0).*vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage1, leverage2, mean(RV[included]) - mean(MedRV[included]), jumpsize, jumpsize2, njumps, mean(rets), mean(ret0))'
     end
     return stats
 end
