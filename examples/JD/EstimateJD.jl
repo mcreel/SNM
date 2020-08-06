@@ -1,8 +1,7 @@
-# example of using trained net to do a single
-# Baysian estimation using MCMC
-
+using Pkg
+Pkg.activate("../../")
 include("../../src/SNM.jl")
-include("../../src/MCMC.jl")
+include("MCMC.jl")
 include("JDlib.jl")
 using BSON:@load
 using DelimitedFiles
