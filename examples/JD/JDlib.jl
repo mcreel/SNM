@@ -150,6 +150,7 @@ function auxstat(θ, reps)
         included = n*rep-n+1:n*rep # data for this sample
         jumpsize = mean(RV[included][jump[included]]) - mean(RV[included][nojump[included]])
         jumpsize2 = std(rets[included][jump[included]]) - std(rets[included][nojump[included]])
+        if isnan(jumpsize) jumpsize = 0.0; end
         if isnan(jumpsize2) jumpsize2 = 0.0; end
         njumps = mean(jump[included])
         # look at opening returns, for overnight/weekend jumps
