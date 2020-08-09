@@ -176,9 +176,9 @@ version = "3.9.0"
 
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "efec1b9e082d98d24c99f243abafb4653fb960d6"
+git-tree-sha1 = "607c0ea16cb32af49ea2976f90c0c5acbca37d21"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.10.7"
+version = "0.10.8"
 
 [[Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "InteractiveUtils", "Reexport"]
@@ -249,9 +249,9 @@ version = "1.3.0"
 
 [[DataFrames]]
 deps = ["CategoricalArrays", "Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "Missings", "PooledArrays", "Printf", "REPL", "Reexport", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "7721fa8c42ccb8f1ea7f99f6c2e94686892dd3b7"
+git-tree-sha1 = "4fe99dbfb5201c5766d20d32a65209434347fd58"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "0.21.5"
+version = "0.21.6"
 
 [[DataFramesMeta]]
 deps = ["DataFrames", "Tables"]
@@ -261,9 +261,9 @@ version = "0.5.1"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "edad9434967fdc0a2631a65d902228400642120c"
+git-tree-sha1 = "88d48e133e6d3dd68183309877eac74393daa7eb"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.19"
+version = "0.17.20"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -379,7 +379,7 @@ version = "0.8.2"
 
 [[Econometrics]]
 deps = ["CSV", "Calculus", "DataFrames", "DataFramesMeta", "Distances", "Distributions", "GR", "KernelDensity", "LinearAlgebra", "NLopt", "Optim", "Plots", "PrettyTables", "Printf", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "StatsModels", "StatsPlots", "Test"]
-git-tree-sha1 = "988d17c3d0c3051815ef204b4290774188362e33"
+git-tree-sha1 = "f375459c111b18c38710cad3a89bf341defa87e0"
 repo-rev = "master"
 repo-url = "https://github.com/mcreel/Econometrics.git"
 uuid = "4d6a76a9-bfbc-5492-8924-cf6ed7875f06"
@@ -427,9 +427,9 @@ version = "0.3.2"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "be4180bdb27a11188d694ee3773122f4921f1a62"
+git-tree-sha1 = "4863cbb7910079369e258dee4add9d06ead5063a"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.8.13"
+version = "0.8.14"
 
 [[FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
@@ -718,9 +718,9 @@ uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
 version = "2020.1.216+0"
 
 [[MLStyle]]
-git-tree-sha1 = "95b06320a3b9cda1815efdb232051015698c39ba"
+git-tree-sha1 = "21213f53e79c6f966c1f7f58a2af02be6da684f2"
 uuid = "d8e11817-5142-5d16-987a-aa16d5891078"
-version = "0.4.3"
+version = "0.4.4"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
@@ -772,9 +772,9 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[ModelingToolkit]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqJump", "DiffRules", "Distributed", "DocStringExtensions", "GeneralizedGenerated", "LabelledArrays", "Latexify", "LightGraphs", "LinearAlgebra", "MacroTools", "NaNMath", "RecursiveArrayTools", "Requires", "SafeTestsets", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "TreeViews", "UnPack", "Unitful"]
-git-tree-sha1 = "4d58c49c3e6b20f6de35857094bde819262c63a0"
+git-tree-sha1 = "0fff3ca3662d88684f773f759cd46261151e30f2"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "3.14.1"
+version = "3.15.0"
 
 [[MuladdMacro]]
 git-tree-sha1 = "c6190f9a7fc5d9d5915ab29f2134421b12d24a68"
@@ -1193,10 +1193,10 @@ uuid = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 version = "0.6.12"
 
 [[StatsPlots]]
-deps = ["Clustering", "DataStructures", "DataValues", "Distributions", "Interpolations", "KernelDensity", "MultivariateStats", "Observables", "Plots", "RecipesBase", "RecipesPipeline", "Reexport", "StatsBase", "TableOperations", "Tables", "Widgets"]
-git-tree-sha1 = "b9b7fff81f573465fcac4685df1497d968537a9e"
+deps = ["Clustering", "DataStructures", "DataValues", "Distributions", "Interpolations", "KernelDensity", "LinearAlgebra", "MultivariateStats", "Observables", "Plots", "RecipesBase", "RecipesPipeline", "Reexport", "StatsBase", "TableOperations", "Tables", "Widgets"]
+git-tree-sha1 = "a19e1d3e70652503bc3b05c6a441a5ad792c8ab3"
 uuid = "f3b207a7-027a-5e70-b257-86293d7955fd"
-version = "0.14.6"
+version = "0.14.8"
 
 [[SteadyStateDiffEq]]
 deps = ["DiffEqBase", "DiffEqCallbacks", "LinearAlgebra", "NLsolve", "Reexport"]
@@ -1286,9 +1286,9 @@ version = "0.9.5"
 
 [[Transducers]]
 deps = ["ArgCheck", "BangBang", "CompositionsBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "Requires", "Setfield", "SplittablesBase", "Tables"]
-git-tree-sha1 = "ffbaa46cf4163363620526b58b6241248d5fbd54"
+git-tree-sha1 = "4aad5d3291e667395d14b6c1d8fbcc7fcd145e75"
 uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
-version = "0.4.46"
+version = "0.4.47"
 
 [[TreeViews]]
 deps = ["Test"]

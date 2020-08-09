@@ -6,12 +6,17 @@ include("JDlib.jl")
 using BSON:@load
 using DelimitedFiles
 using Plots:savefig
+include("../../src/MakeNeuralMoments.jl") # the specialized MCMC using net 
 
-@time function main()
-    @load "neural_moments.bson" NNmodel transform_stats_info
-    m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)
-    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=10, rt=0.1)
-    chain, θhat
+function main()
+# generate the trained net: comment out when done for the chosen model
+nParams = size(PriorSupport()[1],1)
+TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
+MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
+@load "neural_moments.bson" NNmodel transform_stats_info
+m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)
+@time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=10, rt=0.1)
+return chain, θhat
 end
 chain, θhat = main()
 writedlm("chain", chain)

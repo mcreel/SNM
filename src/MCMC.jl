@@ -32,7 +32,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     Σinv = inv((1.0+1/reps).*EstimateΣ(θhat, 100, auxstat, NNmodel, info))
     # define things for MCMC
     lnL = θ -> H(θ, m, reps, auxstat, NNmodel, info, Σinv)
-    ChainLength = 1000
+    ChainLength = Int(1000/nthreads)
     MCMCburnin = 0
     tuning = 0.2/sqrt(12.0)*(ub-lb) # two tenths of a standard. dev. of prior
     Proposal = θ -> proposal1(θ, tuning)
@@ -50,7 +50,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
         end    
         Proposal = θ -> proposal2(θ,tuning*P)
         if j == MC_loops
-            ChainLength = 10000
+            ChainLength = Int(10000/nthreads)
         end    
         θinit = mean(chain[:,1:nParams],dims=1)[:]
         chain = mcmc(θinit, ChainLength, 0, Prior, lnL, Proposal, verbosity, nthreads)

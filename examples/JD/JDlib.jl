@@ -139,46 +139,42 @@ end
 
 # returns reps replications of the statistics
 function auxstat(θ, reps)
-    stats = zeros(reps,21) # dropped 6 from initial run, added mean of rets, ret0
     rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
     RV = log.(RV)
     MedRV = log.(MedRV)
     jump = RV .> (1.5 .* MedRV)
     nojump = jump .== false
-    n = Int(size(rets,1)/reps)
-    @inbounds Threads.@threads for rep = 1:reps # the data is for reps samples, so split them
-        included = n*rep-n+1:n*rep # data for this sample
-        jumpsize = mean(RV[included][jump[included]]) - mean(RV[included][nojump[included]])
-        jumpsize2 = std(rets[included][jump[included]]) - std(rets[included][nojump[included]])
-        if isnan(jumpsize) jumpsize = 0.0; end
-        if isnan(jumpsize2) jumpsize2 = 0.0; end
-        njumps = mean(jump[included])
-        # look at opening returns, for overnight/weekend jumps
-        X = [ones(n-1,1) (MedRV[included])[1:end-1] (Monday[included])[2:end]]
-        y = abs.(ret0[included][2:end])
-        βret0 = X\y
-        u = y - X*βret0
-        σ0 = std(u) # larger variance means more frequent jumps
-        κ0 = std(u.^2.0) 
-        # ρ
-        X = [(MedRV[included])[2:end] (MedRV[included])[1:end-1]]
-        y = rets[included][2:end]
-        βrets = X\y
-        ϵrets = y-X*βrets
-        σrets = std(ϵrets)
-        κrets = std(ϵrets.^2.0)
-        # normal volatility: κ, α and σ
-        X = [ones(n-1,1) (MedRV[included])[1:end-1]]
-        y = MedRV[included][2:end]
-        βvol = X\y
-        ϵvol = y-X*βvol
-        σvol = std(ϵvol)
-        κvol = std(ϵvol.^2.0)
-        # leverage
-        leverage1 = cor(MedRV[included], rets[included])
-        leverage2 = cor(RV[included], rets[included])
-        stats[rep,:] = sqrt(1000.0).*vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage1, leverage2, mean(RV[included]) - mean(MedRV[included]), jumpsize, jumpsize2, njumps, mean(rets), mean(ret0))'
-    end
+    n = size(rets,1)
+    jumpsize = mean(RV[jump]) - mean(RV[nojump])
+    jumpsize2 = std(rets[jump]) - std(rets[nojump])
+    if isnan(jumpsize) jumpsize = 0.0; end
+    if isnan(jumpsize2) jumpsize2 = 0.0; end
+    njumps = mean(jump)
+    # look at opening returns, for overnight/weekend jumps
+    X = [ones(n-1,1) MedRV[1:end-1] Monday[2:end]]
+    y = abs.(ret0[2:end])
+    βret0 = X\y
+    u = y - X*βret0
+    σ0 = std(u) # larger variance means more frequent jumps
+    κ0 = std(u.^2.0) 
+    # ρ
+    X = [MedRV[2:end] MedRV[1:end-1]]
+    y = rets[2:end]
+    βrets = X\y
+    ϵrets = y-X*βrets
+    σrets = std(ϵrets)
+    κrets = std(ϵrets.^2.0)
+    # normal volatility: κ, α and σ
+    X = [ones(n-1,1) MedRV[1:end-1]]
+    y = MedRV[2:end]
+    βvol = X\y
+    ϵvol = y-X*βvol
+    σvol = std(ϵvol)
+    κvol = std(ϵvol.^2.0)
+    # leverage
+    leverage1 = cor(MedRV, rets)
+    leverage2 = cor(RV, rets)
+    stats = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage1, leverage2, mean(RV) - mean(MedRV), jumpsize, jumpsize2, njumps, mean(rets), mean(ret0))'
     return stats
 end
 

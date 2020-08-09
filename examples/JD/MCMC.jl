@@ -19,16 +19,16 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     lb, ub = PriorSupport()
     nParams = size(lb,1)
     # use a rapid SAMIN to get good initialization values for chain
-    obj = θ -> -1.0*H(θ, m, 1, auxstat, NNmodel, info)
+    obj = θ -> -1.0*H(θ, m, 10, auxstat, NNmodel, info)
     if verbosity == true
         sa_verbosity = 2
     else
         sa_verbosity = 0
     end    
-    #θhat, junk, junk, junk = samin(obj, m, lb, ub; coverage_ok=0, maxevals=175, verbosity = sa_verbosity, rt = rt)
+    #θhat, junk, junk, junk = samin(obj, m, lb, ub; coverage_ok=0, maxevals=70, verbosity = sa_verbosity, rt = rt)
     # get covariance estimate
     θhat = m
-    reps = 1
+    reps = 10
     Σinv = inv((1.0+1/reps).*EstimateΣ(θhat, 100, auxstat, NNmodel, info))
     # define things for MCMC
     lnL = θ -> H(θ, m, reps, auxstat, NNmodel, info, Σinv)
@@ -39,7 +39,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     chain = mcmc(θhat, ChainLength, MCMCburnin, Prior, lnL, Proposal, verbosity, nthreads)
     # now use a MVN random walk proposal with updates of covariance and longer chain
     # on final loop
-    Σ = cov(chain[:,1:nParams])
+    Σ = NeweyWest(chain[:,1:nParams])
     tuning = 1.0
     MC_loops = 5
     @inbounds for j = 1:MC_loops
@@ -61,7 +61,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
             elseif accept < 0.25
                 tuning *= 0.25
             end
-            Σ = 0.5*Σ + 0.5*cov(chain[:,1:nParams])
+            Σ = 0.5*Σ + 0.5*NeweyWest(chain[:,1:nParams])
         end    
     end
     chain = chain[:,1:nParams]

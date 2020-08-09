@@ -24,8 +24,11 @@ end
 
 # estimate covariance
 function EstimateΣ(θ, reps, auxstat, NNmodel, info)
-    ms = NeuralMoments(θ, auxstat, reps, NNmodel, info)
-    Σ = cov(ms')
+    ms = zeros(reps, size(θ,1))
+    Threads.@threads for i = 1:reps
+        ms[i,:] = NeuralMoments(θ, auxstat, 1, NNmodel, info)
+    end    
+    Σ = cov(ms)
 end
 
 # method with identity weight
