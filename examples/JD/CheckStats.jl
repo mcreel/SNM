@@ -3,7 +3,7 @@
 using Pkg
 Pkg.activate("../../")
 using Plots, Econometrics
-mcreps = 20 # how many reps?
+mcreps = 500 # how many reps?
 
 # load code
 include("JDlib.jl")
@@ -18,7 +18,7 @@ Threads.@threads for mcrep = 1:mcreps
     println("mc rep: ", mcrep)
     θ = PriorDraw()
     trueθ[mcrep,:] = θ
-    θhat[mcrep,:] = mean(NeuralMoments(θ, auxstat, 10, NNmodel, transform_stats_info), dims=2)
+    θhat[mcrep,:] = mean(NeuralMoments(θ, auxstat, 1, NNmodel, transform_stats_info), dims=2)
 end    
 return trueθ, θhat
 end
