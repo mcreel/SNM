@@ -18,7 +18,6 @@ Threads.@threads for mcrep = 1:mcreps
     println("mc rep: ", mcrep)
     θ = PriorDraw()
     trueθ[mcrep,:] = θ
-    #θhat[mcrep,:] = mean(NeuralMoments(θ, auxstat, 1, NNmodel, transform_stats_info), dims=2)
     θhat[mcrep,:] = NeuralMoments(θ, auxstat, 1, NNmodel, transform_stats_info)
 end    
 return trueθ, θhat
