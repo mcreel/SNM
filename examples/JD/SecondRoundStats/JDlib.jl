@@ -145,7 +145,7 @@ function auxstat(θ, reps)
     jump = RV .> (1.5 .* MedRV)
     nojump = jump .== false
     n = size(rets,1)
-    jumpsize = mean(RV[jump]) - mean(RV[nojump])
+    jumpsize = mean(RV[jump]) - mean(MedRV[jump])
     jumpsize2 = std(rets[jump]) - std(rets[nojump])
     if isnan(jumpsize) jumpsize = 0.0; end
     if isnan(jumpsize2) jumpsize2 = 0.0; end
@@ -165,16 +165,27 @@ function auxstat(θ, reps)
     σrets = std(ϵrets)
     κrets = std(ϵrets.^2.0)
     # normal volatility: κ, α and σ
-    X = [ones(n-1,1) MedRV[1:end-1]]
-    y = MedRV[2:end]
+    X = [ones(n-2,1) MedRV[1:end-2] MedRV[2:end-1]]
+    y = MedRV[3:end]
     βvol = X\y
     ϵvol = y-X*βvol
     σvol = std(ϵvol)
     κvol = std(ϵvol.^2.0)
+    # jump size
+    X = [ones(n,1) MedRV jump jump.*MedRV]
+    y = RV
+    βjump = X\y
+    ϵjump = y-X*βjump
+    σjump = std(ϵjump)
+    κjump = std(ϵjump.^2.0)
+    # jump frequency
+    qs = quantile(abs.(rets),[0.5, 0.95])
+    qs2 = quantile(abs.(ret0),[0.5, 0.95])
+    qs3 = quantile(RV,[0.5, 0.95])
     # leverage
     leverage1 = cor(MedRV, rets)
     leverage2 = cor(RV, rets)
-    stats = vcat(βret0, βrets, βvol, σ0, σrets, σvol, κ0, κrets, κvol, leverage1, leverage2, mean(RV) - mean(MedRV), jumpsize, jumpsize2, njumps, mean(rets), mean(ret0))'
+    stats = vcat(βret0, βrets, βvol, βjump, σ0, σrets, σvol, σjump, κ0, κrets, κvol, κjump, leverage1, leverage2, mean(RV) - mean(MedRV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]/qs3[1],  njumps, mean(rets), mean(ret0))'
     return stats
 end
 

@@ -156,14 +156,12 @@ function auxstat(θ, reps)
     βret0 = X\y
     u = y - X*βret0
     σ0 = std(u) # larger variance means more frequent jumps
-    κ0 = std(u.^2.0) 
     # ρ
     X = [MedRV[2:end] MedRV[1:end-1]]
     y = rets[2:end]
     βrets = X\y
     ϵrets = y-X*βrets
     σrets = std(ϵrets)
-    κrets = std(ϵrets.^2.0)
     # normal volatility: κ, α and σ
     X = [ones(n-2,1) MedRV[1:end-2] MedRV[2:end-1]]
     y = MedRV[3:end]
@@ -172,7 +170,7 @@ function auxstat(θ, reps)
     σvol = std(ϵvol)
     κvol = std(ϵvol.^2.0)
     # jump size
-    X = [ones(n,1) MedRV jump jump.*MedRV]
+    X = [ones(n,1) jump]
     y = RV
     βjump = X\y
     ϵjump = y-X*βjump
@@ -185,7 +183,33 @@ function auxstat(θ, reps)
     # leverage
     leverage1 = cor(MedRV, rets)
     leverage2 = cor(RV, rets)
-    stats = vcat(βret0, βrets, βvol, βjump, σ0, σrets, σvol, σjump, κ0, κrets, κvol, κjump, leverage1, leverage2, mean(RV) - mean(MedRV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]/qs3[1],  njumps, mean(rets), mean(ret0))'
+    stats = vcat(βret0, βrets, βvol, βjump, σ0, σrets, σvol, σjump, κvol, κjump, leverage1, leverage2, mean(RV) - mean(MedRV), jumpsize, jumpsize2, qs[2]-qs[1], qs2[2]-qs2[1], qs3[2]-qs3[1],  njumps, mean(rets))'
+# needs updating!
+# bret0 1:3
+# brets 4:5
+# bvol 6:8
+# bjump 9:12
+# sig0 13
+# sigrets 14
+# sigvol 15
+# sigjump 16
+# k0 17
+# krets 18
+# kvol 19
+# kjump 20
+# l1 21
+# l2 22
+# mean RV - mean MedRV 23
+# jumpsize 24
+# jumpsize2 25
+# qs1 26
+# qs2 27 
+# qs3 28
+# njumps 29 
+# mean rets 30
+# mean ret0 31
+#
+
     return stats
 end
 
