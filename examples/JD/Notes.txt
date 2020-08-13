@@ -1,3 +1,0 @@
-need to revise stats to eliminate duds, and more carefully identify jump size
-
-use NN for forecasting volatility give RV, etc.

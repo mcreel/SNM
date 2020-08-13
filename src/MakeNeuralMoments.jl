@@ -20,7 +20,8 @@ function MakeNeuralMoments(auxstat, S)
         while !ok
             θ = PriorDraw()
             z = auxstat(θ,1)'
-            ok = any(isnan.(z))==false 
+            ok = any(isnan.(z))==false
+            if !ok println("warning: NaN in MakeNeuralMoments, retry"); end
         end    
         data[s,:] = vcat(θ, z)
     end
