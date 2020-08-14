@@ -12,7 +12,7 @@ function main()
 # generate the trained net: comment out when done for the chosen model
 nParams = size(PriorSupport()[1],1)
 #TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
-TrainingTestingSize = Int64(nParams*1e3) # 20,000 training and testing for each parameter
+TrainingTestingSize = Int64(2e3) # 20,000 training and testing for each parameter
 MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
 #@load "neural_moments.bson" NNmodel transform_stats_info
 #m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)

@@ -17,7 +17,7 @@ end
 
 function TrueParameters()
     μ = 0.0
-    κ = 0.3
+    κ = 0.2
     α = 0.3
     σ = 0.7
     ρ = -0.7
@@ -28,8 +28,8 @@ end
 
 
 function PriorSupport()
-    lb = [-0.1, 0.0, -1.0, 0.01, -0.999, -0.02,  3.0]
-    ub = [0.1,  0.5, 3.0, 3.0,  0.0, 0.05, 5.0]
+    lb = [-0.1, 0.001, -1.0, 0.01, -0.99, -0.02,  3.0]
+    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0]
     lb,ub
 end    
 
@@ -178,7 +178,6 @@ function auxstat(θ, reps)
     ϵjump = y-X*βjump
     σjump = std(ϵjump)
     κjump = std(ϵjump.^2.0)
-    κjump = std(ϵjump.^2.0)
     # jump frequency
     qs = quantile(abs.(rets),[0.5, 0.95])
     qs2 = quantile(abs.(ret0),[0.5, 0.95])
@@ -212,7 +211,7 @@ function auxstat(θ, reps)
 # mean rets 30
 # mean ret0 31
 #
-
+#@show println((stats))
     return stats
 end
 
