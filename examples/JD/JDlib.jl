@@ -145,7 +145,7 @@ function auxstat(θ, reps)
         rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
         RV = log.(RV)
         MedRV = log.(MedRV)
-        jump = RV .> (1.5 .* MedRV)
+        jump = RV .> (2.0 .* MedRV)
         nojump = jump .== false
         jump[1:2] .= true
         nojump[1:2] .= true
@@ -184,9 +184,9 @@ function auxstat(θ, reps)
         σjump = std(ϵjump)
         κjump = std(ϵjump.^2.0)
         # jump frequency
-        qs = quantile(abs.(rets),[0.5, 0.95])
-        qs2 = quantile(abs.(ret0),[0.5, 0.95])
-        qs3 = quantile(RV,[0.5, 0.95])
+        qs = quantile(abs.(rets),[0.5, 0.9])
+        qs2 = quantile(abs.(ret0),[0.5, 0.9])
+        qs3 = quantile(RV,[0.5, 0.9])
         # leverage
         leverage1 = cor(MedRV, rets)
         leverage2 = cor(RV, rets)

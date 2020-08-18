@@ -16,7 +16,7 @@ function Diffusion(μ,κ,α,σ,ρ,u0,tspan)
 end
 
 function TrueParameters()
-    μ = 0.0
+    μ = 0.02
     κ = 0.2
     α = 0.3
     σ = 0.7
@@ -145,44 +145,48 @@ function auxstat(θ, reps)
         rets, RV, MedRV, ret0, Monday = dgp(θ,reps)
         RV = log.(RV)
         MedRV = log.(MedRV)
-        jump = RV .> (1.5 .* MedRV)
+        jump = RV .> (2.0 .* MedRV)
         nojump = jump .== false
+        jump[1:2] .= true
+        nojump[1:2] .= true
+
         n = size(rets,1)
         jumpsize = mean(RV[jump]) - mean(MedRV[jump])
         jumpsize2 = std(rets[jump]) - std(rets[nojump])
-        njumps = mean(jump)
+        njumps = mean(jump[3:end])
+
         # look at opening returns, for overnight/weekend jumps
-        X = [ones(n-1,1) MedRV[1:end-1] Monday[2:end]]
+        X = [ones(n-1) MedRV[1:end-1] Monday[2:end]]
         y = abs.(ret0[2:end])
         βret0 = X\y
         u = y - X*βret0
         σ0 = std(u) # larger variance means more frequent jumps
         κ0 = std(u.^2.0)
         # ρ
-        X = [MedRV[2:end] MedRV[1:end-1]]
+        X = [ones(n-1) MedRV[2:end] MedRV[1:end-1]]
         y = rets[2:end]
         βrets = X\y
         ϵrets = y-X*βrets
         σrets = std(ϵrets)
         κrets = std(ϵrets.^2.0)
         # normal volatility: κ, α and σ
-        X = [ones(n-2,1) MedRV[1:end-2] MedRV[2:end-1]]
+        X = [ones(n-2) MedRV[1:end-2] MedRV[2:end-1]]
         y = MedRV[3:end]
         βvol = X\y
         ϵvol = y-X*βvol
         σvol = std(ϵvol)
         κvol = std(ϵvol.^2.0)
         # jump size
-        X = [ones(n,1) jump MedRV jump.*MedRV]
+        X = [ones(n) jump MedRV jump.*MedRV]
         y = RV
         βjump = X\y
         ϵjump = y-X*βjump
         σjump = std(ϵjump)
         κjump = std(ϵjump.^2.0)
         # jump frequency
-        qs = quantile(abs.(rets),[0.5, 0.95])
-        qs2 = quantile(abs.(ret0),[0.5, 0.95])
-        qs3 = quantile(RV,[0.5, 0.95])
+        qs = quantile(abs.(rets),[0.5, 0.9])
+        qs2 = quantile(abs.(ret0),[0.5, 0.9])
+        qs3 = quantile(RV,[0.5, 0.9])
         # leverage
         leverage1 = cor(MedRV, rets)
         leverage2 = cor(RV, rets)
@@ -212,7 +216,6 @@ function auxstat(θ, reps)
         # mean rets 30
         # mean ret0 31
         #
-        #@show println((stats))
         not_ok = any(isnan.(stats))
     end
     return stats
