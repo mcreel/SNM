@@ -12,8 +12,8 @@ using BSON:@load
 
 function main()
 @load "neural_moments.bson" NNmodel transform_stats_info
-trueθ = zeros(mcreps,7)
-θhat = zeros(mcreps,7)
+trueθ = zeros(mcreps,8)
+θhat = zeros(mcreps,8)
 Threads.@threads for mcrep = 1:mcreps
     println("mc rep: ", mcrep)
     θ = PriorDraw()
@@ -30,6 +30,7 @@ savefig(scatter(trueθ[:,4], θhat[:,4]),"sigma.svg")
 savefig(scatter(trueθ[:,5], θhat[:,5]),"rho.svg")
 savefig(scatter(trueθ[:,6], θhat[:,6]),"lambda0.svg")
 savefig(scatter(trueθ[:,7], θhat[:,7]),"lambda1.svg")
-for i = 1:7
+savefig(scatter(trueθ[:,8], θhat[:,8]),"tau.svg")
+for i = 1:8
     ols(θhat[:,i],[ones(mcreps) trueθ[:,i]])
 end
