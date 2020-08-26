@@ -23,14 +23,14 @@ function TrueParameters()
     ρ = -0.7
     λ0 = 0.005 # jump rate per day
     λ1 = 4.0 # scaling factor st. dev. of jumps
-    τ = 0.02
+    τ = 0.005
     return [μ, κ, α, σ, ρ, λ0, λ1, τ]
 end
 
 
 function PriorSupport()
     lb = [-0.1, 0.001, -1.0, 0.01, -0.99, -0.02,  3.0, 0.0]
-    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.1]
+    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.03]
     lb,ub
 end    
 
@@ -144,7 +144,7 @@ function auxstat(θ, reps)
         rets, RV, BV, ret0, Monday = dgp(θ,reps)
         RV = log.(RV)
         BV = log.(BV)
-        jump = RV .> (2.0 .* BV)
+        jump = RV .> (1.5 .* BV)
         nojump = jump .== false
         jump[1:2] .= true
         nojump[1:2] .= true
@@ -177,10 +177,11 @@ function auxstat(θ, reps)
         # jump frequency
         qs = quantile(abs.(rets),[0.5, 0.9])
         qs2 = quantile(RV,[0.5, 0.9])
+        qs2 = quantile(BV,[0.5, 0.9])
         # leverage
         leverage1 = cor(BV, rets)
         leverage2 = cor(RV, rets)
-        stats = vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, leverage1, leverage2, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1],  njumps, mean(rets))'
+        stats = vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, leverage1, leverage2, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs./qs2, njumps, mean(rets))'
         # needs updating!
         # bret0 1:3
         # brets 4:6
