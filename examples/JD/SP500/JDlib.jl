@@ -212,3 +212,50 @@ function auxstat(θ, reps)
     return stats
 end
 
+
+# real data auxstats, for estimation of SP500
+function auxstat(rets, RV, BV)
+    stats = 0.0
+    RV = log.(RV)
+    BV = log.(BV)
+    jump = RV .> (1.5 .* BV)
+    nojump = jump .== false
+    jump[1:2] .= true
+    nojump[1:2] .= true
+
+    n = size(rets,1)
+    jumpsize = mean(RV[jump]) - mean(BV[jump])
+    jumpsize2 = std(rets[jump]) - std(rets[nojump])
+    njumps = mean(jump[3:end])
+    # ρ
+    X = [ones(n-1) BV[2:end] BV[1:end-1]]
+    y = rets[2:end]
+    βrets = X\y
+    ϵrets = y-X*βrets
+    σrets = std(ϵrets)
+    κrets = std(ϵrets.^2.0)
+    # normal volatility: κ, α and σ
+    X = [ones(n-2) BV[1:end-2] BV[2:end-1]]
+    y = BV[3:end]
+    βvol = X\y
+    ϵvol = y-X*βvol
+    σvol = std(ϵvol)
+    κvol = std(ϵvol.^2.0)
+    # jump size
+    X = [ones(n) jump BV jump.*BV]
+    y = RV
+    βjump = X\y
+    ϵjump = y-X*βjump
+    σjump = std(ϵjump)
+    κjump = std(ϵjump.^2.0)
+    # jump frequency
+    qs = quantile(abs.(rets),[0.5, 0.9])
+    qs2 = quantile(RV,[0.5, 0.9])
+    qs2 = quantile(BV,[0.5, 0.9])
+    # leverage
+    leverage1 = cor(BV, rets)
+    leverage2 = cor(RV, rets)
+    stats = vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, leverage1, leverage2, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs./qs2, njumps, mean(rets))'
+    return stats
+end
+

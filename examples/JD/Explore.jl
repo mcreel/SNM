@@ -5,7 +5,7 @@ using Econometrics
 include("JDlib.jl")
 θ = TrueParameters()
 #θ = PriorDraw()
-rets, RV, MedRV, ret0, Monday = dgp(θ,10)
+rets, RV, MedRV, ret0, Monday = dgp(θ,1)
 
 
 #=
