@@ -29,8 +29,8 @@ end
 
 
 function PriorSupport()
-    lb = [-0.1, 0.001, -1.0, 0.01, -0.99, -0.02,  3.0, 0.0]
-    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.03]
+    lb = [-0.1, 0.001, -3.0, 0.01, -0.99, -0.02,  3.0, -0.02]
+    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.05]
     lb,ub
 end    
 
@@ -222,7 +222,6 @@ function auxstat(rets, RV, BV)
     nojump = jump .== false
     jump[1:2] .= true
     nojump[1:2] .= true
-
     n = size(rets,1)
     jumpsize = mean(RV[jump]) - mean(BV[jump])
     jumpsize2 = std(rets[jump]) - std(rets[nojump])

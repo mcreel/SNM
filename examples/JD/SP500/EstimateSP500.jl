@@ -12,14 +12,16 @@ function main()
 nParams = size(PriorSupport()[1],1)
 # load SP500 data
 data = readdlm("SP500.txt")
-rets = data[2:end,2]
-RV = data[2:end,3]
-BV = data[2:end,4]
+data = Float64.(data[2:end,2:end])
+rets = data[:,1]
+RV = data[:,2]
+BV = data[:,3]
+# make neural stats for SP500 data
 @load "neural_moments.bson" NNmodel transform_stats_info
-# make neural stats
 lb, ub = PriorSupport()
-z = auxstat(rets, RV, BV) # stats for SP500 data
-m = min.(max.(Float64.(NNmodel(TransformStats(z, info)')),lb),ub)
+z = auxstat(rets, RV, BV)
+m = min.(max.(Float64.(NNmodel(TransformStats(z, transform_stats_info)')),lb),ub)
+# do the estimation
 @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=10, rt=0.1)
 return chain, θhat
 end
