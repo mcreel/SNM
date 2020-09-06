@@ -1,19 +1,19 @@
 using Statistics
 function auxstat(θ, reps)
-    stats = zeros(reps,11)
-    @inbounds Threads.@threads for rep = 1:reps
-        n = 1000
-        μ_1, μ_2, σ_1, σ_2, prob = θ
+    n = 1000
+    stats = zeros(reps, 11)
+    r=0:0.1:1
+    μ_1, μ_2, σ_1, σ_2, prob = θ
+    for i = 1:reps
         d1=randn(n).*σ_1 .+ μ_1
         d2=randn(n).*σ_2 .+ μ_2
         ps=rand(n).<prob
         data=zeros(n)
         data[ps].=d1[ps]
         data[.!ps].=d2[.!ps]
-        r=0:0.1:1
-        stats[rep,:] = sqrt(Float64(n)).* quantile.(Ref(data),r)'
-    end        
-    return stats
+        stats[i,:] = sqrt(n).* quantile.(Ref(data),r)
+    end
+    return mean(stats, dims=1)
 end    
 
 function TrueParameters()
@@ -30,6 +30,11 @@ function PriorMean()
     lb,ub = PriorSupport()
     (ub - lb) ./ 2.0
 end
+
+function PriorDraw()
+    lb, ub = PriorSupport()
+    θ = (ub-lb).*rand(size(lb,1)) + lb
+end    
 
 function Prior(θ)
     lb,ub = PriorSupport()

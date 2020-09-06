@@ -137,6 +137,10 @@ return rets, RV, BV, ret0, Monday
 end
 
 # returns reps replications of the statistics
+# this computes stats for rep*n observations,
+# instead of the usual reps repetitions of stats
+# computed using n observations. The reason is
+# that we don't want to solve the model reps times.
 function auxstat(θ, reps)
     not_ok = true
     stats = 0.0

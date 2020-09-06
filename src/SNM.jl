@@ -40,6 +40,6 @@ end
 
 # log likelihood (GMM-form) with fixed weight matrix
 function H(θ, m, reps, auxstat, NNmodel, info, invΣ)
-    x = m - vec(mean(NeuralMoments(θ, auxstat, reps, NNmodel, info), dims=2))
+    x = m - NeuralMoments(θ, auxstat, reps, NNmodel, info)
     -0.5*dot(x,invΣ*x)
 end
