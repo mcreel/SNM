@@ -2010,7 +2010,36 @@ noprefix "false"
  This makes the MCMC iterations faster, as the simulation-based update of
  the covariance estimate at each MCMC step is avoided.
  This estimation method was applied to the Mixture of Normals model.
- 
+ In this case, 1000 Monte Carlo replications were used, and only the neural
+ statistics were used.
+ We see in Tables 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:90%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+-
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:99%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ that confidence interval coverage is statistically proper in all occasion
+ except one (the 99% interval for the 
+\begin_inset Formula $\sigma_{1}$
+\end_inset
+
+ parameter).
+ Thus, the experiment supports the use of the two step version of the methods,
+ which is of interest because it is less computationally intensive.
 \end_layout
 
 \begin_layout Section
@@ -2259,7 +2288,7 @@ using raw (
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="15" columns="5">
+<lyxtabular version="3" rows="10" columns="5">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -3003,282 +3032,6 @@ ARMA
 \end_inset
 </cell>
 </row>
-<row>
-<cell multirow="3" alignment="center" valignment="middle" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-MN
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $\mu_{1}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $\sigma{}_{1}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $\mu_{2}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $\sigma{}_{2}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $p$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
 </lyxtabular>
 
 \end_inset
@@ -3330,7 +3083,7 @@ using raw (
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="15" columns="5">
+<lyxtabular version="3" rows="10" columns="5">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -4069,282 +3822,6 @@ ARMA
 \noun off
 \color none
 -0.006
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="3" alignment="center" valignment="middle" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-MN
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $\mu_{1}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $\sigma{}_{1}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $\mu_{2}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $\sigma{}_{2}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell multirow="4" alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $p$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
 \end_layout
 
 \end_inset
@@ -5091,7 +4568,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -5100,7 +4577,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.918
 \end_layout
 
 \end_inset
@@ -5154,7 +4631,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -5163,7 +4640,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.875
 \end_layout
 
 \end_inset
@@ -5204,7 +4681,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -5213,7 +4690,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.908
 \end_layout
 
 \end_inset
@@ -5267,7 +4744,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -5276,7 +4753,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.908
 \end_layout
 
 \end_inset
@@ -5317,7 +4794,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -5326,7 +4803,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.926
 \end_layout
 
 \end_inset
@@ -6097,7 +5574,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -6106,7 +5583,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.965
 \end_layout
 
 \end_inset
@@ -6160,7 +5637,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -6169,7 +5646,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.931
 \end_layout
 
 \end_inset
@@ -6210,7 +5687,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -6219,7 +5696,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+9.957
 \end_layout
 
 \end_inset
@@ -6273,7 +5750,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -6282,7 +5759,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.955
 \end_layout
 
 \end_inset
@@ -6323,7 +5800,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -6332,7 +5809,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.962
 \end_layout
 
 \end_inset
@@ -7103,7 +6580,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -7112,7 +6589,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.992
 \end_layout
 
 \end_inset
@@ -7166,7 +6643,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -7176,6 +6653,8 @@ MN
 
 \begin_layout Plain Layout
 
+\emph on
+0.977
 \end_layout
 
 \end_inset
@@ -7216,7 +6695,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -7225,7 +6704,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.990
 \end_layout
 
 \end_inset
@@ -7279,7 +6758,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -7288,7 +6767,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.986
 \end_layout
 
 \end_inset
@@ -7329,7 +6808,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+na
 \end_layout
 
 \end_inset
@@ -7338,7 +6817,7 @@ MN
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.993
 \end_layout
 
 \end_inset
