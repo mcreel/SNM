@@ -22,7 +22,7 @@ lb, ub = PriorSupport()
 z = auxstat(rets, RV, BV)
 m = min.(max.(Float64.(NNmodel(TransformStats(z, transform_stats_info)')),lb),ub)
 # do the estimation
-@time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=10, rt=0.1)
+@time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=2, rt=0.1)
 return chain, θhat
 end
 chain, θhat = main()
