@@ -2010,8 +2010,9 @@ noprefix "false"
  This makes the MCMC iterations faster, as the simulation-based update of
  the covariance estimate at each MCMC step is avoided.
  This estimation method was applied to the Mixture of Normals model.
- In this case, 1000 Monte Carlo replications were used, and only the neural
- statistics were used.
+ In this case, 1000 Monte Carlo replications were done, and only the neural
+ statistics were used, as the previous results support the use of these,
+ in favor of the whole set of statistics.
  We see in Tables 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -6827,6 +6828,58 @@ na
 
 \end_inset
 
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+\begin_inset Newpage newpage
+\end_inset
+
+Figures
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+MCMC results for 
+\begin_inset Formula $\mu$
+\end_inset
+
+ for the S&P 500 data.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /home/michael/git/SNM/examples/JD/SP500/mu.svg
+	width 10cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 
 \end_layout
 
