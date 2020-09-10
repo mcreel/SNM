@@ -183,31 +183,23 @@ function auxstat(θ, reps)
         qs2 = quantile(RV,[0.5, 0.9])
         qs3 = quantile(BV,[0.5, 0.9])
         stats = vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)'
-        # needs updating!
-        # bret0 1:3
-        # brets 4:6
-        # bvol 7:9
-        # bjump 10:13
-        # sig0 14
-        # sigrets 15
-        # sigvol 16
-        # sigjump 17
-        # k0 18
-        # krets 19
-        # kvol 20
-        # kjump 21
-        # l1 22
-        # l2 23
-        # mean RV - mean BV 24
-        # jumpsize 25
-        # jumpsize2 26
-        # qs1 27
-        # qs2 28 
-        # qs3 29
-        # njumps 30 
-        # mean rets 31
-        # mean ret0 32
-        #
+        # brets 1:3
+        # bvol 4:6
+        # bjump 7:10
+        # sigrets 11
+        # sigvol 12
+        # sigjump 13
+        # krets 14
+        # kvol 15
+        # kjump 16
+        # mean RV - mean BV 17
+        # jumpsize 18
+        # jumpsize2 19
+        # qs1 20
+        # qs2 21 
+        # qs3 22
+        # qs2/qs3 23-24 
+        # njumps 25
         not_ok = any(isnan.(stats))
     end
     return stats
@@ -251,11 +243,8 @@ function auxstat(rets, RV, BV)
     # jump frequency
     qs = quantile(abs.(rets),[0.5, 0.9])
     qs2 = quantile(RV,[0.5, 0.9])
-    qs2 = quantile(BV,[0.5, 0.9])
-    # leverage
-    leverage1 = cor(BV, rets)
-    leverage2 = cor(RV, rets)
-    stats = vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, leverage1, leverage2, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs./qs2, njumps, mean(rets))'
+    qs3 = quantile(BV,[0.5, 0.9])
+    stats = vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)'
     return stats
 end
 

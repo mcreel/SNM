@@ -25,9 +25,9 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     else
         sa_verbosity = 0
     end    
-    #θhat, junk, junk, junk = samin(obj, m, lb, ub; coverage_ok=0, maxevals=70, verbosity = sa_verbosity, rt = rt)
+    θhat, junk, junk, junk = samin(obj, m, lb, ub; coverage_ok=0, maxevals=1000, verbosity = sa_verbosity, rt = rt)
     # get covariance estimate
-    θhat = m
+    #θhat = m
     reps = 10
     Σinv = inv((1.0+1/reps).*EstimateΣ(θhat, 100, auxstat, NNmodel, info))
     # define things for MCMC
