@@ -1,4 +1,7 @@
-This directory holds an example of estimation of the jump diffusion model using artificial data generated at the parameter values
+This directory holds an example of estimation of the jump diffusion model 
+![model](https://github.com/mcreel/SNM/blob/master/examples/JD/SimulationEstimation/model.png)
+
+using artificial data generated at the parameter values
 ```
 function TrueParameters()
     μ = 0.02
@@ -13,7 +16,7 @@ function TrueParameters()
 end
 ```
 
-The results are in the *.svg files. For example, for the parameter kappa, the marginal posterior is
-For the third parameter, the true value is 0.2 (see above). The density plot of the posterior is
+The results are in the .svg files. For example, for the parameter kappa, the marginal posterior is
+is in the following figure, where you can see that the true value, from above, is inside the 90% confidence interval.
 ![kappa](https://github.com/mcreel/SNM/blob/master/examples/JD/SimulationEstimation/kappa.svg)
 
