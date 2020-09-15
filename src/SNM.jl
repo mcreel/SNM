@@ -19,7 +19,7 @@ function NeuralMoments(θ, auxstat, reps, NNmodel, info)
         if !ok "NaN in auxstat, retry" end
     end    
     lb, ub = PriorSupport()
-    min.(max.(Float64.(NNmodel(TransformStats(z, info)')),lb),ub)
+    mean(min.(max.(Float64.(NNmodel(TransformStats(z, info)')),lb),ub),dims=2)
 end        
 
 # estimate covariance
