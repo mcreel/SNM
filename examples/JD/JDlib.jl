@@ -156,7 +156,7 @@ function auxstat(rets, RV, BV, reps)
     nojump = jump .== false
     stats = 0.0
     n = 1000
-    for rep = 1:reps
+    @views Threads.@threads for rep = 1:reps
         # split out data for this rep
         retsr = rets[rep*n-n+1:rep*n]
         RVr = RV[rep*n-n+1:rep*n]
@@ -195,7 +195,7 @@ function auxstat(rets, RV, BV, reps)
         qs = quantile(abs.(retsr),[0.5, 0.9])
         qs2 = quantile(RVr,[0.5, 0.9])
         qs3 = quantile(BVr,[0.5, 0.9])
-        stats = s .+ sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RVr) - mean(BVr), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)'
+        stats = stats .+ sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RVr) - mean(BVr), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)'
     end
     stats = stats ./ reps
     # brets 1:3

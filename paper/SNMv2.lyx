@@ -2044,22 +2044,28 @@ noprefix "false"
 \end_layout
 
 \begin_layout Section
-Application: A Jump Diffusion Model of S&P500 Returns
+Application: A Jump Diffusion Model of S&P 500 Returns
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Generating the training/testing data for the net took slightly less than
- 16 hours, running on cluster using 20 threads.
- Check influential stats.
-\end_layout
+The previous examples are all small models that are not costly to simulate.
+ As an example of a more computationally challenging model, this section
+ presents results for estimation of a jump diffusion model of S&P 500 returns.
+ Solving the model using the SRIW1 strong order 1.5 solver from the 
+\begin_inset CommandInset href
+LatexCommand href
+name "DifferentialEquations.jl"
+target "https://github.com/SciML/DifferentialEquations.jl"
+literal "false"
 
 \end_inset
 
-
+ package takes about 15 seconds for each parameter vector trial, so training
+ a net and estimation by MCMC is somewhat costly, requiring about 3 days
+ to complete using a moderate power workstation and threads-based parallelizatio
+n, where possible.
+ This example is intended to show that the methods are feasible for research
+ projects where simulation from the model is costly, but not extremely so.
 \end_layout
 
 \begin_layout Standard
@@ -2162,16 +2168,80 @@ where
  and BV.
 \end_layout
 
-\begin_layout Itemize
-explain stats
+\begin_layout Standard
+The raw statistics, 
+\begin_inset Formula $W,$
+\end_inset
+
+ which are used to train the net and to do estimation are a combination
+ of coefficients from auxiliary regressions between the three observed variables
+, summary statistics, and functions of quantiles of the variables.
+ It is possible to tune the choice of statistics through experimentation
+ with artificially generated data, to ensure that the parameters are all
+ well identified, and it is possible to check that statistics have a minimal
+ importance, by examining the weights of the first layer of the neural net
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+See the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "Importance.jl"
+target "https://github.com/mcreel/SNM/blob/master/src/Importance.jl"
+literal "false"
+
+\end_inset
+
+ for how to do this
 \end_layout
 
-\begin_layout Itemize
-fit to data simulated at known parameters
+\end_inset
+
+.
+ The details of the 25 statistics which are used are found in the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "JDlib.jl"
+target "https://github.com/mcreel/SNM/blob/master/examples/JD/JDlib.jl"
+literal "false"
+
+\end_inset
+
+.
+ The importances of the statistics are seen in the figure 
+\begin_inset CommandInset href
+LatexCommand href
+name "ImportanceOfStatistics.svg"
+target "https://github.com/mcreel/SNM/blob/master/examples/JD/ImportanceOfStatistics.svg"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
-\begin_layout Itemize
-fit to SP500 data
+\begin_layout Standard
+The model was fit to S&P500 data
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The data source is the Oxford-Man Institute's realized library, v.
+ 0.2.
+\end_layout
+
+\end_inset
+
+ from 16 Dec.
+ 2013 to 04 Dec.
+ 2017, which is an interval of 1000 trading days, the same as was used to
+ train the neural net.
+ ADD PLOT OF data.
+ The results are in Figures x-y, which show nonparametric plots of the marginal
+ posterior density for each parameter, along with posterior means and medians,
+ and 90% confidence intervals defined by the limits of the green areas.
+ 
 \end_layout
 
 \begin_layout Section
@@ -6863,16 +6933,6 @@ MCMC results for
 
  for the S&P 500 data.
 \end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/mu.svg
-	width 10cm
 
 \end_inset
 
