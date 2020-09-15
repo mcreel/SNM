@@ -18,8 +18,15 @@ end
 function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     lb, ub = PriorSupport()
     nParams = size(lb,1)
+    θhat = m
+    println("NN estimator")
+    @show θhat
+    reps = 10
+    Σinv = inv((1.0+1/reps).*EstimateΣ(θhat, 200, auxstat, NNmodel, info))
+    println("first step cov matrix")
+    prettyprint(inv(Σinv))
     # use a rapid SAMIN to get good initialization values for chain
-    obj = θ -> -1.0*H(θ, m, 10, auxstat, NNmodel, info)
+    obj = θ -> -1.0*H(θ, m, 10, auxstat, NNmodel, info, Σinv)
     if verbosity == true
         sa_verbosity = 2
     else
@@ -27,11 +34,12 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     end    
     θhat, junk, junk, junk = samin(obj, m, lb, ub; coverage_ok=0, maxevals=1000, verbosity = sa_verbosity, rt = rt)
     # get covariance estimate
-    #θhat = m
-    reps = 10
-    Σinv = inv((1.0+1/reps).*EstimateΣ(θhat, 100, auxstat, NNmodel, info))
+    Σinv = inv((1.0+1/reps).*EstimateΣ(θhat, 200, auxstat, NNmodel, info))
+    println("SA estimator and second step estimator and cov matrix")
+    @show θhat
+    prettyprint(inv(Σinv))
     # define things for MCMC
-    lnL = θ -> H(θ, m, reps, auxstat, NNmodel, info, Σinv)
+    lnL = θ -> H(θ, m, 10, auxstat, NNmodel, info, Σinv)
     ChainLength = Int(1000/nthreads)
     MCMCburnin = 0
     tuning = 0.2/sqrt(12.0)*(ub-lb) # two tenths of a standard. dev. of prior
@@ -39,7 +47,8 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     chain = mcmc(θhat, ChainLength, MCMCburnin, Prior, lnL, Proposal, verbosity, nthreads)
     # now use a MVN random walk proposal with updates of covariance and longer chain
     # on final loop
-    Σ = NeweyWest(chain[:,1:nParams])
+    Σ = cov(chain[:,1:nParams])
+    @show Σ
     tuning = 1.0
     MC_loops = 5
     @inbounds for j = 1:MC_loops
@@ -61,7 +70,8 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
             elseif accept < 0.25
                 tuning *= 0.25
             end
-            Σ = 0.5*Σ + 0.5*NeweyWest(chain[:,1:nParams])
+            Σ = 0.5*Σ + 0.5*cov(chain[:,1:nParams])
+            @show Σ
         end    
     end
     chain = chain[:,1:nParams]
