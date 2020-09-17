@@ -19,7 +19,7 @@ BV = data[:,3]
 # make neural stats for SP500 data
 @load "../neural_moments.bson" NNmodel transform_stats_info
 lb, ub = PriorSupport()
-z = auxstat(rets, RV, BV)
+z = auxstat(rets, RV, BV, 1)
 m = min.(max.(Float64.(NNmodel(TransformStats(z, transform_stats_info)')),lb),ub)
 # do the estimation
 @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=10, rt=0.2)

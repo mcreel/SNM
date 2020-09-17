@@ -55,7 +55,7 @@ function Prior(θ)
     return a
 end
 
-function dgp(θ,reps)
+function dgp(θ::Array{Float64},reps::Int64)
 TradingDays = 1000*reps    
 Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
 MinPerDay = 1440 # minutes per day
@@ -136,7 +136,7 @@ ret0 = ret0[2:end]
 return rets, RV, BV, ret0, Monday
 end
 
-function auxstat(θ, reps)
+function auxstat(θ::Array{Float64}, reps::Int64)
     not_ok = true
     stats = 0.0
     while not_ok
@@ -149,14 +149,14 @@ function auxstat(θ, reps)
 end
 
 # auxstats, given data (either simulated or real)
-function auxstat(rets, RV, BV, reps)
+function auxstat(rets::Array{Float64}, RV::Array{Float64}, BV::Array{Float64}, reps::Int64)
     RV = log.(RV)
     BV = log.(BV)
     jump = RV .> (1.5 .* BV)
     nojump = jump .== false
     stats = zeros(reps,25)
     n = 1000
-    Threads.@threads for rep = 1:reps
+    @inbounds Threads.@threads for rep = 1:reps
         # split out data for this rep
         retsr = rets[rep*n-n+1:rep*n]
         RVr = RV[rep*n-n+1:rep*n]
