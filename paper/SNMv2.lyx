@@ -1844,499 +1844,11 @@ noprefix "false"
 \end_layout
 
 \begin_layout Standard
-Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:Bias-relative-to"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- reports bias.
- In all cases, bias is low, and there is no clear pattern of differences
- between estimators based on 
-\begin_inset Formula $W$
-\end_inset
-
- and those based on 
-\begin_inset Formula $Z.$
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Standard
-Results for confidence interval coverage are presented in Tables 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:90%-confidence-interval"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-, 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:95%-confidence-interval"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:99%-confidence-interval"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-, for 90, 95 and 99 percent intervals, respectively.
- Monte Carlo confidence interval coverage is the proportion of times that
- the true parameter value is not rejected, at the chosen confidence level.
- Before interpreting results, we remind the reader that 500 Monte Carlo
- replications were done in all cases.
- Critical values for the hypothesis that a 100·
-\begin_inset Formula $p\%$
-\end_inset
-
- confidence interval has correct coverage can be found using the quantiles
- of a binomial(500,
-\begin_inset Formula $p$
-\end_inset
-
-) random variable.
- In Tables 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:90%-confidence-interval"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
--
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:99%-confidence-interval"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-, cases where correct coverage is rejected at the 1% significance level
- are indicated by italic typeface.
- Here, we see some important differences.
- Coverage is poor for estimators that directly use the full set of moments,
- 
-\begin_inset Formula $W,$
-\end_inset
-
- for the SV and ARMA models, where correct coverage is rejected in all cases
- except for one of 18 (the 90% interval for the 
-\begin_inset Formula $\phi$
-\end_inset
-
- parameter of the SV model).
- For the DPD model, the estimators based on 
-\begin_inset Formula $W$
-\end_inset
-
- and on 
-\begin_inset Formula $Z$
-\end_inset
-
- both perform well, as correct coverage is never rejected.
- For the three models, when the neural net statistics are used, correct
- coverage is not rejected except for 2 of 18 cases, and in both of these
- cases, the error is one of Monte Carlo Type I error being lower than the
- nominal level, which is to say that the confidence intervals are somewhat
- broader than they should be, erring on the side of caution.
-\end_layout
-
-\begin_layout Subsection
-Two step estimator
-\end_layout
-
-\begin_layout Standard
-In order to speed up computations, a possibility is to use a consistent
- estimator of the parameter vector to compute an estimate of the covariance
- matrix 
-\begin_inset Formula $\bar{V}(\theta),$
-\end_inset
-
- and to keep this estimate fixed when evaluating the criterion function
- during the course of MCMC iterations, in typical two-step fashion.
- Concretely, the parameter vector 
-\begin_inset Formula $\theta$
-\end_inset
-
- was consistently estimated using 
-\begin_inset Formula $\arg\min H(\theta)$
-\end_inset
-
-, where 
-\begin_inset Formula $\hat{\bar{V}}(\theta)$
-\end_inset
-
- in eqn.
- 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:GMM criterion"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- was set to an identity matrix, using simulated annealing to do the minimization.
- Then 
-\begin_inset Formula $\hat{\bar{V}}(\theta)$
-\end_inset
-
- was fixed to its value at this estimate of the parameter vector, and MCMC
- was done in the same fashion as in the previous section, with this one
- difference.
- This makes the MCMC iterations faster, as the simulation-based update of
- the covariance estimate at each MCMC step is avoided.
- This estimation method was applied to the Mixture of Normals model.
- In this case, 1000 Monte Carlo replications were done, and only the neural
- statistics were used, as the previous results support the use of these,
- in favor of the whole set of statistics.
- We see in Tables 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:90%-confidence-interval"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
--
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:99%-confidence-interval"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- that confidence interval coverage is statistically proper in all occasion
- except one (the 99% interval for the 
-\begin_inset Formula $\sigma_{1}$
-\end_inset
-
- parameter).
- Thus, the experiment supports the use of the two step version of the methods,
- which is of interest because it is less computationally intensive.
-\end_layout
-
-\begin_layout Section
-Application: A Jump Diffusion Model of S&P 500 Returns
-\end_layout
-
-\begin_layout Standard
-The previous examples are all small models that are not costly to simulate.
- As an example of a more computationally challenging model, this section
- presents results for estimation of a jump diffusion model of S&P 500 returns.
- Solving and simulating
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-The model is solved and simulated using the SRIW1 strong order 1.5 solver
- from the 
-\begin_inset CommandInset href
-LatexCommand href
-name "DifferentialEquations.jl"
-target "https://github.com/SciML/DifferentialEquations.jl"
-literal "false"
-
-\end_inset
-
- package for the Julia language.
-\end_layout
-
-\end_inset
-
- the model for each MCMC trial parameter acceptance/rejection decision takes
- about 13 seconds, so training a net and estimation by MCMC is somewhat
- costly, requiring about 2 days to complete using a moderate power workstation
- and threads-based parallelization, where possible.
- This example is intended to show that the methods are feasible for research
- projects where simulation from the model is costly, but not extremely so.
-\end_layout
-
-\begin_layout Standard
-The jump diffusion model is
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-dp_{t} & =\mu dt+\sqrt{\exp h_{t}}dW_{1t}+J_{t}dN_{t}\\
-dh_{t} & =\kappa(\alpha-h_{t})+\sigma dW_{2t}
-\end{align*}
-
-\end_inset
-
-where 
-\begin_inset Formula $p_{t}$
-\end_inset
-
- is log price, 
-\begin_inset Formula $h_{t}$
-\end_inset
-
- is log volatility, 
-\begin_inset Formula $J_{t}$
-\end_inset
-
- is jump size, and 
-\begin_inset Formula $N_{t}$
-\end_inset
-
- is a Poisson process with jump intensity 
-\begin_inset Formula $\lambda_{0}$
-\end_inset
-
-.
- 
-\begin_inset Formula $W_{1t}$
-\end_inset
-
- and 
-\begin_inset Formula $W_{2t}$
-\end_inset
-
- are two standard Brownian motions with correlation 
-\begin_inset Formula $\rho$
-\end_inset
-
-.
- When a jump occurs, its size is 
-\begin_inset Formula $J_{t}=a\lambda_{1}\sqrt{\exp h_{t}}$
-\end_inset
-
-, where 
-\begin_inset Formula $a$
-\end_inset
-
- is 
-\begin_inset Formula $1$
-\end_inset
-
- with probability 
-\begin_inset Formula $0.5$
-\end_inset
-
- and 
-\begin_inset Formula $-1$
-\end_inset
-
- with probability 
-\begin_inset Formula $0.5.$
-\end_inset
-
- So, jump size depends on the current standard deviation, and jumps are
- positive or negative with equal probability.
- Log price, 
-\begin_inset Formula $p_{t},$
-\end_inset
-
- is simulated using 5 minute tics, and the observed log price adds a 
-\begin_inset Formula $N(0,\tau^{2})$
-\end_inset
-
- measurement error to 
-\begin_inset Formula $p_{t}$
-\end_inset
-
-.
- From this model, 1000 daily observations on returns, realized volatility
- (RV), and bipower variation (BV) are generated.
- The model is simulated on a continuous 24 hour basis, and returns are computed
- using the change in daily log closing price, for trading days only.
- Overnight periods and weekends are simulated, but returns, RV and BV are
- recorded only at the close of trading days.
- In summary, the seven parameters are 
-\begin_inset Formula $\theta=(\mu,\kappa,\alpha,\sigma,\rho,\lambda_{0},\lambda_{1},\tau)$
-\end_inset
-
-, and simulated data consists of 1000 daily observations on returns, RV
- and BV.
-\end_layout
-
-\begin_layout Standard
-The raw statistics, 
-\begin_inset Formula $W,$
-\end_inset
-
- which are used to train the net and to do estimation are a combination
- of coefficients from auxiliary regressions between the three observed variables
-, summary statistics, and functions of quantiles of the variables.
- It is possible to tune the choice of statistics through experimentation
- with artificially generated data, to ensure that the parameters are all
- well identified, and it is possible to check that statistics have a minimal
- importance, by examining the weights of the first layer of the neural net
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-See the file 
-\begin_inset CommandInset href
-LatexCommand href
-name "Importance.jl"
-target "https://github.com/mcreel/SNM/blob/master/src/Importance.jl"
-literal "false"
-
-\end_inset
-
- for how to do this
-\end_layout
-
-\end_inset
-
-.
- The details of the 25 statistics which are used are found in the file 
-\begin_inset CommandInset href
-LatexCommand href
-name "JDlib.jl"
-target "https://github.com/mcreel/SNM/blob/master/examples/JD/JDlib.jl"
-literal "false"
-
-\end_inset
-
-.
- The importances of the statistics are seen in the figure 
-\begin_inset CommandInset href
-LatexCommand href
-name "ImportanceOfStatistics.svg"
-target "https://github.com/mcreel/SNM/blob/master/examples/JD/ImportanceOfStatistics.svg"
-literal "false"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-The model was fit to S&P500 data
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-The data source is the Oxford-Man Institute's realized library, v.
- 0.2.
-\end_layout
-
-\end_inset
-
- from 16 Dec.
- 2013 to 04 Dec.
- 2017, which is an interval of 1000 trading days, the same as was used to
- train the neural net.
- ADD PLOT OF data.
- The results are in Figures x-y, which show nonparametric plots of the marginal
- posterior density for each parameter, along with posterior means and medians,
- and 90% confidence intervals defined by the limits of the green areas.
- 
-\end_layout
-
-\begin_layout Section
-Conclusions
-\end_layout
-
-\begin_layout Standard
-This paper has shown that confidence intervals based upon quantiles of a
- tuned MCMC chain may have coverage which is far from the nominal level.
- It has proposed to use neural networks to reduce the dimension of an initial
- set of moments to the minimum number of moments needed to maintain identificati
-on.
- When estimation and inference is based on the neural moments, confidence
- intervals have correct coverage in almost all cases, and departures from
- correct coverage are small.
-\end_layout
-
-\begin_layout Standard
-It is to be noted that the step of filtering moments though a neural net
- is very easy and quick to perform using modern deep learning software environme
-nts.
- The software archive that accompanies this paper provides a function for
- automatic training, requiring no human intervention.
- It only requires a sample of moments drawn from the model at parameter
- values drawn from the prior, and this is always possible when simulation-based
- estimation is being used.
- Filtering moments through a neural net gives an informative, minimal dimension
- statistic as the output.
- This provides an alternative to moment selection procedures.
- Uninformative moments are essentially removed, and correlated moments are
- combined.
-\end_layout
-
-\begin_layout Standard
-This paper has examined how inference using quantiles of MCMC chains may
- be improved when neural moments are used.
- It seems likely that other inference methods which are used with simulation-bas
-ed estimators, such as bootstrapping, may be made more reliable if neural
- moments are used, as dimension reduction while maintaining relevant information
- is likely to be generally beneficial.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Newpage newpage
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset bibtex
-LatexCommand bibtex
-btprint "btPrintCited"
-bibfiles "econometrics"
-options "plainnm"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Newpage newpage
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section*
-
-\series bold
-Tables
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Float table
 placement h
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -3127,15 +2639,35 @@ ARMA
 \end_layout
 
 \begin_layout Standard
-\begin_inset Newpage newpage
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Bias-relative-to"
+plural "false"
+caps "false"
+noprefix "false"
+
 \end_inset
 
+ reports bias.
+ In all cases, bias is low, and there is no clear pattern of differences
+ between estimators based on 
+\begin_inset Formula $W$
+\end_inset
 
+ and those based on 
+\begin_inset Formula $Z.$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 placement h
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -3581,7 +3113,7 @@ DPD
 \uwave off
 \noun off
 \color none
- 0.000 
+0.000
 \end_layout
 
 \end_inset
@@ -3657,7 +3189,7 @@ DPD
 \uwave off
 \noun off
 \color none
- 0.010 
+0.010
 \end_layout
 
 \end_inset
@@ -3809,7 +3341,7 @@ ARMA
 \uwave off
 \noun off
 \color none
- 0.008
+0.008
 \end_layout
 
 \end_inset
@@ -3831,7 +3363,7 @@ ARMA
 \uwave off
 \noun off
 \color none
- 0.001
+0.001
 \end_layout
 
 \end_inset
@@ -3885,7 +3417,7 @@ ARMA
 \uwave off
 \noun off
 \color none
- 0.004
+0.004
 \end_layout
 
 \end_inset
@@ -3926,15 +3458,107 @@ ARMA
 \end_layout
 
 \begin_layout Standard
-\begin_inset Newpage newpage
+Results for confidence interval coverage are presented in Tables 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:90%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
 \end_inset
 
+, 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:95%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
 
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:99%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, for 90, 95 and 99 percent intervals, respectively.
+ Monte Carlo confidence interval coverage is the proportion of times that
+ the true parameter value is not rejected, at the chosen confidence level.
+ Before interpreting results, we remind the reader that 500 Monte Carlo
+ replications were done in all cases.
+ Critical values for the hypothesis that a 100·
+\begin_inset Formula $p\%$
+\end_inset
+
+ confidence interval has correct coverage can be found using the quantiles
+ of a binomial(500,
+\begin_inset Formula $p$
+\end_inset
+
+) random variable.
+ In Tables 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:90%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+-
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:99%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, cases where correct coverage is rejected at the 1% significance level
+ are indicated by italic typeface.
+ Here, we see some important differences.
+ Coverage is poor for estimators that directly use the full set of moments,
+ 
+\begin_inset Formula $W,$
+\end_inset
+
+ for the SV and ARMA models, where correct coverage is rejected in all cases
+ except for one of 18 (the 90% interval for the 
+\begin_inset Formula $\phi$
+\end_inset
+
+ parameter of the SV model).
+ For the DPD model, the estimators based on 
+\begin_inset Formula $W$
+\end_inset
+
+ and on 
+\begin_inset Formula $Z$
+\end_inset
+
+ both perform well, as correct coverage is never rejected.
+ For the three models, when the neural net statistics are used, correct
+ coverage is not rejected except for 2 of 18 cases, and in both of these
+ cases, the error is one of Monte Carlo Type I error being lower than the
+ nominal level, which is to say that the confidence intervals are somewhat
+ broader than they should be, erring on the side of caution.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 placement h
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -4335,7 +3959,7 @@ DPD
 \uwave off
 \noun off
 \color none
-0.900 
+0.900
 \end_layout
 
 \end_inset
@@ -4912,15 +4536,11 @@ na
 \end_layout
 
 \begin_layout Standard
-\begin_inset Newpage newpage
-\end_inset
-
-
 \begin_inset Float table
 placement h
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -5605,7 +5225,7 @@ ARMA
 \begin_layout Plain Layout
 
 \emph on
-0.880 
+0.880
 \end_layout
 
 \end_inset
@@ -5922,15 +5542,11 @@ na
 \end_layout
 
 \begin_layout Standard
-\begin_inset Newpage newpage
-\end_inset
-
-
 \begin_inset Float table
 placement h
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -6615,7 +6231,7 @@ ARMA
 \begin_layout Plain Layout
 
 \emph on
-0.920 
+0.920
 \end_layout
 
 \end_inset
@@ -6933,16 +6549,319 @@ na
 
 \end_layout
 
-\begin_layout Section*
-\begin_inset Newpage newpage
+\begin_layout Subsection
+Two step estimator
+\end_layout
+
+\begin_layout Standard
+In order to speed up computations, a possibility is to use a consistent
+ estimator of the parameter vector to compute an estimate of the covariance
+ matrix 
+\begin_inset Formula $\bar{V}(\theta),$
 \end_inset
 
-Figures
+ and to keep this estimate fixed when evaluating the criterion function
+ during the course of MCMC iterations, in typical two-step fashion.
+ Concretely, the parameter vector 
+\begin_inset Formula $\theta$
+\end_inset
+
+ was consistently estimated using 
+\begin_inset Formula $\arg\min H(\theta)$
+\end_inset
+
+, where 
+\begin_inset Formula $\hat{\bar{V}}(\theta)$
+\end_inset
+
+ in eqn.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:GMM criterion"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ was set to an identity matrix, using simulated annealing to do the minimization.
+ Then 
+\begin_inset Formula $\hat{\bar{V}}(\theta)$
+\end_inset
+
+ was fixed to its value at this estimate of the parameter vector, and MCMC
+ was done in the same fashion as in the previous section, with this one
+ difference.
+ This makes the MCMC iterations faster, as the simulation-based update of
+ the covariance estimate at each MCMC step is avoided.
+ This estimation method was applied to the Mixture of Normals model.
+ In this case, 1000 Monte Carlo replications were done, and only the neural
+ statistics were used, as the previous results support the use of these,
+ in favor of the whole set of statistics.
+ We see in Tables 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:90%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+-
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:99%-confidence-interval"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ that confidence interval coverage is statistically proper in all occasion
+ except one (the 99% interval for the 
+\begin_inset Formula $\sigma_{1}$
+\end_inset
+
+ parameter).
+ Thus, the experiment supports the use of the two step version of the methods,
+ which is of interest because it is less computationally intensive.
+\end_layout
+
+\begin_layout Section
+Application: A Jump Diffusion Model of S&P 500 Returns
+\end_layout
+
+\begin_layout Standard
+The previous examples are all small models that are not costly to simulate.
+ As an example of a more computationally challenging model, this section
+ presents results for estimation of a jump diffusion model of S&P 500 returns.
+ Solving and simulating
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The model is solved and simulated using the SRIW1 strong order 1.5 solver
+ from the 
+\begin_inset CommandInset href
+LatexCommand href
+name "DifferentialEquations.jl"
+target "https://github.com/SciML/DifferentialEquations.jl"
+literal "false"
+
+\end_inset
+
+ package for the Julia language.
+\end_layout
+
+\end_inset
+
+ the model for each MCMC trial parameter acceptance/rejection decision takes
+ about 13 seconds, so training a net and estimation by MCMC is somewhat
+ costly, requiring about 2 days to complete using a moderate power workstation
+ and threads-based parallelization, where possible.
+ This example is intended to show that the methods are feasible for research
+ projects where simulation from the model is costly, but not extremely so.
+\end_layout
+
+\begin_layout Standard
+The jump diffusion model is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+dp_{t} & =\mu dt+\sqrt{\exp h_{t}}dW_{1t}+J_{t}dN_{t}\\
+dh_{t} & =\kappa(\alpha-h_{t})+\sigma dW_{2t}
+\end{align*}
+
+\end_inset
+
+where 
+\begin_inset Formula $p_{t}$
+\end_inset
+
+ is log price, 
+\begin_inset Formula $h_{t}$
+\end_inset
+
+ is log volatility, 
+\begin_inset Formula $J_{t}$
+\end_inset
+
+ is jump size, and 
+\begin_inset Formula $N_{t}$
+\end_inset
+
+ is a Poisson process with jump intensity 
+\begin_inset Formula $\lambda_{0}$
+\end_inset
+
+.
+ 
+\begin_inset Formula $W_{1t}$
+\end_inset
+
+ and 
+\begin_inset Formula $W_{2t}$
+\end_inset
+
+ are two standard Brownian motions with correlation 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ When a jump occurs, its size is 
+\begin_inset Formula $J_{t}=a\lambda_{1}\sqrt{\exp h_{t}}$
+\end_inset
+
+, where 
+\begin_inset Formula $a$
+\end_inset
+
+ is 
+\begin_inset Formula $1$
+\end_inset
+
+ with probability 
+\begin_inset Formula $0.5$
+\end_inset
+
+ and 
+\begin_inset Formula $-1$
+\end_inset
+
+ with probability 
+\begin_inset Formula $0.5.$
+\end_inset
+
+ So, jump size depends on the current standard deviation, and jumps are
+ positive or negative with equal probability.
+ Log price, 
+\begin_inset Formula $p_{t},$
+\end_inset
+
+ is simulated using 5 minute tics, and the observed log price adds a 
+\begin_inset Formula $N(0,\tau^{2})$
+\end_inset
+
+ measurement error to 
+\begin_inset Formula $p_{t}$
+\end_inset
+
+.
+ From this model, 1000 daily observations on returns, realized volatility
+ (RV), and bipower variation (BV) are generated.
+ The model is simulated on a continuous 24 hour basis, and returns are computed
+ using the change in daily log closing price, for trading days only.
+ Overnight periods and weekends are simulated, but returns, RV and BV are
+ recorded only at the close of trading days.
+ In summary, the seven parameters are 
+\begin_inset Formula $\theta=(\mu,\kappa,\alpha,\sigma,\rho,\lambda_{0},\lambda_{1},\tau)$
+\end_inset
+
+, and simulated data consists of 1000 daily observations on returns, RV
+ and BV.
+ The model studied here is quite similar to that studied in 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "creel2017neural"
+literal "false"
+
+\end_inset
+
+, except that the drift process is simplfied to be constant, and the jump
+ process is modeled somewhat differently, with constant intensity, but with
+ the magnitude of a jump depending on the current instantaneous volatility.
+ These changes were motivated by the results of the previous paper, and
+ by the better tractibility of the present specification.
+\end_layout
+
+\begin_layout Standard
+The raw statistics, 
+\begin_inset Formula $W,$
+\end_inset
+
+ which are used to train the net and to do estimation are a combination
+ of coefficients from auxiliary regressions between the three observed variables
+, summary statistics, and functions of quantiles of the variables.
+ It is possible to tune the choice of statistics through experimentation
+ with artificially generated data, to ensure that the parameters are all
+ well identified, and it is possible to check that statistics have a minimal
+ importance, by examining the weights of the first layer of the neural net
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+See the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "Importance.jl"
+target "https://github.com/mcreel/SNM/blob/master/src/Importance.jl"
+literal "false"
+
+\end_inset
+
+ for how to do this
+\end_layout
+
+\end_inset
+
+.
+ The details of the 25 statistics which are used are found in the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "JDlib.jl"
+target "https://github.com/mcreel/SNM/blob/master/examples/JD/JDlib.jl"
+literal "false"
+
+\end_inset
+
+.
+ The importances of the statistics are seen in the figure 
+\begin_inset CommandInset href
+LatexCommand href
+name "ImportanceOfStatistics.svg"
+target "https://github.com/mcreel/SNM/blob/master/examples/JD/ImportanceOfStatistics.svg"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The model was fit to S&P500 data
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The data source is the Oxford-Man Institute's realized library, v.
+ 0.2.
+\end_layout
+
+\end_inset
+
+ from 16 Dec.
+ 2013 to 05 Dec.
+ 2017, which is an interval of 1000 trading days, the same as was used to
+ train the neural net.
+ The data may be seen in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Plot-of-returns,"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, where we observe typical volatility clusters and some apparent jumps.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
-placement H
 wide false
 sideways false
 status open
@@ -6951,7 +6870,92 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-MCMC results for the S&P 500 data.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Plot-of-returns,"
+
+\end_inset
+
+Plot of returns, RV and BV, S&P 500, 16 Dec.
+ 2013 - 05 Dec.
+ 2017.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+\begin_inset Graphics
+	filename data.png
+	width 12cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The results are in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:MCMC-results-for"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, which shows nonparametric plots of the marginal posterior density for
+ each parameter, along with posterior means and medians, and 90% confidence
+ intervals defined by the limits of the green areas.
+ Drift is not significantly different from zero.
+ There is quite a bit of persistence in volatility, as mean reversion, 
+\begin_inset Formula $\kappa$
+\end_inset
+
+, is estimated to be between 0.09 and 0.13.
+ Leverage (
+\begin_inset Formula $\rho)$
+\end_inset
+
+ is quite strong, estimated between -0.85 and -0.65.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+JUMPS and ME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:MCMC-results-for"
+
+\end_inset
+
+MCMC results for the jump-diffusion model of S&P 500 data.
 \end_layout
 
 \end_inset
@@ -6987,10 +6991,6 @@ status collapsed
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -7239,9 +7239,64 @@ status collapsed
 
 \end_layout
 
-\begin_layout Plain Layout
+\end_inset
+
 
 \end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+This paper has shown that confidence intervals based upon quantiles of a
+ tuned MCMC chain may have coverage which is far from the nominal level.
+ It has proposed to use neural networks to reduce the dimension of an initial
+ set of moments to the minimum number of moments needed to maintain identificati
+on.
+ When estimation and inference is based on the neural moments, confidence
+ intervals have correct coverage in almost all cases, and departures from
+ correct coverage are small.
+\end_layout
+
+\begin_layout Standard
+It is to be noted that the step of filtering moments though a neural net
+ is very easy and quick to perform using modern deep learning software environme
+nts.
+ The software archive that accompanies this paper provides a function for
+ automatic training, requiring no human intervention.
+ It only requires a sample of moments drawn from the model at parameter
+ values drawn from the prior, and this is always possible when simulation-based
+ estimation is being used.
+ Filtering moments through a neural net gives an informative, minimal dimension
+ statistic as the output.
+ This provides an alternative to moment selection procedures.
+ Uninformative moments are essentially removed, and correlated moments are
+ combined.
+\end_layout
+
+\begin_layout Standard
+This paper has examined how inference using quantiles of MCMC chains may
+ be improved when neural moments are used.
+ It seems likely that other inference methods which are used with simulation-bas
+ed estimators, such as bootstrapping, may be made more reliable if neural
+ moments are used, as dimension reduction while maintaining relevant information
+ is likely to be generally beneficial.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "econometrics"
+options "plainnm"
 
 \end_inset
 
