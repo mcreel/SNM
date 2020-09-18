@@ -1,5 +1,8 @@
-# This does MLE and then MCMC, either using raw statistic, or using NN transform,
-# depending on the argument usenn
+# this uses the NN estimator to get the covariance matrix,
+# and also uses the covariance for the prior for MCMC. SA is
+# eliminated.
+
+
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
 
 # uniform random walk in one dimension
