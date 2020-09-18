@@ -1,3 +1,8 @@
+# Note: could accelerate this by using the NN estimator to get the 
+# covariance directly, without SA. Also, could use that covariance
+# to form the proposal, using proposal2 directly, skipping the
+# first naive proposal. 
+
 # This does MLE and then MCMC, either using raw statistic, or using NN transform,
 # depending on the argument usenn
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
