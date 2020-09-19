@@ -97,9 +97,11 @@
 \use_package stackrel 1
 \use_package stmaryrd 1
 \use_package undertilde 1
-\cite_engine natbib
+\cite_engine biblatex
 \cite_engine_type authoryear
 \biblio_style plainnat
+\biblatex_bibstyle authoryear
+\biblatex_citestyle authoryear
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
@@ -6751,8 +6753,18 @@ where
 \end_inset
 
 .
- From this model, 1000 daily observations on returns, realized volatility
+ From this model, 1000 daily observations on returns realized volatility
  (RV), and bipower variation (BV) are generated.
+ Both RV and BV are informative about volatility (
+\begin_inset CommandInset citation
+LatexCommand citet
+key "barndorff2006econometrics"
+literal "false"
+
+\end_inset
+
+), and, because BV is somewhat robust to jumps, while RV is not, the difference
+ between the two can help to identify the frequency and size of jumps.
  The model is simulated on a continuous 24 hour basis, and returns are computed
  using the change in daily log closing price, for trading days only.
  Overnight periods and weekends are simulated, but returns, RV and BV are
@@ -6766,15 +6778,23 @@ where
  The model studied here is quite similar to that studied in 
 \begin_inset CommandInset citation
 LatexCommand citet
+key "CreelKristensenABCofSV"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset citation
+LatexCommand citet
 key "creel2017neural"
 literal "false"
 
 \end_inset
 
-, except that the drift process is simplfied to be constant, and the jump
- process is modeled somewhat differently, with constant intensity, but with
+, except that the drift process is simplified to be constant, and the jump
+ process is modeled somewhat differently, with constant intensity, and with
  the magnitude of a jump depending on the current instantaneous volatility.
- These changes were motivated by the results of the previous paper, and
+ These changes were motivated by the results of the previous papers, and
  by the better tractibility of the present specification.
 \end_layout
 
@@ -6818,7 +6838,8 @@ literal "false"
 
 \end_inset
 
-.
+ (this same file also gives details of the priors, which are uniform over
+ fairly broad supports, for all parameters).
  The importances of the statistics are seen in the figure 
 \begin_inset CommandInset href
 LatexCommand href
@@ -6829,6 +6850,7 @@ literal "false"
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
@@ -6857,7 +6879,10 @@ noprefix "false"
 
 \end_inset
 
-, where we observe typical volatility clusters and some apparent jumps.
+, where we observe typical volatility clusters and some jumps.
+ For example, the Brexit drop of June, 2016 is clearly seen, and the spike
+ in RV but not BV at this point illustrates the fact that jumps can be identifie
+d by comparing the two.
 \end_layout
 
 \begin_layout Standard
@@ -6886,10 +6911,78 @@ Plot of returns, RV and BV, S&P 500, 16 Dec.
 
 \end_layout
 
-\begin_layout Section*
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Returns
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Graphics
-	filename data.png
+	filename /home/michael/git/SNM/examples/JD/SP500/returns.svg
 	width 12cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+RV and BV
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /home/michael/git/SNM/examples/JD/SP500/volatility.svg
+	width 12cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
 
 \end_inset
 
@@ -6902,7 +6995,7 @@ Plot of returns, RV and BV, S&P 500, 16 Dec.
 \end_layout
 
 \begin_layout Standard
-The results are in Figure 
+The estimation results are in Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:MCMC-results-for"
@@ -6915,7 +7008,12 @@ noprefix "false"
 , which shows nonparametric plots of the marginal posterior density for
  each parameter, along with posterior means and medians, and 90% confidence
  intervals defined by the limits of the green areas.
- Drift is not significantly different from zero.
+ All posteriors are considerably more concentrated than are the priors.
+ Drift (
+\begin_inset Formula $\mu)$
+\end_inset
+
+ is not significantly different from zero.
  There is quite a bit of persistence in volatility, as mean reversion, 
 \begin_inset Formula $\kappa$
 \end_inset
@@ -6926,17 +7024,72 @@ noprefix "false"
 \end_inset
 
  is quite strong, estimated between -0.85 and -0.65.
- 
-\begin_inset Note Note
-status open
+ The results for jumps are interesting: the jump probability per day (
+\begin_inset Formula $\lambda_{0})$
+\end_inset
 
-\begin_layout Plain Layout
-JUMPS and ME
+ is estimated to be between 0.01 and 0.04, with the point estimate being approxima
+tely 0.02.
+ So, jumps are a statistically important feature of the model.
+ When a jump does occur, its magnitude (
+\begin_inset Formula $\lambda_{1}$
+\end_inset
+
+) is approximately 3.2 times the current instantaneous standard deviation.
+ Another interesting result is that the standard deviation of measurement
+ error, 
+\begin_inset Formula $\tau$
+\end_inset
+
+, is estimated to be approximately 0.01.
+ The hypothesis that this parameter is zero cannot be rejected at the 10%
+ significance level, but most posterior probability is on positive values.
+ Thus, it appears that it is a safer option to allow for measurement error
+ in the model, as its omission could bias the estimates of the other parameters.
+ 
 \end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset citation
+LatexCommand citet
+key "creel2017neural"
+literal "false"
 
 \end_inset
 
+ uses similar methods to analyze the S&P 500 data over the Jan.
+ 2015 - May 2016 interval.
+ That paper found that mean volatility (
+\begin_inset Formula $\alpha)$
+\end_inset
 
+ was higher than the estimate here, the variance of volatility (
+\begin_inset Formula $\sigma$
+\end_inset
+
+) was lower than that found here, and that mean reversion (
+\begin_inset Formula $\kappa)$
+\end_inset
+
+ was faster than that estimated here.
+ These results are consistent with what is seen in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Plot-of-returns,"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ The Jan.
+ 2015 - May 2016 interval is one of relatively high volatility, with less
+ pronounced clusters.
+ For this shorter data window, volatility is higher on average and less
+ variable, with less clustering.
+ The differences in the estimated parameters between the earlier paper and
+ the results here are consistent with these facts.
 \end_layout
 
 \begin_layout Standard
@@ -6956,6 +7109,8 @@ name "fig:MCMC-results-for"
 \end_inset
 
 MCMC results for the jump-diffusion model of S&P 500 data.
+ Posterior mean in blue, posterior median in black.
+ The green-yellow borders define the limits of a 90% confidence interval.
 \end_layout
 
 \end_inset
@@ -6986,8 +7141,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/mu.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/mu.svg
+	width 7cm
 
 \end_inset
 
@@ -7019,8 +7174,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/kappa.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/kappa.svg
+	width 7cm
 
 \end_inset
 
@@ -7055,8 +7210,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/alpha.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/alpha.svg
+	width 7cm
 
 \end_inset
 
@@ -7088,8 +7243,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/sigma.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/sigma.svg
+	width 7cm
 
 \end_inset
 
@@ -7124,8 +7279,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/rho.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/rho.svg
+	width 7cm
 
 \end_inset
 
@@ -7157,8 +7312,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/lambda0.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/lambda0.svg
+	width 7cm
 
 \end_inset
 
@@ -7193,8 +7348,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/lambda1.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/lambda1.svg
+	width 7cm
 
 \end_inset
 
@@ -7226,8 +7381,8 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /home/michael/git/SNM/examples/JD/SP500/tau.png
-	width 6cm
+	filename /home/michael/git/SNM/examples/JD/SP500/tau.svg
+	width 7cm
 
 \end_inset
 
@@ -7296,7 +7451,7 @@ ed estimators, such as bootstrapping, may be made more reliable if neural
 LatexCommand bibtex
 btprint "btPrintCited"
 bibfiles "econometrics"
-options "plainnm"
+options "plain"
 
 \end_inset
 
