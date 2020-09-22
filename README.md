@@ -5,7 +5,7 @@ The project allows for creation and training of the neural net, and for calculat
 
 The project allows for Monte Carlo investigation of the performance of estimators and the reliability of confidence intervals obtained from the quantiles samples from the posterior distribution.
 
-The project is motivated by results in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>. The code in the WP branch of this archive allows for replication of the results in that paper. The master branch builds on the results of the paper to focus on the best performing methods.
+The results of the project are reported in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>. The code in the WP branch of this archive holds the code for the continuously updating version, while the the master branch has updates since v1 of the WP, which focus on the two-step version and also add the jump diffusion results. The code in the master branch is simpler, performs as well, and is recommended.
 
 # Worked example
 The following is an explanation of how to use the code in the master branch.
