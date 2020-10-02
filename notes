@@ -1,9 +1,0 @@
-Since the WP, the newer code uses a two step approach, holding the covariance
-matrix fixed at the estimate at the initial consistent estimator. This is faster,
-and works fine.
-
-Also, focus only on the GMM form, and on the NN estimator. This saves time, as the 
-questions about the other versions are answered by the WP.
-
-Have added a mixture of normals example, and now working on adding a jump diffusion.
-
