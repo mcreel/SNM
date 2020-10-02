@@ -26,7 +26,7 @@ results = zeros(mcreps,4*nParams)
 for mcrep = 1:mcreps
     # generate a draw of neural moments at true params
     m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)    
-    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info)
+    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info, verbosity=false, nthreads=4)
     results[mcrep,:] = vcat(θhat, Analyze(chain))
     println("__________ replication: ", mcrep, "_______________")
     println("Results so far")
@@ -40,5 +40,3 @@ end
 writedlm(run_title, results)
 end
 RunProject()
-
-

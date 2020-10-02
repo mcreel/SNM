@@ -47,6 +47,7 @@ function MakeNeuralMoments(auxstat, S)
     TrainingProportion = 0.5
     Epochs = 1000 # passes through entire training set
     params = Float32.(params)
+    s = std(params, dims=1)'
     statistics = Float32.(statistics)
     trainsize = Int(TrainingProportion*S)
     yin = params[1:trainsize, :]'
@@ -60,7 +61,7 @@ function MakeNeuralMoments(auxstat, S)
         Dense(10*nParams, nParams)
     )
     opt = ADAGrad() # the optimizer 
-    loss(x,y) = Flux.mse(NNmodel(x),y) # Define the loss function
+    loss(x,y) = Flux.mse(NNmodel(x)./s,y./s) # Define the loss function
     # monitor training
     function monitor(e)
         println("epoch $(lpad(e, 4)): (training) loss = $(round(loss(xin,yin); digits=4)) (testing) loss = $(round(loss(xout,yout); digits=4))| ")

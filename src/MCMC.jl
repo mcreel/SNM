@@ -6,43 +6,36 @@
 # This does MLE and then MCMC, either using raw statistic, or using NN transform,
 # depending on the argument usenn
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
-
-# uniform random walk in one dimension
-function proposal1(current, tuning)
-    trial = copy(current)
-    i = rand(1:size(trial,1))
-    trial[i] += tuning[i].*randn()
-    return trial
-end
-
 # MVN random walk, or occasional draw from prior
-function proposal2(current, cholV)
+function proposal(current, cholV)
     current + cholV'*randn(size(current))
 end
 
-function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
+function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
     lb, ub = PriorSupport()
     nParams = size(lb,1)
+    reps = 10 # replications at each trial parameter
+    covreps = 500 # replications used to compute weight matrix
     # use a rapid SAMIN to get good initialization values for chain
-    obj = θ -> -1.0*H(θ, m, 10, auxstat, NNmodel, info)
+    obj = θ -> -1.0*H(θ, θnn, 10, auxstat, NNmodel, info)
     if verbosity == true
         sa_verbosity = 2
     else
         sa_verbosity = 0
     end    
-    θhat, junk, junk, junk = samin(obj, m, lb, ub; coverage_ok=0, maxevals=1000, verbosity = sa_verbosity, rt = rt)
+    θsa, junk, junk, junk = samin(obj, θnn, lb, ub; coverage_ok=0, maxevals=1000, verbosity = sa_verbosity, rt = rt)
     # get covariance estimate
-    reps = 10
-    Σinv = inv((1.0+1/reps).*EstimateΣ(θhat, 100, auxstat, NNmodel, info))
+    Σ = EstimateΣ(θsa, covreps, auxstat, NNmodel, info) 
+    Σinv = inv((1.0+1/reps).*Σ)
+    P = (cholesky(Σ)).U
+    P = diagm(diag(Σ))
     # define things for MCMC
-    lnL = θ -> H(θ, m, reps, auxstat, NNmodel, info, Σinv)
+    lnL = θ -> H(θ, θnn, reps, auxstat, NNmodel, info, Σinv)
     ChainLength = Int(1000/nthreads)
-    MCMCburnin = 0
-    tuning = 0.2/sqrt(12.0)*(ub-lb) # two tenths of a standard. dev. of prior
-    Proposal = θ -> proposal1(θ, tuning)
-    chain = mcmc(θhat, ChainLength, MCMCburnin, Prior, lnL, Proposal, verbosity, nthreads)
-    # now use a MVN random walk proposal with updates of covariance and longer chain
-    # on final loop
+    Proposal = θ -> proposal(θ, P)
+    # initial short chain to tune proposal
+    chain = mcmc(θsa, ChainLength, 0, Prior, lnL, Proposal, verbosity, nthreads)
+    # loops to tune proposal
     Σ = NeweyWest(chain[:,1:nParams])
     tuning = 1.0
     MC_loops = 5
@@ -52,7 +45,7 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
         catch
             P = diagm(diag(Σ))
         end    
-        Proposal = θ -> proposal2(θ,tuning*P)
+        Proposal = θ -> proposal(θ,tuning*P)
         if j == MC_loops
             ChainLength = Int(10000/nthreads)
         end    
@@ -69,5 +62,5 @@ function MCMC(m, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
         end    
     end
     chain = chain[:,1:nParams]
-    return chain, θhat
+    return chain, θnn
 end
