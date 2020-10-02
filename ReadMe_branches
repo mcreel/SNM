@@ -1,0 +1,9 @@
+branch WP has code for June 2020 version of WP.
+
+branch WP2 has code for the Oct. 2020 version of WP
+this branch  uses a two step approach, holding the covariance
+matrix fixed at the estimate at the initial consistent estimator. This is faster,
+and works fine. Also, focus only on the GMM form, and on the NN estimator. This saves time, as the 
+questions about the other versions are answered by the WP. Have added a mixture of normals example
+and a jump diffusion empirical example.
+

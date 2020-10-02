@@ -3,8 +3,8 @@ Pkg.activate("../../../")
 using DelimitedFiles
 using Plots
 chain = readdlm("chain")
-p = npdensity(chain[:,1])
-plot!(p, legend=false)
+p1 = npdensity(chain[:,1])
+plot!(p1, title="mu", legend=false)
 savefig( "mu.svg")
 p = npdensity(chain[:,2])
 plot!(p, legend=false)
