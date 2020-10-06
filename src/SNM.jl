@@ -1,3 +1,4 @@
+module SNM
 using Flux, Statistics, LinearAlgebra
 
 # bounds by quantiles, and standardizes and normalizes around median
@@ -43,3 +44,5 @@ function H(θ, m, reps, auxstat, NNmodel, info, invΣ)
     x = m - NeuralMoments(θ, auxstat, reps, NNmodel, info)
     -0.5*dot(x,invΣ*x)
 end
+
+export H, EstimateΣ, NeuralMoments 
