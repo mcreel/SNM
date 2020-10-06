@@ -3,7 +3,6 @@
 using Econometrics, StatsBase, Statistics, Flux, Random, LinearAlgebra
 using BSON: @save
 using Base.Iterators
-include("SNM.jl")
 
 function MakeNeuralMoments(auxstat, S)
     data = 0.0
