@@ -47,6 +47,6 @@ end
 
 include("MCMC.jl")
 include("Analyze.jl")
-include("MakeNeuralMoments")
+include("MakeNeuralMoments.jl")
 export H, EstimateΣ, NeuralMoments, MCMC, Analyze, MakeNeuralMoments
 end
