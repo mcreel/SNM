@@ -45,4 +45,6 @@ function H(θ, m, reps, auxstat, NNmodel, info, invΣ)
     -0.5*dot(x,invΣ*x)
 end
 
-export H, EstimateΣ, NeuralMoments 
+include("MCMC.jl")
+include("Analyze.jl")
+export H, EstimateΣ, NeuralMoments, MCMC, Analyze 
