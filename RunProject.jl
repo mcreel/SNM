@@ -1,20 +1,13 @@
 using Pkg
 Pkg.activate(".")
+import SNM
+using BSON:@load
 project="Auction"  # set to one of the projects in examples: SV, DPD, ARMA, MN
+include("examples/"*project*"/"*project*"lib.jl")
 run_title = "working" # Monte Carlo results written to this file
 mcreps = 1000 # how many reps?
 
-# load code
-include("examples/"*project*"/"*project*"lib.jl")
-#include("src/SNM.jl")
-#include("src/MakeNeuralMoments.jl") # the specialized MCMC using net 
-#include("src/Analyze.jl") # computes the confidence intervals, etc
-#include("src/MCMC.jl") # the specialized MCMC using net 
-using SNM
-using BSON:@load
-
 function RunProject()
-
 # generate the trained net: comment out when done for the chosen model
 nParams = size(PriorSupport()[1],1)
 TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
