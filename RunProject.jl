@@ -1,6 +1,6 @@
 using Pkg
 Pkg.activate(".")
-project="MN"  # set to one of the projects in examples: SV, DPD, ARMA, MN
+project="Auction"  # set to one of the projects in examples: SV, DPD, ARMA, MN
 run_title = "working" # Monte Carlo results written to this file
 mcreps = 1000 # how many reps?
 
