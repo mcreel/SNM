@@ -6,10 +6,11 @@ mcreps = 1000 # how many reps?
 
 # load code
 include("examples/"*project*"/"*project*"lib.jl")
-include("src/SNM.jl")
-include("src/MakeNeuralMoments.jl") # the specialized MCMC using net 
-include("src/Analyze.jl") # computes the confidence intervals, etc
-include("src/MCMC.jl") # the specialized MCMC using net 
+#include("src/SNM.jl")
+#include("src/MakeNeuralMoments.jl") # the specialized MCMC using net 
+#include("src/Analyze.jl") # computes the confidence intervals, etc
+#include("src/MCMC.jl") # the specialized MCMC using net 
+using SNM
 using BSON:@load
 
 function RunProject()
