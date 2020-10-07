@@ -3,7 +3,11 @@ Pkg.activate(".")
 using BSON:@load
 project="Auction"  # set to one of the projects in examples: SV, DPD, ARMA, MN
 include("examples/"*project*"/"*project*"lib.jl")
-using SNM
+include("src/SNM.jl")
+include("src/MakeNeuralMoments.jl")
+include("src/MCMC.jl")
+include("src/Analyze.jl")
+
 run_title = "working" # Monte Carlo results written to this file
 mcreps = 1000 # how many reps?
 

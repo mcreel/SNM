@@ -1,7 +1,3 @@
-module SNM
-using Flux, Statistics, LinearAlgebra
-
-
 # bounds by quantiles, and standardizes and normalizes around median
 function TransformStats(data, info)
     q01,q50,q99,iqr = info
@@ -46,8 +42,3 @@ function H(θ, m, reps, auxstat, NNmodel, info, invΣ)
     -0.5*dot(x,invΣ*x)
 end
 
-include("MCMC.jl")
-include("Analyze.jl")
-include("MakeNeuralMoments.jl")
-export H, EstimateΣ, NeuralMoments, MCMC, Analyze, MakeNeuralMoments, TransformStats
-end
