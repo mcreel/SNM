@@ -2,22 +2,6 @@ module SNM
 using Flux, Statistics, LinearAlgebra
 
 
-# dummy functions to be overrided by user code
-function PriorSupport()
-end
-
-function PriorMean()
-end
-
-function Prior()
-end
-
-function PriorDraw()
-end
-
-function TrueParameters()
-end 
-
 # bounds by quantiles, and standardizes and normalizes around median
 function TransformStats(data, info)
     q01,q50,q99,iqr = info
@@ -66,5 +50,4 @@ include("MCMC.jl")
 include("Analyze.jl")
 include("MakeNeuralMoments.jl")
 export H, EstimateΣ, NeuralMoments, MCMC, Analyze, MakeNeuralMoments, TransformStats
-export PriorSupport, PriorMean, Prior, PriorDraw, TrueParameters
 end

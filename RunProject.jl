@@ -1,9 +1,9 @@
 using Pkg
 Pkg.activate(".")
-using SNM
 using BSON:@load
 project="Auction"  # set to one of the projects in examples: SV, DPD, ARMA, MN
 include("examples/"*project*"/"*project*"lib.jl")
+using SNM
 run_title = "working" # Monte Carlo results written to this file
 mcreps = 1000 # how many reps?
 
