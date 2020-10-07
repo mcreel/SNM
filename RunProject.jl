@@ -1,6 +1,6 @@
 using Pkg
 Pkg.activate(".")
-import SNM
+using SNM
 using BSON:@load
 project="Auction"  # set to one of the projects in examples: SV, DPD, ARMA, MN
 include("examples/"*project*"/"*project*"lib.jl")
