@@ -1,0 +1,16 @@
+Base time, single thread 
+22m34s
+
+threads
+20: 9m5s
+10: 8m13s
+5: 9m26s
+2: 13m21s
+
+
+mpi
+20: 7m34s
+10: 7m15s
+5: 8m5s
+2: 12m54s
+
