@@ -33,7 +33,7 @@ function AuctionMonitor(sofar, results)
 end
 
 function main()
-    reps = 100   # desired number of MC reps
+    reps = 1000   # desired number of MC reps
     results = zeros(reps, 8)
     pooled = 1  # do this many reps b
     Threads.@threads for rep = 1:reps
