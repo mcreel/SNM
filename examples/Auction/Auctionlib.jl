@@ -1,4 +1,6 @@
 # The auction model, inputs are parameters and sample size
+# the dgp is the same as Tong Li, 2010. The auxiliary stats
+# are different
 function AuctionModel(theta, n)
     # the model: any zero max bids are rejected (so, it's part of prior)
 	theta1, theta2 = theta
@@ -20,24 +22,24 @@ function AuctionModel(theta, n)
         b = v .- D ./ ((1.0 .- exp.(-v./phi)).^(N-1))
         ok = all(b.>0.0)
     end    
-    log.(b), [ones(n) x]
+    log.(b), [ones(n) x x.^2.0]
 end
 
 # Auxiliary statistic.
 function auxstat(theta, reps)
-    n = 20 # number of auctions
+    n = 100 # number of auctions
     stats = zeros(reps, 7)
     for i = 1:reps
         y, x = AuctionModel(theta, n)
         bhat = x\y
-        sig = std(y - x*bhat)
-        stats[i,:] = sqrt(n)*vcat(bhat, sig, mean(y), std(y), skewness(y), kurtosis(y))
+        u = y -x*bhat
+        stats[i,:] = sqrt(n)*vcat(bhat, mean(y), std(u), skewness(u), kurtosis(u))
     end
     return stats
 end
 
 function TrueParameters()
-    [0.5, 0.5]
+    [1.0, 0.5]
 end    
 
 function PriorSupport()

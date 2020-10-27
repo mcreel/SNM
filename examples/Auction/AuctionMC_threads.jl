@@ -39,10 +39,12 @@ function main()
     Threads.@threads for rep = 1:reps
         results[rep,:] = AuctionWrapper()
         AuctionMonitor(rep, results)
-    end    
+    end
+    AuctionMonitor(reps, results)
+    results
 end
 
-main()
+results = main()
 
 
 
