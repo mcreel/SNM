@@ -1,17 +1,17 @@
 using Statistics
 function auxstat(θ, reps)
     n = 1000
-    stats = zeros(reps, 10)
-    r=0.05:0.1:0.95
+    stats = zeros(reps, 11)
+    r = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
     μ_1, μ_2, σ_1, σ_2, prob = θ
     for i = 1:reps
-        d1=randn(n).*σ_1 .+ μ_1
+        d1=randn(n).*σ_1 .+ (μ_1+μ_2)
         d2=randn(n).*σ_2 .+ μ_2
         ps=rand(n).<prob
         data=zeros(n)
         data[ps].=d1[ps]
         data[.!ps].=d2[.!ps]
-        stats[i,:] = sqrt(n).* quantile.(Ref(data),r)
+        stats[i,:] = sqrt(n).* vcat(quantile.(Ref(data),r), mean(data), std(data), skewness(data), kurtosis(data))
     end
     return stats
 end    
