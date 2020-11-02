@@ -13,7 +13,7 @@ mcreps = 1000 # how many reps?
 
 function RunProject()
 # generate the trained net: comment out when done for the chosen model
-nParams = size(PriorSupport()[1],1)
+nParams = size(TrueParameters(),1)
 TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
 MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
 # Monte Carlo study of confidence interval coverage for chosen model

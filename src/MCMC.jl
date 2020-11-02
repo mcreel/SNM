@@ -25,6 +25,7 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
     lnL = θ -> H(θ, θnn, reps, auxstat, NNmodel, info, Σinv)
     ChainLength = Int(1000/nthreads)
     # set up the initial proposal
+    P = 0.0
     try
         P = ((cholesky(Σ)).U)' # transpose it here 
     catch
@@ -39,7 +40,7 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
     MC_loops = 5
     @inbounds for j = 1:MC_loops
         P = try
-            P = (cholesky(Σ)).U
+            P = ((cholesky(Σ)).U)'
         catch
             P = diagm(diag(Σ))
         end    
