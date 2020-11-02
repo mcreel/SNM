@@ -2,7 +2,7 @@
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
 # MVN random walk, or occasional draw from prior
 function proposal(current, cholV)
-    current + cholV'*randn(size(current))
+    current + cholV*randn(size(current))
 end
 
 function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.5)
@@ -25,8 +25,11 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
     lnL = θ -> H(θ, θnn, reps, auxstat, NNmodel, info, Σinv)
     ChainLength = Int(1000/nthreads)
     # set up the initial proposal
-    P = (cholesky(Σ)).U 
-    P = diagm(diag(Σ))
+    try
+        P = ((cholesky(Σ)).U)' # transpose it here 
+    catch
+        P = diagm(diag(Σ))
+    end
     Proposal = θ -> proposal(θ, P)
     # initial short chain to tune proposal
     chain = mcmc(θsa, ChainLength, 0, Prior, lnL, Proposal, verbosity, nthreads)
@@ -56,6 +59,5 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
             Σ = 0.5*Σ + 0.5*NeweyWest(chain[:,1:nParams])
         end    
     end
-    chain = chain[:,1:nParams]
-    return chain, θnn
+    return chain[:,1:nParams], θnn
 end
