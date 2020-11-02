@@ -55,11 +55,11 @@ function MakeNeuralMoments(auxstat, S)
     nStats = size(xin,1)
     NNmodel = Chain(
         Dense(nStats, 10*nStats, tanh),
-#        Dense(10*nStats, 5*nParams, tanh),
-        Dense(10*nStats, nParams)
+        Dense(10*nStats, 5*nParams, tanh),
+        Dense(5*nParams, nParams)
     )
-    opt = ADAGrad() # the optimizer 
-    loss(x,y) = Flux.mse(NNmodel(x), y) # Define the loss function
+
+    loss(x,y) = Flux.mae(NNmodel(x)./s, y./s) # Define the loss function
     # monitor training
     function monitor(e)
         println("epoch $(lpad(e, 4)): (training) loss = $(round(loss(xin,yin); digits=4)) (testing) loss = $(round(loss(xout,yout); digits=4))| ")
@@ -67,9 +67,14 @@ function MakeNeuralMoments(auxstat, S)
     # do the training
     bestsofar = 1.0e10
     pred = 0.0 # define it here to have it outside the for loop
-    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 1000)];
+    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 50)];
     bestmodel = 0.0
     for i = 1:Epochs
+        if i < 20
+            opt = Momentum() # the optimizer
+        else
+            opt = ADAMW() # the optimizer
+        end 
         Flux.train!(loss, Flux.params(NNmodel), batches, opt)
         current = loss(xout,yout)
         if current < bestsofar
