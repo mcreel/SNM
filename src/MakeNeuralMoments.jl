@@ -11,22 +11,21 @@ function MakeNeuralMoments(auxstat, S)
     nParams = size(lb,1)
     # training and testing
     W = auxstat(PriorMean(),1)' # draw the raw statistics
-    data = zeros(S,size(vcat(lb, W),1))
+    params = zeros(S,size(lb,1))
+    statistics = zeros(S,size(W,1))
     @inbounds Threads.@threads for s = 1:S
         ok = false
         θ = lb # initialize
-        z = 0.0
+        W = 0.0
         while !ok
             θ = PriorDraw()
-            z = auxstat(θ,1)'
-            ok = any(isnan.(z))==false
+            W = auxstat(θ,1)'
+            ok = any(isnan.(W))==false
             if !ok println("warning: NaN in MakeNeuralMoments, retry"); end
         end    
-        data[s,:] = vcat(θ, z)
+        params[s,:] = θ
+        statistics[s,:] = W
     end
-    # remove NaNs
-    params = data[:,1:nParams]
-    statistics = data[:,nParams+1:end]
     # transform stats to robustify against outliers
     q50 = zeros(size(statistics,2))
     q01 = similar(q50)
@@ -46,7 +45,7 @@ function MakeNeuralMoments(auxstat, S)
     TrainingProportion = 0.5
     Epochs = 1000 # passes through entire training set
     params = Float32.(params)
-    s = std(params, dims=1)'
+    s = std(params,dims=1)'
     statistics = Float32.(statistics)
     trainsize = Int(TrainingProportion*S)
     yin = params[1:trainsize, :]'
@@ -60,7 +59,7 @@ function MakeNeuralMoments(auxstat, S)
         Dense(10*nParams, nParams)
     )
     opt = ADAGrad() # the optimizer 
-    loss(x,y) = Flux.mse(NNmodel(x)./s,y./s) # Define the loss function
+    loss(x,y) = sqrt.(Flux.mse(NNmodel(x)./s,y./s)) # Define the loss function
     # monitor training
     function monitor(e)
         println("epoch $(lpad(e, 4)): (training) loss = $(round(loss(xin,yin); digits=4)) (testing) loss = $(round(loss(xout,yout); digits=4))| ")
@@ -68,7 +67,7 @@ function MakeNeuralMoments(auxstat, S)
     # do the training
     bestsofar = 1.0e10
     pred = 0.0 # define it here to have it outside the for loop
-    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 1024)];
+    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 512)];
     bestmodel = 0.0
     for i = 1:Epochs
         Flux.train!(loss, Flux.params(NNmodel), batches, opt)

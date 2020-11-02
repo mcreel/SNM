@@ -1,10 +1,4 @@
-# Note: could accelerate this by using the NN estimator to get the 
-# covariance directly, without SA. Also, could use that covariance
-# to form the proposal, using proposal2 directly, skipping the
-# first naive proposal. 
-
-# This does MLE and then MCMC, either using raw statistic, or using NN transform,
-# depending on the argument usenn
+# This does extremum GMM and then MCMC using the NN estimate as the statistic
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
 # MVN random walk, or occasional draw from prior
 function proposal(current, cholV)
@@ -27,11 +21,12 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
     # get covariance estimate
     Σ = EstimateΣ(θsa, covreps, auxstat, NNmodel, info) 
     Σinv = inv((1.0+1/reps).*Σ)
-    P = (cholesky(Σ)).U
-    P = diagm(diag(Σ))
     # define things for MCMC
     lnL = θ -> H(θ, θnn, reps, auxstat, NNmodel, info, Σinv)
     ChainLength = Int(1000/nthreads)
+    # set up the initial proposal
+    P = (cholesky(Σ)).U 
+    P = diagm(diag(Σ))
     Proposal = θ -> proposal(θ, P)
     # initial short chain to tune proposal
     chain = mcmc(θsa, ChainLength, 0, Prior, lnL, Proposal, verbosity, nthreads)
@@ -45,7 +40,7 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
         catch
             P = diagm(diag(Σ))
         end    
-        Proposal = θ -> proposal(θ,tuning*P)
+        Proposal = θ -> proposal(θ,tuning*P) # random walk MVN proposal
         if j == MC_loops
             ChainLength = Int(10000/nthreads)
         end    
