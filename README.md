@@ -44,7 +44,7 @@ end
 ```    
 
 When we run ```RunProject()```, as above, a Monte Carlo study of 1000 replications of estimation of the model is done. For each replication, confidence intervals for each of the parameters are computed, and we can observe whether or not the true parameters lie in the respective confidence intervals. We obtain output similar to the following results, for 1000 Monte Carlo replications:
-![results](https://github.com/mcreel/SNM/blob/master/results.png)
+![results](https://github.com/mcreel/SNM/blob/master/examples/MN/results.png)
 
 The parameters are estimated with little bias, and good precision, and confidence interval coverages are close to the nominal levels, for each of the 5 parameters.
 
