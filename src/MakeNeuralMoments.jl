@@ -40,11 +40,10 @@ function MakeNeuralMoments(auxstat, S)
     transform_stats_info = (q01, q50, q99, iqr) 
     statistics = TransformStats(statistics, transform_stats_info)
     # train net
-    # size of training/testing
-    TrainingProportion = 0.5
+    TrainingProportion = 0.5 # size of training/testing
     Epochs = 1000 # passes through entire training set
     params = Float32.(params)
-    s = std(params,dims=1)'
+    s = Float32.(std(params, dims=1)')
     statistics = Float32.(statistics)
     trainsize = Int(TrainingProportion*S)
     yin = params[1:trainsize, :]'
@@ -54,12 +53,11 @@ function MakeNeuralMoments(auxstat, S)
     # define the neural net
     nStats = size(xin,1)
     NNmodel = Chain(
-        Dense(nStats, 10*nStats, tanh),
-        Dense(10*nStats, 5*nParams, tanh),
-        Dense(5*nParams, nParams)
+        Dense(nStats, 10*nParams, tanh),
+        Dense(10*nParams, 3*nParams, tanh),
+        Dense(3*nParams, nParams)
     )
-
-    loss(x,y) = Flux.mae(NNmodel(x)./s, y./s) # Define the loss function
+    loss(x,y) = Flux.huber_loss(NNmodel(x)./s, y./s; δ=0.1) # Define the loss function
     # monitor training
     function monitor(e)
         println("epoch $(lpad(e, 4)): (training) loss = $(round(loss(xin,yin); digits=4)) (testing) loss = $(round(loss(xout,yout); digits=4))| ")
@@ -67,7 +65,7 @@ function MakeNeuralMoments(auxstat, S)
     # do the training
     bestsofar = 1.0e10
     pred = 0.0 # define it here to have it outside the for loop
-    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 50)];
+    batches = [(xin[:,ind],yin[:,ind])  for ind in partition(1:size(yin,2), 50)]
     bestmodel = 0.0
     for i = 1:Epochs
         if i < 20

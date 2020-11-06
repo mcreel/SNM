@@ -16,11 +16,11 @@ function RunProject()
 nParams = size(TrueParameters(),1)
 TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
 MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
+#=
 # Monte Carlo study of confidence interval coverage for chosen model
 results = zeros(mcreps,4*nParams)
 # load the trained net: note, there are trained nets in the dirs of each project,
 # to use those, edit the following line to set the correct path
-#=
 @load "neural_moments.bson" NNmodel transform_stats_info
 for mcrep = 1:mcreps
     # generate a draw of neural moments at true params

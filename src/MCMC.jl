@@ -29,7 +29,7 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
     try
         P = ((cholesky(Σ)).U)' # transpose it here 
     catch
-        P = diagm(diag(Σ))
+        P = diagm(sqrt.(diag(Σ)))
     end
     Proposal = θ -> proposal(θ, P)
     # initial short chain to tune proposal
@@ -42,7 +42,7 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
         P = try
             P = ((cholesky(Σ)).U)'
         catch
-            P = diagm(diag(Σ))
+            P = diagm(sqrt.(diag(Σ)))
         end    
         Proposal = θ -> proposal(θ,tuning*P) # random walk MVN proposal
         if j == MC_loops
@@ -60,5 +60,5 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
             Σ = 0.5*Σ + 0.5*NeweyWest(chain[:,1:nParams])
         end    
     end
-    return chain[:,1:nParams], θnn
+    return chain[:,1:nParams], θsa
 end
