@@ -16,31 +16,37 @@ The following is an explanation of how to use the code in the master branch.
 
 The mixture of normals model (see the file [MNlib.jl](https://github.com/mcreel/SNM/blob/master/examples/MN/MNlib.jl) for details) draws statistics using the function
 ```
-function auxstat(θ)
+function auxstat(θ, reps)
     n = 1000
-    μ_1, μ_2, σ_1, σ_2, prob = θ
-    d1=randn(n).*σ_1 .+ μ_1
-    d2=randn(n).*σ_2 .+ μ_2
-    ps=rand(n).<prob
-    data=zeros(n)
-    data[ps].=d1[ps]
-    data[.!ps].=d2[.!ps]
-    r=0:0.1:1
-    sqrt(Float64(n)).* quantile.(Ref(data),r)
-end
+    stats = zeros(reps, 15)
+    r = 0.0 : 0.1 : 1.0
+    μ1, μ2, σ1, σ2, prob = θ
+    for i = 1:reps
+        d1=randn(n).*σ1 .+ μ1
+        d2=randn(n).*(σ1+σ2) .+ (μ1 - μ2) # second component lower mean and higher variance
+        ps=rand(n).<prob
+        data=zeros(n)
+        data[ps].=d1[ps]
+        data[.!ps].=d2[.!ps]
+        stats[i,:] = vcat(mean(data), std(data), skewness(data), kurtosis(data),
+        quantile.(Ref(data),r))
+    end
+    sqrt(n).*stats
+end    
+
 ```    
 
-So, there are five parameters, and 11 summary statistics. Samples of 1000 observations are used to compute the statistics. The "true" parameter values we will use to evaluate performance and confidence interval coverage are from
+So, there are five parameters, and 15 summary statistics. Samples of 1000 observations are used to compute the statistics. The "true" parameter values we will use to evaluate performance and confidence interval coverage are from
 ```
 function TrueParameters()
-    [1.0, 0.0, 0.2, 2.0, 0.4]
+    [1.0, 1.0, 0.2, 1.8, 0.4]
 end
 ```    
 
 When we run ```RunProject()```, as above, a Monte Carlo study of 1000 replications of estimation of the model is done. For each replication, confidence intervals for each of the parameters are computed, and we can observe whether or not the true parameters lie in the respective confidence intervals. We obtain output similar to the following results, for 1000 Monte Carlo replications:
 ![MCresults](https://github.com/mcreel/SNM/blob/master/MCresults.png)
 
-The parameters are estimated with little bias, and good precision, and confidence interval coverages are close to the nominal levels, for each of the 5 parameters. One can observe that the model is estimated in about 10 seconds.
+The parameters are estimated with little bias, and good precision, and confidence interval coverages are close to the nominal levels, for each of the 5 parameters.
 
 
 4. do ```include("examples/MN/EstimateMN.jl")``` to do a single estimation of the mixture of normals model. We can visualize the posterior densities for the parameters, based on a kernel density fit to the final MCMC chain, and the tail quantiles which define a 90% confidence interval, for each of the five parameters of the model:
