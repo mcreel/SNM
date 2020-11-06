@@ -1,4 +1,4 @@
-using Statistics
+using StatsBase
 function auxstat(θ, reps)
     n = 1000
     stats = zeros(reps, 15)

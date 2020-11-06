@@ -8,18 +8,18 @@ include("MNlib.jl")
 using BSON:@load
 using DelimitedFiles
 using Plots:savefig
-
+using Statistics
 function EstimateMN()
     @load "neural_moments.bson" NNmodel transform_stats_info
     m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)
-    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=false, nthreads=10)
+    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=false)
     chain, θhat
 end
 chain, θhat = EstimateMN()
 writedlm("chain", chain)
-savefig(npdensity(chain[:,1]), "MNp1.svg")
-savefig(npdensity(chain[:,2]), "MNp2.svg")
-savefig(npdensity(chain[:,3]), "MNp3.svg")
-savefig(npdensity(chain[:,4]), "MNp4.svg")
-savefig(npdensity(chain[:,5]), "MNp5.svg")
+savefig(npdensity(chain[:,1]), "MNp1.png")
+savefig(npdensity(chain[:,2]), "MNp2.png")
+savefig(npdensity(chain[:,3]), "MNp3.png")
+savefig(npdensity(chain[:,4]), "MNp4.png")
+savefig(npdensity(chain[:,5]), "MNp5.png")
 
