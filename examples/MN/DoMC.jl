@@ -14,7 +14,7 @@ function Wrapper()
     nParams = size(PriorSupport()[1],1)
     @load "neural_moments.bson" NNmodel transform_stats_info
     m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)    
-    chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info, verbosity=false, nthreads=4)
+    chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info, verbosity=false)
     vcat(θhat, Analyze(chain))
 end
 
