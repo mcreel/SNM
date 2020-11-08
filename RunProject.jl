@@ -35,9 +35,7 @@ end
 function RunProject()
     # generate the trained net: comment out when done for the chosen model
     nParams = size(TrueParameters(),1)
-    #TrainingTestingSize = Int64(nParams*2*1e4) # 20,000 training and testing for each parameter
-    # try larger training to see effect on MA model
-    TrainingTestingSize = Int64(nParams*2*1e5) # 200,000 training and testing for each parameter
+    TrainingTestingSize = Int64(nParams*2*1e4) # 200,000 training and testing for each parameter
     MakeNeuralMoments(auxstat, TrainingTestingSize) # already done for the 4 examples
     # Monte Carlo study of confidence interval coverage for chosen model
     results = zeros(mcreps,4*nParams)
