@@ -5,14 +5,14 @@ The project allows for creation and training of the neural net, and for calculat
 
 The project allows for Monte Carlo investigation of the performance of estimators and the reliability of confidence intervals obtained from the quantiles samples from the posterior distribution.
 
-The results of the project are reported in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>. The code in the WP branch of this archive holds the code for the continuously updating version, while the the master branch has updates since v1 of the WP, which focus on the two-step version and also add the jump diffusion results. The code in the master branch is simpler, performs as well, and is recommended.
+The results of the project are reported in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>. The code in the WP branch of this archive holds the code for the continuously updating version. The master branches focus on the two-step version and also adds additional examples and the jump diffusion results. The code in the master branch is simpler, performs as well, and is recommended. 
 
 # Worked example
 The following is an explanation of how to use the code in the master branch.
 
 1. git clone the project into a directory. Go to that directory, set the appropriate number of Julia threads, given your hardware, e.g. ```export JULIA_NUM_THREADS=10```
 2. start Julia, and do ```]activate .``` to set up the dependencies correctly. This will take quite a while the first time you do it, as the project relies on a number of packages.
-3. do ```include("RunProject.jl)```  to run a Monte Carlo study of simple example based on a mixture of normals.
+3. do ```include("RunProject.jl)```  to run a Monte Carlo study of simple example based on a mixture of normals. 
 
 The mixture of normals model (see the file [MNlib.jl](https://github.com/mcreel/SNM/blob/master/examples/MN/MNlib.jl) for details) draws statistics using the function
 ```
