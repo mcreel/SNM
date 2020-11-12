@@ -2,7 +2,7 @@ using Econometrics, Statistics, Random
 
 function auxstat(θ, reps)
     stats = zeros(reps,11)
-    @inbounds Threads.@threads for rep = 1:reps
+    for rep = 1:reps
         n = 500
         burnin = 100
         y = SVmodel(θ, n, burnin)

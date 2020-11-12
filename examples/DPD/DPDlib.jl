@@ -6,7 +6,7 @@ function dgp(θ)
     T = 5
     data = zeros(N*T,3)
     datadm = zeros(N*T,3)
-    @simd for i = 1:N
+    for i = 1:N
         @inbounds data[i*T-T+1:i*T,:], datadm[i*T-T+1:i*T,:] = dgp_agent(θ)
     end
     return data, datadm
@@ -22,7 +22,7 @@ function dgp_agent(θ)
     # individual effect
     α = randn()
     y = α + σ/sqrt(1.0 - ρ*ρ)*randn()
-    @simd for t = 1:T
+    for t = 1:T
         data[t,3] = y # lagged y
         x = randn()
         y = α + ρ*y + β*x + σ*randn()
@@ -33,28 +33,27 @@ function dgp_agent(θ)
     return data, datadm
 end
 
-function auxstat(θ)
-    ρ = θ[1]
-    β = θ[2]
-    σ = θ[3]
+function auxstat(θ, reps)
+    ρ, β, σ = θ
+    stats = zeros(reps, 7)
     T = 5
-    data, datadm = dgp(θ)
-    # demeaned data
-    y = datadm[:,1]
-    x = datadm[:,2]
-    ylag = datadm[:,3]
-    b1, junk, u = lsfit(y, [x ylag])
-    s1 = sqrt(mean(u.*u))
-    #10.0*vcat(b, s1) # n = 100, so sqrt is 10
-    # extended
-    # demeaned data
-    y = data[:,1]
-    x = data[:,2]
-    ylag = data[:,3]
-    n = size(y,1)
-    b2, junk, u = lsfit(y, [ones(n) x ylag])
-    s2 = sqrt(mean(u.*u))
-    10.0*vcat(b1, s1, b2, s2)
+    for rep = 1:reps
+        data, datadm = dgp(θ)
+        # demeaned data
+        y = datadm[:,1]
+        x = datadm[:,2]
+        ylag = datadm[:,3]
+        b1, junk, u = lsfit(y, [x ylag])
+        s1 = sqrt(mean(u.*u))
+        y = data[:,1]
+        x = data[:,2]
+        ylag = data[:,3]
+        n = size(y,1)
+        b2, junk, u = lsfit(y, [ones(n) x ylag])
+        s2 = sqrt(mean(u.*u))
+        stats[rep, :] = 10.0*vcat(b1, s1, b2, s2)
+    end
+    return stats
 end    
 
 function TrueParameters()
@@ -81,4 +80,10 @@ function Prior(theta)
     end
     return a
 end
+
+function PriorDraw()
+    lb, ub = PriorSupport()
+    (ub-lb).*rand(size(lb,1)) + lb
+end    
+
 
