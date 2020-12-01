@@ -45,6 +45,7 @@ function RunProject()
     Threads.@threads for mcrep = 1:mcreps
         # generate a draw of neural moments at true params
         m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)    
+        # do the sampling
         @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info, verbosity=false)
         r = vcat(θhat, Analyze(chain))
         println("current result: ", r)

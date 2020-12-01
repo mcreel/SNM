@@ -1,10 +1,6 @@
 # This does extremum GMM and then MCMC using the NN estimate as the statistic
 using Flux, Econometrics, LinearAlgebra, Statistics, DelimitedFiles
 
-# MVN random walk proposal
-function proposal(current, cholV)
-    current + cholV*randn(size(current))
-end
 
 # the main MCMC routine, does several short chains to tune proposal
 # then a longer final chain
@@ -34,12 +30,12 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
     catch
         P = diagm(sqrt.(diag(Σ)))
     end
-    Proposal = θ -> proposal(θ, P)
+    tuning = 1.0
+    Proposal = θ -> θ + tuning*P*randn(size(θ))
     # initial short chain to tune proposal
     chain = mcmc(θsa, ChainLength, 0, Prior, lnL, Proposal, verbosity, nthreads)
     # loops to tune proposal
     Σ = NeweyWest(chain[:,1:nParams])
-    tuning = 1.0
     MC_loops = 5
     @inbounds for j = 1:MC_loops
         P = try
@@ -47,7 +43,7 @@ function MCMC(θnn, auxstat, NNmodel, info; verbosity = false, nthreads=1, rt=0.
         catch
             P = diagm(sqrt.(diag(Σ)))
         end    
-        Proposal = θ -> proposal(θ,tuning*P) # random walk MVN proposal
+        Proposal = θ -> θ + tuning*P*randn(size(θ))
         if j == MC_loops
             ChainLength = Int(10000/nthreads)
         end    
