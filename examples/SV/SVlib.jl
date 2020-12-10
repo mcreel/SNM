@@ -17,7 +17,7 @@ function auxstat(θ, reps)
         q = try
             q = quantile((ma(y,3)[3:end]), [0.25, 0.75])
         catch
-            q = [1.0, 0.0]
+            q = [1.0, 1.0]
         end
         c1 = log(q[2]/q[1])
         stats[rep,:] = sqrt(Float64(n))*vcat(m, s, s2, k, c, c1, HAR(y))'
