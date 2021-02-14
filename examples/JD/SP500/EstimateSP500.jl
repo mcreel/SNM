@@ -1,33 +1,37 @@
-using Pkg
-Pkg.activate("../../../")
-include("../../../src/SNM.jl")
-include("../MCMC.jl")
-include("../JDlib.jl")
+using SimulatedNeuralMoments, Flux, MCMCChains, StatsPlots, DelimitedFiles
+using BSON:@save
 using BSON:@load
 using DelimitedFiles
-using Plots:savefig
 
-function main()
-# generate the trained net: comment out when done for the chosen model
-nParams = size(PriorSupport()[1],1)
-# load SP500 data
+# get the things to define the structure for the model
+# For your own models, you will need to supply the functions
+# found in MNlib.jl, using the same formats
+include("JDlib.jl")
+lb, ub = PriorSupport()
+
+# fill in the structure that defines the model
+model = SNMmodel("SP500 estimation", lb, ub, InSupport, Prior, PriorDraw, auxstat)
+
+# train the net, and save it and the transformation info
+#nnmodel, nninfo = MakeNeuralMoments(model)
+#@save "neuralmodel.bson" nnmodel nninfo  # use this line to save the trained neural net 
+@load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
 data = readdlm("SP500.txt")
 data = Float64.(data[2:end,2:end])
 rets = data[:,1]
 RV = data[:,2]
 BV = data[:,3]
-# make neural stats for SP500 data
-@load "../neural_moments.bson" NNmodel transform_stats_info
-lb, ub = PriorSupport()
-z = auxstat(rets, RV, BV, 1)
-m = min.(max.(Float64.(NNmodel(TransformStats(z, transform_stats_info)')),lb),ub)
-# do the estimation
-@time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=true, nthreads=10, rt=0.2)
-return chain, θhat
-end
-chain, θhat = main()
+z = auxstat(rets, RV, BV)
+m = mean(min.(max.(Float64.(nnmodel(TransformStats(z, nninfo)')),model.lb),model.ub),dims=2)
+# draw a chain of length 10000, and get the extremum estimator
+chain, θhat = MCMC(m, 10000, model, nnmodel, nninfo, verbosity=true)
+# save visualize results
 writedlm("chain", chain)
 writedlm("thetahat", θhat)
+chn = Chains(chain)
+display(chn)
+plot(chn)
+savefig("chain.png")
 savefig(npdensity(chain[:,1]), "mu.png")
 savefig(npdensity(chain[:,2]), "kappa.png")
 savefig(npdensity(chain[:,3]), "alpha.png")
