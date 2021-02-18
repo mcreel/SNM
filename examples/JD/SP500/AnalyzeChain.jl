@@ -2,6 +2,7 @@ using SimulatedNeuralMoments, Flux, MCMCChains, StatsPlots, DelimitedFiles, Econ
 using BSON:@save
 using BSON:@load
 using DelimitedFiles
+#=
 # get the things to define the structure for the model
 # For your own models, you will need to supply the functions
 # found in MNlib.jl, using the same formats
@@ -27,7 +28,9 @@ chain, θhat = MCMC(m, 10000, model, nnmodel, nninfo, verbosity=true)
 # save visualize results
 writedlm("chain", chain)
 writedlm("thetahat", θhat)
+=#
 chain = readdlm("chain")
+chain = chain[500:end,:] # drop burnin period
 chn = Chains(chain)
 display(chn)
 plot(chn)
