@@ -22,15 +22,14 @@ RV = data[:,2]
 BV = data[:,3]
 z = auxstat(rets, RV, BV)
 m = mean(min.(max.(Float64.(nnmodel(TransformStats(z, nninfo)')),model.lb),model.ub),dims=2)
-# draw a chain (dropping burnin) and get the extremum estimator
-chain, θhat, P, tuning = MCMC(m, 20500, model, nnmodel, nninfo, verbosity=true)
+# draw a chain (dropping burnin)
+chain, P, tuning = MCMC(m, 20500, model, nnmodel, nninfo, verbosity=true)
 chain = chain[501:end, :]
 # save visualize results
-writedlm("chain2", chain)
-writedlm("thetahat2", θhat)
+writedlm("chain", chain)
+writedlm("thetahat", θhat)
 writedlm("P", P)
 writedlm("tuning", tuning)
-chain = readdlm("chain")
 chn = Chains(chain)
 display(chn)
 plot(chn)
@@ -43,3 +42,4 @@ savefig(npdensity(chain[:,5]), "rho.png")
 savefig(npdensity(chain[:,6]), "lambda0.png")
 savefig(npdensity(chain[:,7]), "lambda1.png")
 savefig(npdensity(chain[:,8]), "tau.png")
+
