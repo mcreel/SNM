@@ -92,7 +92,7 @@ sol = solver(θ)
 # simulate
 μ, κ, α, σ, ρ, λ0, λ1, τ = θ
 lnPs = [sol(t)[1] for t in dt:dt:Days]
-lnPs = lnPs + (τ>0).*τ .* randn(size(lnPs)) # add measurement error
+lnPs = lnPs + τ .* randn(size(lnPs)) # add measurement error
 # get log price at end of trading days. We will compute lag, so loose first
 lnPtrading = zeros(TradingDays+1)
 #Volatility = zeros(TradingDays+1) # real latent volatility
