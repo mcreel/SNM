@@ -1,6 +1,8 @@
 # SNM
 
-Update: there is a registered Julia package "SimulatedNeuralMoments" which allows convenient use of the methods. It has the mixture of normals example, ready to replicate the Monte Carlo results. So, this repository is just to archive the results in the paper. Development of the code will be in the referenced package.
+Update: there is a registered Julia package "SimulatedNeuralMoments" which allows convenient use of the methods. It has the mixture of normals example, ready to replicate the Monte Carlo results. Also, the jump-diffusion results for the S&P500 data were obtained using the registered package. So, this repository is just to archive the results reported in the paper. Development of the code will be in the referenced package, and interested users are encouraged to use that code, instead of what is archived here.
+
+--------------
 
 This project explores the use of neural nets to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments. This leads to more reliable inference: confidence intervals derived from quantiles of samples from the posterior are found to be more reliable when the statistics are filtered through a neural net.
 
