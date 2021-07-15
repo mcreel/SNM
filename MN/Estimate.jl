@@ -1,25 +1,39 @@
-# example of using trained net to do a single
-# Baysian estimation using MCMC
-using Pkg
-Pkg.activate("../../")
-include("../../src/SNM.jl")
-include("../../src/MCMC.jl") # the specialized MCMC using net 
-include("MNlib.jl")
+using SimulatedNeuralMoments, Flux, MCMCChains, StatsPlots, DelimitedFiles
+using BSON:@save
 using BSON:@load
-using DelimitedFiles
-using Plots:savefig
-using Statistics
-function Estimate()
-    @load "neural_moments.bson" NNmodel transform_stats_info
-    m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)
-    @time chain, θhat = MCMC(m, auxstat, NNmodel, transform_stats_info; verbosity=false)
-    chain, θhat
-end
-chain, θhat = Estimate()
-writedlm("chain", chain)
-savefig(npdensity(chain[:,1]), "MNp1.png")
-savefig(npdensity(chain[:,2]), "MNp2.png")
-savefig(npdensity(chain[:,3]), "MNp3.png")
-savefig(npdensity(chain[:,4]), "MNp4.png")
-savefig(npdensity(chain[:,5]), "MNp5.png")
 
+# get the things to define the structure for the model
+include("MNlib.jl") # contains the functions for the DSGE model
+function main()
+lb, ub = PriorSupport()
+
+# fill in the structure that defines the model
+model = SNMmodel("MN example", lb, ub, InSupport, Prior, PriorDraw, auxstat)
+
+# Here, you can train the net from scratch, or use a previous run
+# train the net, and save it and the transformation info
+nnmodel, nninfo = MakeNeuralMoments(model)
+@save "neuralmodel.bson" nnmodel nninfo  # use this line to save the trained neural net 
+#=
+#@load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
+
+# draw a sample at the design parameters, from the prior, or use the official "real" data
+data = SVmodel(TrueParameters())
+
+# define the neural moments using the data
+m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
+# Here, you can create a new chain, or use the results from a previous run
+# draw a chain of length 10000 plus 500 burnin
+chain, junk, junk = MCMC(m, 10500, model, nnmodel, nninfo, covreps = 100, verbosity=true, do_cue = true)
+chain = chain[501:end,:]
+writedlm("chain.txt", chain)
+chain = readdlm("chain.txt")
+
+# visualize results
+chn = Chains(chain, ["ϕ", "ρ", "σ"])
+plot(chn)
+savefig("chain.png")
+display(chn)
+=#
+end
+main()

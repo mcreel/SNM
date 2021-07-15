@@ -1,21 +1,27 @@
-using StatsBase
-function auxstat(θ, reps)
+using Statistics, StatsBase, Random
+
+function MNmodel(θ, rndseed=1234)
+    Random.seed!(rndseed)
     n = 1000
-    stats = zeros(reps, 15)
-    r = 0.0 : 0.1 : 1.0
     μ1, μ2, σ1, σ2, prob = θ
-    for i = 1:reps
-        d1=randn(n).*σ1 .+ μ1
-        d2=randn(n).*(σ1+σ2) .+ (μ1 - μ2) # second component lower mean and higher variance
-        ps=rand(n).<prob
-        data=zeros(n)
-        data[ps].=d1[ps]
-        data[.!ps].=d2[.!ps]
-        stats[i,:] = vcat(mean(data), std(data), skewness(data), kurtosis(data),
-        quantile.(Ref(data),r))
-    end
-    sqrt(n).*stats
+    d1=randn(n).*σ1 .+ μ1
+    d2=randn(n).*(σ1+σ2) .+ (μ1 - μ2) # second component lower mean and higher variance
+    ps=rand(n).<prob
+    data=zeros(n)
+    data[ps].=d1[ps]
+    data[.!ps].=d2[.!ps]
+    return data
 end    
+
+function auxstat(θ, reps)
+    data = [MNmodel(θ, rand(1:Int64(1e12))) for i = 1:reps]  # reps draws of data
+    auxstat.(data)
+end
+
+function auxstat(data)
+    r = 0.0 : 0.1 : 1.0
+    sqrt(Float64(size(data,1)))*vcat(mean(data), std(data), skewness(data), kurtosis(data), quantile.(Ref(data),r))
+end 
 
 function TrueParameters()
     [1.0, 1.0, 0.2, 1.8, 0.4] # first component N(1,0.2) second component N(0,2)
@@ -26,6 +32,11 @@ function PriorSupport()
     ub = [3.0, 3.0, 1.0, 3.0, 0.95] 
     lb,ub
 end    
+
+function InSupport(θ)
+    lb,ub = PriorSupport()
+    all(θ .>= lb) & all(θ .<= ub)
+end
 
 function PriorMean()
     lb,ub = PriorSupport()
