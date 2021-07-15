@@ -23,7 +23,7 @@ function arma11(θ)
     data
 end
 
-function auxstat(θ, reps)
+@views function auxstat(θ, reps)
     stats = zeros(reps, 13)
     for rep = 1:reps
         x = arma11(θ)

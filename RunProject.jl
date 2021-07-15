@@ -1,15 +1,11 @@
 using Pkg
 Pkg.activate(".")
 using BSON:@load
-project="MN"  # set to one of the projects in examples: SV, DPD, ARMA, MN
+project="SV"  # set to one of the projects in examples: SV, ARMA, MN, DSGE
 include("examples/"*project*"/"*project*"lib.jl")
-include("src/SNM.jl")
-include("src/MakeNeuralMoments.jl")
-include("src/MCMC.jl")
-include("src/Analyze.jl")
 
 run_title = "working" # Monte Carlo results written to this file
-mcreps = 1000 # how many reps?
+mcreps = 500 # how many reps?
 
 # the monitoring function
 function Monitor(sofar, results)
@@ -41,7 +37,7 @@ function RunProject()
     results = zeros(mcreps,4*nParams)
     # load the trained net: note, there are trained nets in the dirs of each project,
     # to use those, edit the following line to set the correct path
-    @load "neural_moments.bson" NNmodel transform_stats_info
+    @load "neuralmodel.bson" NNmodel transform_stats_info
     Threads.@threads for mcrep = 1:mcreps
         # generate a draw of neural moments at true params
         m = NeuralMoments(TrueParameters(), auxstat, 1, NNmodel, transform_stats_info)    
