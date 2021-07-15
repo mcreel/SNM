@@ -1,18 +1,19 @@
-# I recommend starting julia with "julia --project -t X" where X is 
-# the number of physical cores available, then, include this file.
-using SimulatedNeuralMoments, Flux, SolveDSGE, MPI, DelimitedFiles
+# run this using mpirun -np X julia --proj MonteCarlo.jl
+# where X is a divisor of 500, plus 1. X should also be less than
+# or equal to the physical cores of your computer.
+using SimulatedNeuralMoments, Flux, MPI, DelimitedFiles
 using BSON:@save
 using BSON:@load
 
-include("CKlib.jl") # contains the functions for the DSGE model
+include("SVlib.jl") # contains the functions for the DSGE model
 include("Analyze.jl")
 include("montecarlo.jl")
 
 function Wrapper()
     lb, ub = PriorSupport()
-    model = SNMmodel("DSGE example", lb, ub, InSupport, Prior, PriorDraw, auxstat)
+    model = SNMmodel("SV example", lb, ub, InSupport, Prior, PriorDraw, auxstat)
     @load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
-    data = dgp(TrueParameters(), dsge, 1, rand(1:Int64(1e12)))[1]
+    data = SVmodel(TrueParameters(), rand(1:Int64(1e12)))
     m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
     @time chain, junk, junk = MCMC(m, 5500, model, nnmodel, nninfo; verbosity=false, do_cue = true)
     Analyze(chain[501:end,:])
@@ -37,7 +38,8 @@ function main()
     end
     comm = MPI.COMM_WORLD
     reps = 500
-    n_returns = 28 
+    nparams = size(TrueParameters(),1)
+    n_returns = 4*nparams 
     pooled = 1
     montecarlo(Wrapper, Monitor, comm, reps, n_returns, pooled)
     MPI.Finalize()
