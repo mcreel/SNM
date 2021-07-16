@@ -12,13 +12,12 @@ model = SNMmodel("ARMA example", lb, ub, InSupport, Prior, PriorDraw, auxstat)
 
 # Here, you can train the net from scratch, or use a previous run
 # train the net, and save it and the transformation info
-nnmodel, nninfo = MakeNeuralMoments(model)
-@save "neuralmodel.bson" nnmodel nninfo  # use this line to save the trained neural net 
-#=
-#@load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
+#nnmodel, nninfo = MakeNeuralMoments(model)
+#@save "neuralmodel.bson" nnmodel nninfo  # use this line to save the trained neural net 
+@load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
 
 # draw a sample at the design parameters, from the prior, or use the official "real" data
-data = SVmodel(TrueParameters())
+data = ARMAmodel(TrueParameters())
 
 # define the neural moments using the data
 m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
@@ -27,13 +26,11 @@ m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
 chain, junk, junk = MCMC(m, 10500, model, nnmodel, nninfo, covreps = 100, verbosity=true, do_cue = true)
 chain = chain[501:end,:]
 writedlm("chain.txt", chain)
-#chain = readdlm("chain.txt")
 
 # visualize results
 chn = Chains(chain, ["ϕ", "ρ", "σ"])
 plot(chn)
 savefig("chain.png")
 display(chn)
-=#
 end
 main()

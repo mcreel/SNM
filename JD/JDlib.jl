@@ -50,12 +50,10 @@ function PriorDraw()
     θ = (ub-lb).*rand(size(lb,1)) + lb
 end    
 
-
 function PriorMean()
     lb,ub = PriorSupport()
     (ub + lb) ./ 2.0
 end
-
 
 function solver(θ)
     TradingDays = 1000    
@@ -88,7 +86,6 @@ dt = 1/tics # divisions per day
 closing = Int(round(6.5*60/MinPerTic)) # tic at closing
 # solve the diffusion
 sol = solver(θ)
-
 # simulate
 μ, κ, α, σ, ρ, λ0, λ1, τ = θ
 lnPs = [sol(t)[1] for t in dt:dt:Days]

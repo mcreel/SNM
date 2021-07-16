@@ -5,17 +5,17 @@ using SimulatedNeuralMoments, Flux, MPI, DelimitedFiles
 using BSON:@save
 using BSON:@load
 
-include("SVlib.jl") # contains the functions for the DSGE model
+include("ARMAlib.jl") # contains the functions for the DSGE model
 include("Analyze.jl")
 include("montecarlo.jl")
 
 function Wrapper()
     lb, ub = PriorSupport()
-    model = SNMmodel("SV example", lb, ub, InSupport, Prior, PriorDraw, auxstat)
+    model = SNMmodel("ARMAexample", lb, ub, InSupport, Prior, PriorDraw, auxstat)
     @load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
-    data = SVmodel(TrueParameters(), rand(1:Int64(1e12)))
+    data = ARMAmodel(TrueParameters(), rand(1:Int64(1e12)))
     m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
-    @time chain, junk, junk = MCMC(m, 5500, model, nnmodel, nninfo; verbosity=false, do_cue = true)
+    @time chain, junk, junk = MCMC(m, 5500, model, nnmodel, nninfo; verbosity=false, do_cue = false)
     Analyze(chain[501:end,:])
 end
 

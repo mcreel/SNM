@@ -1,6 +1,7 @@
-using Statistics, StatsBase, Random
+using Statistics, StatsBase, Random, LinearAlgebra
 
-function ARMAmodel(θ)
+function ARMAmodel(θ, rndseed=1234)
+    Random.seed!(rndseed)
     N = 300
     burnin = 50
     α = θ[1]
@@ -26,13 +27,12 @@ function auxstat(θ, reps)
     auxstat.(data)
 end
 
-@views function auxstat(data)
-    x = arma11(θ)
+@views function auxstat(x)
     s = std(x)
     c = cor(x[2:end,:],x[1:end-1])
     n = size(x,1)
-    b, varb, u, junk1, rsq  = ols(x[2:end,:], x[1:end-1,:], silent=true)
-    ϕ, varϕ, u, junk2, rsq2 = ols(u[2:end,:], u[1:end-1,:], silent=true)
+    b, varb, u, junk1, rsq  = ols(x[2:end,:], x[1:end-1,:])
+    ϕ, varϕ, u, junk2, rsq2 = ols(u[2:end,:], u[1:end-1,:])
     σ = std(u)
     sqrt(300.0).*vcat(s, c, b, varb, rsq, ϕ, varϕ, rsq2, σ, pacf(x,collect(1:4)))
 end    
@@ -46,6 +46,11 @@ function PriorSupport()
     ub = [0.99, 0.99, 4.0]
     lb,ub
 end    
+
+function InSupport(θ)
+    lb,ub = PriorSupport()
+    all(θ .>= lb) & all(θ .<= ub)
+end
 
 function PriorMean()
     lb, ub = PriorSupport()
@@ -68,12 +73,16 @@ function Prior(theta)
 end
 
 # from Econometrics
-function ols(y::Array{Float64}, x::Array{Float64,2}; R=[], r=[], names="", vc="white", silent=false)
+# compute ols coefficients, fitted values, and errors
+function lsfit(Y, X)
+    beta = X\Y
+    fit = X*beta
+    errors = Y - fit
+    return beta, fit, errors
+end
+
+function ols(y, x)
     n,k = size(x)
-    if names==""
-        names = 1:k
-        names = names'
-    end
     b, fit, e = lsfit(y,x)
     df = n-k
     sigsq = (e'*e/df)[1,1]
