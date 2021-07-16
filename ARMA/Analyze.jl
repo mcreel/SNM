@@ -1,5 +1,5 @@
 using Statistics
-include("SVlib.jl")
+include("ARMlib.jl")
 function Analyze(chain)
     lb,ub = PriorSupport()
     θtrue = TrueParameters()
