@@ -6,6 +6,4 @@ and on the NN estimator. This saves time in simulations, as the
 questions about the use of other options were answered by the June version
 of the WP.
 
-The master branch will incorporate streamlining of the MCMC step,
-using the NN estimator as initialization of the chain, and also
-directly using proposal2.
+The master branch has the code used in the current working version of the paper, which will be posted when ready.

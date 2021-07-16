@@ -1,17 +1,11 @@
 # SNM
 
-Update: there is a registered Julia package "SimulatedNeuralMoments" which allows convenient use of the methods. It has the mixture of normals example, ready to replicate the Monte Carlo results. Also, the jump-diffusion results for the S&P500 data were obtained using the registered package. So, this repository is just to archive the results reported in the paper. Development of the code will be in the referenced package, and interested users are encouraged to use that code, instead of what is archived here.
+There is a registered Julia package "SimulatedNeuralMoments" which allows convenient use of the methods. It has the mixture of normals example, ready to replicate the Monte Carlo results. Also, the jump-diffusion results for the S&P500 data were obtained using the registered package. So, this repository is just to archive the results reported in the paper. Development of the code will be in the referenced package, and interested users are encouraged to use that code, instead of what is archived here.
 
 --------------
 
-This project explores the use of neural nets to reduce the dimension of statistics used for Approximate Bayesian Computing or the method of simulated moments. This leads to more reliable inference: confidence intervals derived from quantiles of samples from the posterior are found to be more reliable when the statistics are filtered through a neural net.
-
-The project allows for creation and training of the neural net, and for calculation of the neural moments, given the trained net. It also provides the large sample indirect likelihood function of the neural moments, which can be used to sample from the posterior. Sampling is done by MCMC, using a very effective proposal that naturally follows from the neural net estimator. The results reported below are a product of three features: the use of neural moments to reduce the dimension of the summary statistics, and the use of the indirect likelihood function as the criterion or distance measure, and effective MCMC sampling due to a well-chosen proposal distribution. The code for these three features is [here](https://github.com/mcreel/SNM/blob/master/src/SNM.jl).
-
-The project allows for Monte Carlo investigation of the performance of estimators and the reliability of confidence intervals obtained from the quantiles samples from the posterior distribution.
-
-The results of the project are reported in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>. The code in the WP branch of this archive holds the code for the continuously updating version, for the SV, ARMA and DPD examples. This code was used in the first version of the working paper. The WP2 branch holds the original code for the newer JD and Auction examples, and was used for the revised version of the working paper. The master branches focus on the two-step version and also adds additional examples and the jump diffusion results. The code in the master branch is simpler, performs as well, and is recommended. 
-
+This archive contains the code for the examples reported in The results of the project are reported in the working paper <a href=https://www.barcelonagse.eu/research/working-papers/inference-using-simulated-neural-moments>Inference using simulated neural moments</a>. The code in the WP branch of this archive holds the code for the continuously updating version, for the SV, ARMA and DPD examples. This code was used in the first version of the working paper. The WP2 branch holds the original code for the newer JD and Auction examples, and was used for the revised version of the working paper. The master branches focus on the two-step version and also adds additional examples and the jump diffusion results. The code in the master branch is simpler, performs as well, and is recommended. 
+ 
 # Worked example
 The following is an explanation of how to use the code in the master branch.
 
