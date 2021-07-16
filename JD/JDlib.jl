@@ -1,4 +1,4 @@
-using DifferentialEquations, Statistics
+using DifferentialEquations, Statistics, Random
 
 function Diffusion(μ,κ,α,σ,ρ,u0,tspan)
     f = function (du,u,p,t)
@@ -13,46 +13,6 @@ function Diffusion(μ,κ,α,σ,ρ,u0,tspan)
     noise = CorrelatedWienerProcess!(Γ,tspan[1],zeros(2),zeros(2))
     sde_f = SDEFunction{true}(f,g)
     SDEProblem(sde_f,g,u0,tspan,noise=noise)
-end
-
-function TrueParameters()
-    μ = 0.02
-    κ = 0.2
-    α = 0.3
-    σ = 0.7
-    ρ = -0.7
-    λ0 = 0.005 # jump rate per day
-    λ1 = 4.0 # scaling factor st. dev. of jumps
-    τ = 0.005
-    return [μ, κ, α, σ, ρ, λ0, λ1, τ]
-end
-
-function PriorSupport()
-    lb = [-0.1, 0.001, -3.0, 0.01, -0.99, -0.02,  3.0, -0.02]
-    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.05]
-    lb,ub
-end    
-
-# check if parameter is in support.
-function InSupport(θ)
-    lb,ub = PriorSupport()
-    all(θ .>= lb) & all(θ .<= ub)
-end
-
-# prior checks that we're in the bounds, and that the unconditional std. dev. of log vol is not too high
-# returns 1 if this is true, zero otherwise. Value is not important, as it's constant
-function Prior(θ)
-    InSupport(θ) ? 1.0 : 0.0
-end
-
-function PriorDraw()
-    lb, ub = PriorSupport()
-    θ = (ub-lb).*rand(size(lb,1)) + lb
-end    
-
-function PriorMean()
-    lb,ub = PriorSupport()
-    (ub + lb) ./ 2.0
 end
 
 function solver(θ)
@@ -76,76 +36,74 @@ function solver(θ)
     sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false)
 end
 
-function dgp(θ::Array{Float64})
-TradingDays = 1000    
-Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
-MinPerDay = 1440 # minutes per day
-MinPerTic = 5 # minutes between tics, lower for better accuracy
-tics = Int(MinPerDay/MinPerTic) # number of tics in day
-dt = 1/tics # divisions per day
-closing = Int(round(6.5*60/MinPerTic)) # tic at closing
-# solve the diffusion
-sol = solver(θ)
-# simulate
-μ, κ, α, σ, ρ, λ0, λ1, τ = θ
-lnPs = [sol(t)[1] for t in dt:dt:Days]
-lnPs = lnPs + τ .* randn(size(lnPs)) # add measurement error
-# get log price at end of trading days. We will compute lag, so loose first
-lnPtrading = zeros(TradingDays+1)
-#Volatility = zeros(TradingDays+1) # real latent volatility
-RV = zeros(TradingDays+1)
-BV = zeros(TradingDays+1)
-DayofWeek = 0 # counter for day of week
-TradingDay = 0 # counter for trading days
-Day = 0
-lnPlag = 0.0
-@inbounds while TradingDay < TradingDays+1
-    Day +=1
-    DayofWeek +=1
-    # set day of week, and record if it's a trading day
-    if DayofWeek<6
-        TradingDay +=1 # advance trading day
-        # compute realized measures
-        t1 = 0.0
-        t2 = 0.0
-        for tic = 1:closing
-            lnP = lnPs[(Day-1)*tics+tic]
-            ret = lnP - lnPlag 
-            lnPlag = lnP # update lag, this is inter-day for the first
-            t2 = t1 # one lag
-            t1 = abs(ret) # current
-            # RV measures
-            if tic > 1
-                RV[TradingDay]+=(ret*ret)
-                BV[TradingDay] += t1*t2
-            end
-        end    
-        lnPtrading[TradingDay] = lnPs[(Day-1)*tics+closing]
+@views function JDmodel(θ, rndseed=1234)
+    Random.seed!(rndseed)
+    TradingDays = 1000    
+    Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
+    MinPerDay = 1440 # minutes per day
+    MinPerTic = 5 # minutes between tics, lower for better accuracy
+    tics = Int(MinPerDay/MinPerTic) # number of tics in day
+    dt = 1/tics # divisions per day
+    closing = Int(round(6.5*60/MinPerTic)) # tic at closing
+    # solve the diffusion
+    sol = solver(θ)
+    # simulate
+    μ, κ, α, σ, ρ, λ0, λ1, τ = θ
+    lnPs = [sol(t)[1] for t in dt:dt:Days]
+    lnPs = lnPs + τ .* randn(size(lnPs)) # add measurement error
+    # get log price at end of trading days. We will compute lag, so loose first
+    lnPtrading = zeros(TradingDays+1)
+    #Volatility = zeros(TradingDays+1) # real latent volatility
+    RV = zeros(TradingDays+1)
+    BV = zeros(TradingDays+1)
+    DayofWeek = 0 # counter for day of week
+    TradingDay = 0 # counter for trading days
+    Day = 0
+    lnPlag = 0.0
+    @inbounds while TradingDay < TradingDays+1
+        Day +=1
+        DayofWeek +=1
+        # set day of week, and record if it's a trading day
+        if DayofWeek<6
+            TradingDay +=1 # advance trading day
+            # compute realized measures
+            t1 = 0.0
+            t2 = 0.0
+            for tic = 1:closing
+                lnP = lnPs[(Day-1)*tics+tic]
+                ret = lnP - lnPlag 
+                lnPlag = lnP # update lag, this is inter-day for the first
+                t2 = t1 # one lag
+                t1 = abs(ret) # current
+                # RV measures
+                if tic > 1
+                    RV[TradingDay]+=(ret*ret)
+                    BV[TradingDay] += t1*t2
+                end
+            end    
+            lnPtrading[TradingDay] = lnPs[(Day-1)*tics+closing]
+        end
+        if DayofWeek==7 # restart the week if Sunday
+            DayofWeek = 0
+        end
     end
-    if DayofWeek==7 # restart the week if Sunday
-        DayofWeek = 0
-    end
-end
-rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
-RV = RV[2:end]
-BV = (pi/2.0) .* BV
-BV = BV[2:end]
-return rets, RV, BV
+    rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
+    RV = RV[2:end]
+    BV = (pi/2.0) .* BV
+    BV = BV[2:end]
+    [rets RV BV]
 end
 
-function auxstat(θ::Array{Float64}, reps::Int64)
-    stats = zeros(reps,25)
-    Threads.@threads    for i = 1:reps
-        rets, RV, BV = dgp(θ)
-        stats[i,:] = auxstat(rets, RV, BV)
-    end
-    return stats
+function auxstat(θ, reps)
+    data = [JDmodel(θ, rand(1:Int64(1e12))) for i = 1:reps]  # reps draws of data
+    auxstat.(data)
 end
 
 # auxstats, given data (either simulated or real)
-function auxstat(rets::Array{Float64}, RV::Array{Float64}, BV::Array{Float64})
-    RV = log.(RV)
-    BV = log.(BV)
+@views function auxstat(data)
+    rets = data[:,1]
+    RV = log.(data[:,2])
+    BV = log.(data[:,3])
     jump = RV .> (1.5 .* BV)
     nojump = jump .== false
     n = 1000
@@ -199,6 +157,46 @@ function auxstat(rets::Array{Float64}, RV::Array{Float64}, BV::Array{Float64})
     # qs3 22
     # qs2/qs3 23-24 
     # njumps 25
+end
+
+function TrueParameters()
+    μ = 0.02
+    κ = 0.2
+    α = 0.3
+    σ = 0.7
+    ρ = -0.7
+    λ0 = 0.005 # jump rate per day
+    λ1 = 4.0 # scaling factor st. dev. of jumps
+    τ = 0.005
+    return [μ, κ, α, σ, ρ, λ0, λ1, τ]
+end
+
+function PriorSupport()
+    lb = [-0.1, 0.001, -3.0, 0.01, -0.99, -0.02,  3.0, -0.02]
+    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.05]
+    lb,ub
+end    
+
+# check if parameter is in support.
+function InSupport(θ)
+    lb,ub = PriorSupport()
+    all(θ .>= lb) & all(θ .<= ub)
+end
+
+# prior checks that we're in the bounds, and that the unconditional std. dev. of log vol is not too high
+# returns 1 if this is true, zero otherwise. Value is not important, as it's constant
+function Prior(θ)
+    InSupport(θ) ? 1.0 : 0.0
+end
+
+function PriorDraw()
+    lb, ub = PriorSupport()
+    θ = (ub-lb).*rand(size(lb,1)) + lb
+end    
+
+function PriorMean()
+    lb,ub = PriorSupport()
+    (ub + lb) ./ 2.0
 end
 
 

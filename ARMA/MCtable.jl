@@ -1,5 +1,5 @@
 using SimulatedNeuralMoments, Statistics, DelimitedFiles
-results = readdlm("mcresults.txt")
+results = readdlm("mcresultsCUE.txt")
 sofar = 500
 println("__________ replication: ", sofar, "_______________")
 clabels = ["99%", "95%", "90%"]

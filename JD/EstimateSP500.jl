@@ -17,13 +17,9 @@ model = SNMmodel("SP500 estimation", lb, ub, InSupport, Prior, PriorDraw, auxsta
 @load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
 data = readdlm("SP500.txt")
 data = Float64.(data[2:end,2:end])
-rets = data[:,1]
-RV = data[:,2]
-BV = data[:,3]
-z = auxstat(rets, RV, BV)
-m = mean(min.(max.(Float64.(nnmodel(TransformStats(z, nninfo)')),model.lb),model.ub),dims=2)
+m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
 # draw a chain (dropping burnin)
-chain, P, tuning = MCMC(m, 20500, model, nnmodel, nninfo, verbosity=true)
+chain, P, tuning = MCMC(m, 10500, model, nnmodel, nninfo, covreps=100, verbosity=true, do_cue = true)
 chain = chain[501:end, :]
 # save visualize results
 writedlm("chain", chain)
