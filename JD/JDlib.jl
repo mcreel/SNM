@@ -39,7 +39,6 @@ end
     lnPs = lnPs + τ .* randn(size(lnPs)) # add measurement error
     # get log price at end of trading days. We will compute lag, so loose first
     lnPtrading = zeros(TradingDays+1)
-    #Volatility = zeros(TradingDays+1) # real latent volatility
     RV = zeros(TradingDays+1)
     BV = zeros(TradingDays+1)
     DayofWeek = 0 # counter for day of week
@@ -74,15 +73,14 @@ end
         end
     end
     rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
-    rets = rets[burnin+1:end]
-    RV = RV[burnin+2:end]
-    BV = (pi/2.0) .* BV[burnin+2:end]
+    RV = RV[2:end]
+    BV = (pi/2.0) .* BV[2:end]
     [rets RV BV]
 end
 
 @views function auxstat(θ, reps)
-    nobs = 1000
-    burnin = 200 # days between samples
+    nobs = 1000 # days in sample
+    burnin = 50 # days between samples
     data = JDmodel(θ, reps, burnin, rand(1:Int64(1e12)))
     data = [data[(nobs+burnin)*i-(nobs+burnin)+burnin+1:i*(nobs+burnin),:] for i = 1:reps]
     auxstat.(data)
@@ -161,7 +159,7 @@ function TrueParameters()
 end
 
 function PriorSupport()
-    lb = [-0.1, 0.001, -3.0, 0.01, -0.99, -0.02,  3.0, -0.02]
+    lb = [-0.1, 0.001, -3.0, 0.01, -0.99, -0.02,  2.0, -0.02]
     ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.05]
     lb,ub
 end    
