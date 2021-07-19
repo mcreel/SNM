@@ -15,15 +15,16 @@ function Diffusion(μ,κ,α,σ,ρ,u0,tspan)
     SDEProblem(sde_f,g,u0,tspan,noise=noise)
 end
 
-function solver(θ)
-    TradingDays = 1000    
-    Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
+@views function JDmodel(θ, reps, burnin, rndseed=1234)
+    Random.seed!(rndseed)
+    TradingDays = reps*(burnin+1000) # the sample is 1000 days, also need initial burnin and burnin between samples
+    Days = TradingDays + Int(TradingDays/5*2) + 2 # add weekends, plus a safety net
     MinPerDay = 1440 # minutes per day
-    MinPerTic = 5 # minutes between tics, lower for better accuracy
+    MinPerTic = 10 # minutes between tics, lower for better accuracy
     tics = Int(MinPerDay/MinPerTic) # number of tics in day
     dt = 1/tics # divisions per day
     closing = Int(round(6.5*60/MinPerTic)) # tic at closing
-    # parameters
+    # solve the diffusion
     μ, κ, α, σ, ρ, λ0, λ1, τ = θ
     u0 = [μ; α]
     prob = Diffusion(μ, κ, α, σ, ρ, u0, (0.0,Days))
@@ -33,22 +34,7 @@ function solver(θ)
     affect1!(integrator) = (integrator.u[1] = integrator.u[1].+rand([-1.0,1.0]).*λ1.*exp(integrator.u[2]./2.0))
     jump = ConstantRateJump(rate,affect1!)
     jump_prob = JumpProblem(prob,Direct(), jump)
-    sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false)
-end
-
-@views function JDmodel(θ, rndseed=1234)
-    Random.seed!(rndseed)
-    TradingDays = 1000    
-    Days = TradingDays+Int(TradingDays/5*2)+1 # add weekends, plus a day for lag
-    MinPerDay = 1440 # minutes per day
-    MinPerTic = 5 # minutes between tics, lower for better accuracy
-    tics = Int(MinPerDay/MinPerTic) # number of tics in day
-    dt = 1/tics # divisions per day
-    closing = Int(round(6.5*60/MinPerTic)) # tic at closing
-    # solve the diffusion
-    sol = solver(θ)
-    # simulate
-    μ, κ, α, σ, ρ, λ0, λ1, τ = θ
+    sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false, seed=rndseed)
     lnPs = [sol(t)[1] for t in dt:dt:Days]
     lnPs = lnPs + τ .* randn(size(lnPs)) # add measurement error
     # get log price at end of trading days. We will compute lag, so loose first
@@ -88,14 +74,17 @@ end
         end
     end
     rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
-    RV = RV[2:end]
-    BV = (pi/2.0) .* BV
-    BV = BV[2:end]
+    rets = rets[burnin+1:end]
+    RV = RV[burnin+2:end]
+    BV = (pi/2.0) .* BV[burnin+2:end]
     [rets RV BV]
 end
 
-function auxstat(θ, reps)
-    data = [JDmodel(θ, rand(1:Int64(1e12))) for i = 1:reps]  # reps draws of data
+@views function auxstat(θ, reps)
+    nobs = 1000
+    burnin = 200 # days between samples
+    data = JDmodel(θ, reps, burnin, rand(1:Int64(1e12)))
+    data = [data[(nobs+burnin)*i-(nobs+burnin)+burnin+1:i*(nobs+burnin),:] for i = 1:reps]
     auxstat.(data)
 end
 
@@ -139,7 +128,7 @@ end
     qs = quantile(abs.(rets),[0.5, 0.9])
     qs2 = quantile(RV,[0.5, 0.9])
     qs3 = quantile(BV,[0.5, 0.9])
-    sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)'
+    sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)
     # brets 1:3
     # bvol 4:6
     # bjump 7:10

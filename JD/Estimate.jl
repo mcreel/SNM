@@ -17,8 +17,9 @@ model = SNMmodel("JD example", lb, ub, InSupport, Prior, PriorDraw, auxstat)
 @load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
 
 # draw a sample at the design parameters, from the prior, or use the official "real" data
-data = JDmodel(TrueParameters())
-
+data = JDmodel(TrueParameters(), 1, 10)
+@show size(data)
+#=
 # define the neural moments using the data
 m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
 # Here, you can create a new chain, or use the results from a previous run
@@ -33,5 +34,6 @@ chn = Chains(chain, ["ϕ", "ρ", "σ"])
 plot(chn)
 savefig("chain.png")
 display(chn)
+=#
 end
 main()
