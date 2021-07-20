@@ -34,6 +34,7 @@ end
     affect1!(integrator) = (integrator.u[1] = integrator.u[1].+rand([-1.0,1.0]).*λ1.*exp(integrator.u[2]./2.0))
     jump = ConstantRateJump(rate,affect1!)
     jump_prob = JumpProblem(prob,Direct(), jump)
+    # do the simulation
     sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false, seed=rndseed)
     lnPs = [sol(t)[1] for t in dt:dt:Days]
     lnPs = lnPs + τ .* randn(size(lnPs)) # add measurement error
@@ -62,7 +63,7 @@ end
                 t1 = abs(ret) # current
                 # RV measures
                 if tic > 1
-                    RV[TradingDay]+=(ret*ret)
+                    RV[TradingDay] += ret*ret
                     BV[TradingDay] += t1*t2
                 end
             end    
@@ -78,6 +79,7 @@ end
     [rets RV BV]
 end
 
+# auxstats, using simulated data
 @views function auxstat(θ, reps)
     nobs = 1000 # days in sample
     burnin = 50 # days between samples
@@ -86,7 +88,7 @@ end
     auxstat.(data)
 end
 
-# auxstats, given data (either simulated or real)
+# auxstats, given data
 @views function auxstat(data)
     rets = data[:,1]
     RV = log.(data[:,2])
