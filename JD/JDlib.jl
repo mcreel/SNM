@@ -36,8 +36,8 @@ end
     jump_prob = JumpProblem(prob,Direct(), jump)
     # do the simulation
     sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false, seed=rndseed)
-    lnPs = [sol(t)[1] for t in dt:dt:Days]
-    lnPs = lnPs + τ .* randn(size(lnPs)) # add measurement error
+    # get log price, with measurement error
+    lnPs = [sol(t)[1] .+ τ.*randn()   for t in dt:dt:Days]
     # get log price at end of trading days. We will compute lag, so loose first
     lnPtrading = zeros(TradingDays+1)
     RV = zeros(TradingDays+1)
@@ -84,8 +84,7 @@ end
     nobs = 1000 # days in sample
     burnin = 50 # days between samples
     data = JDmodel(θ, reps, burnin, rand(1:Int64(1e12)))
-    data = [data[(nobs+burnin)*i-(nobs+burnin)+burnin+1:i*(nobs+burnin),:] for i = 1:reps]
-    auxstat.(data)
+    auxstat.(data[(nobs+burnin)*i-(nobs+burnin)+burnin+1:i*(nobs+burnin),:] for i = 1:reps)
 end
 
 # auxstats, given data

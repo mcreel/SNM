@@ -1301,6 +1301,12 @@ git-tree-sha1 = "7b1d07f411bc8ddb7977ec7f377b97b158514fe0"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "0.2.0"
 
+[[Referenceables]]
+deps = ["Adapt"]
+git-tree-sha1 = "e681d3bfa49cd46c3c161505caddf20f0e62aaa9"
+uuid = "42d2dcc6-99eb-4e98-b66c-637b7d73030e"
+version = "0.1.2"
+
 [[Requires]]
 deps = ["UUIDs"]
 git-tree-sha1 = "4036a3bd08ac7e968e27c203d45f5fff15020621"
@@ -1581,6 +1587,12 @@ deps = ["ManualMemory"]
 git-tree-sha1 = "593009385e6536dc50baedc2c8bc1a3717ef358f"
 uuid = "8290d209-cae3-49c0-8002-c8c24d57dab5"
 version = "0.4.5"
+
+[[ThreadsX]]
+deps = ["ArgCheck", "BangBang", "ConstructionBase", "InitialValues", "MicroCollections", "Referenceables", "Setfield", "SplittablesBase", "Transducers"]
+git-tree-sha1 = "269f5c1955c1194086cf6d2029aa4a0b4fb8018b"
+uuid = "ac1d9e8a-700a-412c-b207-f0111f4b6c0d"
+version = "0.1.7"
 
 [[TimerOutputs]]
 deps = ["ExprTools", "Printf"]
