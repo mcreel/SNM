@@ -84,7 +84,8 @@ end
     nobs = 1000 # days in sample
     burnin = 50 # days between samples
     data = JDmodel(θ, reps, burnin, rand(1:Int64(1e12)))
-    auxstat.(data[(nobs+burnin)*i-(nobs+burnin)+burnin+1:i*(nobs+burnin),:] for i = 1:reps)
+    data = [data[(nobs+burnin)*i-(nobs+burnin)+burnin+1:i*(nobs+burnin),:] for i = 1:reps]
+    auxstat.(data)    
 end
 
 # auxstats, given data
