@@ -15,10 +15,10 @@ function Diffusion(μ,κ,α,σ,ρ,u0,tspan)
     SDEProblem(sde_f,g,u0,tspan,noise=noise)
 end
 
-@views function JDmodel(θ, reps, burnin, rndseed=1234)
+@views function JDmodel(θ, burnin, rndseed=1234)
     Random.seed!(rndseed)
-    TradingDays = reps*(burnin+1000) # the sample is 1000 days, also need initial burnin and burnin between samples
-    Days = TradingDays + Int(TradingDays/5*2) + 2 # add weekends, plus a safety net
+    TradingDays = burnin+1000 # the sample is 1000 days, also need initial burnin and burnin between samples
+    Days = TradingDays + Int(TradingDays/5*2) # add weekends
     MinPerDay = 1440 # minutes per day
     MinPerTic = 10 # minutes between tics, lower for better accuracy
     tics = Int(MinPerDay/MinPerTic) # number of tics in day
@@ -46,7 +46,7 @@ end
     TradingDay = 0 # counter for trading days
     Day = 0
     lnPlag = 0.0
-    @inbounds while TradingDay < TradingDays+1
+    @inbounds while TradingDay < TradingDays
         Day +=1
         DayofWeek +=1
         # set day of week, and record if it's a trading day
@@ -73,19 +73,15 @@ end
             DayofWeek = 0
         end
     end
-    rets = lnPtrading[2:end]-lnPtrading[1:end-1] # inter-day returns
-    RV = RV[2:end]
-    BV = (pi/2.0) .* BV[2:end]
+    rets = lnPtrading[burnin+1:burnin+1000] .- lnPtrading[burnin:burnin+1000-1] # inter-day returns
+    RV = RV[burnin+1:burnin+1000]
+    BV = (pi/2.0) .* BV[burnin+1:burnin+1000]
     [rets RV BV]
 end
 
 # auxstats, using simulated data
 @views function auxstat(θ, reps)
-    nobs = 1000 # days in sample
-    burnin = 50 # days between samples
-    data = JDmodel(θ, reps, burnin, rand(1:Int64(1e12)))
-    data = [data[(nobs+burnin)*i-(nobs+burnin)+burnin+1:i*(nobs+burnin),:] for i = 1:reps]
-    auxstat.(data)    
+    auxstat.(JDmodel(θ, burnin, rand(1:Int64(1e12))) for i = 1:reps)
 end
 
 # auxstats, given data
@@ -95,7 +91,7 @@ end
     BV = log.(data[:,3])
     jump = RV .> (1.5 .* BV)
     nojump = jump .== false
-    n = 1000
+    n = size(data,1)
     # ensure variation
     jump[1:2] .= true
     nojump[1:2] .= true
