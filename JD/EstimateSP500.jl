@@ -23,7 +23,7 @@ m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
 #sa_verbosity = 3
 #rt = 0.9
 #m = (Optim.optimize(obj, model.lb, model.ub, m, SAMIN(rt=rt, verbosity=sa_verbosity),Optim.Options(iterations=10^3))).minimizer
-chain, P, tuning = MCMC(m, 10000, model, nnmodel, nninfo, covreps=100, verbosity=true, do_cue = false, tuningloops=2, nthreads=10, burnin=10)
+chain, P, tuning = MCMC(m, 10000, model, nnmodel, nninfo, covreps=100, verbosity=true, do_cue = true, tuningloops=2, nthreads=10, burnin=10)
 # save visualize results
 writedlm("chain", chain)
 writedlm("P", P)
