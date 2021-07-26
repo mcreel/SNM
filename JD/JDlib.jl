@@ -81,7 +81,7 @@ end
 
 # auxstats, using simulated data
 @views function auxstat(θ, reps)
-    auxstat.(JDmodel(θ, burnin, rand(1:Int64(1e12))) for i = 1:reps)
+    auxstat.(JDmodel(θ, 50, rand(1:Int64(1e12))) for i = 1:reps)
 end
 
 # auxstats, given data
