@@ -18,12 +18,7 @@ model = SNMmodel("SP500 estimation", lb, ub, InSupport, Prior, PriorDraw, auxsta
 data = readdlm("SP500.txt")
 data = Float64.(data[2:end,2:end])
 m = NeuralMoments(auxstat(data), model, nnmodel, nninfo)
-# use a rapid SAMIN to get good initialization values for chain
-#obj = θ -> -1.0*H(θ, m, 10, model, nnmodel, nninfo) # define the SAMIN criterion
-#sa_verbosity = 3
-#rt = 0.9
-#m = (Optim.optimize(obj, model.lb, model.ub, m, SAMIN(rt=rt, verbosity=sa_verbosity),Optim.Options(iterations=10^3))).minimizer
-chain, P, tuning = MCMC(m, 10000, model, nnmodel, nninfo, covreps=100, verbosity=true, do_cue = true, tuningloops=2, nthreads=10, burnin=10)
+chain, P, tuning = MCMC(m, 10000, model, nnmodel, nninfo, verbosity=true, do_cue = true, tuningloops=2, nthreads=20, burnin=20, tuning=0.5)
 # save visualize results
 writedlm("chain", chain)
 writedlm("P", P)
