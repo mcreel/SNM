@@ -1,9 +1,0 @@
-branch WP has the code for the June 2020 version of the WP
-
-branch WP2 has the code for the October 2020 version of the WP, which
-uses the two step approach, and focusses only on the GMM form,
-and on the NN estimator. This saves time in simulations, as the 
-questions about the use of other options were answered by the June version
-of the WP.
-
-The master branch has the code used in the current working version of the paper, which will be posted when ready.
