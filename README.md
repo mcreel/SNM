@@ -9,7 +9,7 @@ There is a registered Julia package "SimulatedNeuralMoments" which allows conven
 Here's the abstract of the paper:
 ![abstract](abstract.png)
 
-Here are 95% confidence interval coverage results for the test models.
+Here are 95% confidence interval coverage results for the test models. The Z (CUE) results are for the method that the paper proposes.
 
 Stochastic volatility and ARMA models:
 ![SVARMA](SVARMA.png)
