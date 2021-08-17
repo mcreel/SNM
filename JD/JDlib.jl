@@ -97,7 +97,7 @@ end
     nojump[1:2] .= true
     # jump stats 
     jumpsize = mean(RV[jump]) - mean(BV[jump])
-    jumpsize2 = std(rets[jump]) - std(rets[nojump])
+    jumpsize2 = log.(std(rets[jump]) .+ 1.0) - log.(std(rets[nojump]) .+ 1.0) # limit outliers
     njumps = mean(jump[3:end])
     # ρ
     X = [ones(n-1) BV[2:end] BV[1:end-1]]
@@ -105,26 +105,27 @@ end
     βrets = X\y
     ϵrets = y-X*βrets
     σrets = std(ϵrets)
-    κrets = std(ϵrets.^2.0)
+    κrets = std(log.(ϵrets.^2.0))
     # normal volatility: κ, α and σ
     X = [ones(n-2) BV[1:end-2] BV[2:end-1]]
     y = BV[3:end]
     βvol = X\y
     ϵvol = y-X*βvol
     σvol = std(ϵvol)
-    κvol = std(ϵvol.^2.0)
+    κvol = std(log.(ϵvol.^2.0))  # limit outliers
     # jump size
     X = [ones(n) jump BV jump.*BV]
     y = RV
     βjump = X\y
     ϵjump = y-X*βjump
     σjump = std(ϵjump)
-    κjump = std(ϵjump.^2.0)
+    κjump = std(log.(ϵjump.^2.0))
     # jump frequency
     qs = quantile(abs.(rets),[0.5, 0.9])
     qs2 = quantile(RV,[0.5, 0.9])
     qs3 = quantile(BV,[0.5, 0.9])
     sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)
+
     # brets 1:3
     # bvol 4:6
     # bjump 7:10
