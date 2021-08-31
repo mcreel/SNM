@@ -20,7 +20,7 @@ end
     TradingDays = burnin+1000 # the sample is 1000 days, also need initial burnin and burnin between samples
     Days = TradingDays + Int(TradingDays/5*2) # add weekends
     MinPerDay = 1440 # minutes per day
-    MinPerTic = 10 # minutes between tics, lower for better accuracy
+    MinPerTic = 5 # minutes between tics, lower for better accuracy
     tics = Int(MinPerDay/MinPerTic) # number of tics in day
     dt = 1/tics # divisions per day
     closing = Int(round(6.5*60/MinPerTic)) # tic at closing
@@ -87,45 +87,49 @@ end
 # auxstats, given data
 @views function auxstat(data)
     rets = data[:,1]
-    RV = log.(data[:,2])
-    BV = log.(data[:,3])
-    jump = RV .> (1.5 .* BV)
-    nojump = jump .== false
-    n = size(data,1)
-    # ensure variation
-    jump[1:2] .= true
-    nojump[1:2] .= true
-    # jump stats 
-    jumpsize = mean(RV[jump]) - mean(BV[jump])
-    jumpsize2 = log.(std(rets[jump]) .+ 1.0) - log.(std(rets[nojump]) .+ 1.0) # limit outliers
-    njumps = mean(jump[3:end])
-    # ρ
-    X = [ones(n-1) BV[2:end] BV[1:end-1]]
-    y = rets[2:end]
-    βrets = X\y
-    ϵrets = y-X*βrets
-    σrets = std(ϵrets)
-    κrets = std(log.(ϵrets.^2.0))
-    # normal volatility: κ, α and σ
-    X = [ones(n-2) BV[1:end-2] BV[2:end-1]]
-    y = BV[3:end]
-    βvol = X\y
-    ϵvol = y-X*βvol
-    σvol = std(ϵvol)
-    κvol = std(log.(ϵvol.^2.0))  # limit outliers
-    # jump size
-    X = [ones(n) jump BV jump.*BV]
-    y = RV
-    βjump = X\y
-    ϵjump = y-X*βjump
-    σjump = std(ϵjump)
-    κjump = std(log.(ϵjump.^2.0))
-    # jump frequency
-    qs = quantile(abs.(rets),[0.5, 0.9])
-    qs2 = quantile(RV,[0.5, 0.9])
-    qs3 = quantile(BV,[0.5, 0.9])
-    sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)
-
+    # impose in prior that returns should not be too extreme (based on plot of data)
+    if std(rets) > 10.0
+        return fill(NaN,25)
+    else   
+        RV = log.(data[:,2])
+        BV = log.(data[:,3])
+        jump = RV .> (1.5 .* BV)
+        nojump = jump .== false
+        n = size(data,1)
+        # ensure variation
+        jump[1:2] .= true
+        nojump[1:2] .= true
+        # jump stats 
+        jumpsize = mean(RV[jump]) - mean(BV[jump])
+        jumpsize2 = log.(std(rets[jump]) .+ 1.0) - log.(std(rets[nojump]) .+ 1.0) # limit outliers
+        njumps = mean(jump[3:end])
+        # ρ
+        X = [ones(n-1) BV[2:end] BV[1:end-1]]
+        y = rets[2:end]
+        βrets = X\y
+        ϵrets = y-X*βrets
+        σrets = std(ϵrets)
+        κrets = std(log.(ϵrets.^2.0))
+        # normal volatility: κ, α and σ
+        X = [ones(n-2) BV[1:end-2] BV[2:end-1]]
+        y = BV[3:end]
+        βvol = X\y
+        ϵvol = y-X*βvol
+        σvol = std(ϵvol)
+        κvol = std(log.(ϵvol.^2.0))  # limit outliers
+        # jump size
+        X = [ones(n) jump BV jump.*BV]
+        y = RV
+        βjump = X\y
+        ϵjump = y-X*βjump
+        σjump = std(ϵjump)
+        κjump = std(log.(ϵjump.^2.0))
+        # jump frequency
+        qs = quantile(abs.(rets),[0.5, 0.9])
+        qs2 = quantile(RV,[0.5, 0.9])
+        qs3 = quantile(BV,[0.5, 0.9])
+        return sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)
+    end
     # brets 1:3
     # bvol 4:6
     # bjump 7:10
@@ -159,7 +163,7 @@ end
 
 function PriorSupport()
     lb = [-0.1, 0.001, -3.0, 0.01, -0.99, -0.02,  2.0, -0.02]
-    ub = [0.1,  0.5, 1.0, 2.0,  0.0, 0.05, 6.0, 0.05]
+    ub = [0.1,  0.3, 1.0, 1.5,  -0.3, 0.05, 5.0, 0.05]
     lb,ub
 end    
 
