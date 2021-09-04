@@ -166,6 +166,11 @@ git-tree-sha1 = "18d7f3e82c1a80dd38c16453b8fd3f0a7db92f23"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 version = "0.9.7"
 
+[[Chain]]
+git-tree-sha1 = "cac464e71767e8a04ceee82a889ca56502795705"
+uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
+version = "0.4.8"
+
 [[ChainRules]]
 deps = ["ChainRulesCore", "Compat", "LinearAlgebra", "Random", "Statistics"]
 git-tree-sha1 = "b622156ae9f5e702baf32a0bde0651544b1f1a68"
@@ -301,6 +306,12 @@ deps = ["CategoricalArrays", "Compat", "DataAPI", "Future", "InvertedIndices", "
 git-tree-sha1 = "d50972453ef464ddcebdf489d11885468b7b83a3"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 version = "0.22.7"
+
+[[DataFramesMeta]]
+deps = ["Chain", "DataFrames", "MacroTools", "Reexport"]
+git-tree-sha1 = "55be907a531471de062f321147006c04b8c1e75f"
+uuid = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
+version = "0.8.0"
 
 [[DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -1480,7 +1491,7 @@ version = "0.9.4"
 
 [[SimulatedNeuralMoments]]
 deps = ["Flux", "LinearAlgebra", "Optim", "PrettyTables", "Printf", "Random", "Revise", "Statistics", "StatsBase"]
-git-tree-sha1 = "45f29785696322b65cc6cd538cc2d26da07f5a3b"
+git-tree-sha1 = "5066735acc30d5fb573db29b41acf68c744e4a39"
 repo-rev = "main"
 repo-url = "https://github.com/mcreel/SimulatedNeuralMoments.jl.git"
 uuid = "43b7c8c0-5622-45b8-90a3-338fc50d2232"
