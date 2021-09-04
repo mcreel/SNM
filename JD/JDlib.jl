@@ -20,7 +20,7 @@ end
     TradingDays = burnin+1000 # the sample is 1000 days, also need initial burnin and burnin between samples
     Days = TradingDays + Int(TradingDays/5*2) # add weekends
     MinPerDay = 1440 # minutes per day
-    MinPerTic = 5 # minutes between tics, lower for better accuracy
+    MinPerTic = 10 # minutes between tics, lower for better accuracy
     tics = Int(MinPerDay/MinPerTic) # number of tics in day
     dt = 1/tics # divisions per day
     closing = Int(round(6.5*60/MinPerTic)) # tic at closing
@@ -162,7 +162,7 @@ function TrueParameters()
 end
 
 function PriorSupport()
-    lb = [-0.1, 0.001, -3.0, 0.01, -0.99, -0.02,  2.0, -0.02]
+    lb = [-0.1, 0.001, -5.0, 0.01, -0.99, -0.02,  2.0, -0.02]
     ub = [0.1,  0.3, 1.0, 1.5,  -0.3, 0.05, 5.0, 0.05]
     lb,ub
 end    
