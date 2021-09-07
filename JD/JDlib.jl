@@ -87,7 +87,6 @@ end
 # auxstats, given data
 @views function auxstat(data)
     rets = data[:,1]
-    # impose in prior that returns should not be too extreme (based on plot of data)
     RV = log.(data[:,2])
     BV = log.(data[:,3])
     jump = RV .> (1.5 .* BV)
@@ -158,8 +157,8 @@ function TrueParameters()
 end
 
 function PriorSupport()
-    lb = [-0.1, 0.001, -5.0, 0.01, -0.99, -0.02,  2.0, -0.02]
-    ub = [0.1,  0.3, 1.0, 1.5,  -0.3, 0.05, 5.0, 0.05]
+    lb = [-0.1, 0.001, -6.0, 0.01, -0.99, -0.02,  2.0, -0.02]
+    ub = [0.1,  0.3, 1.0, 1.5,  -0.5, 0.05, 5.0, 0.10]
     lb,ub
 end    
 
