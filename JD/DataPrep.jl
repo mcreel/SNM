@@ -23,10 +23,10 @@ sp500 = @subset(sp500, :Date .<= "2017-12-05")
 # write out variables to plain text file
 data = sp500[:,[:rets, :rv, :bv]]
 data = Matrix{Float64}(data)
-writedlm("sp500.txt", data)
+#writedlm("sp500.txt", data)
 # some plots
-plot(sp500.rets, legend=false)
-savefig("returns.png")
-p = plot([sp500.rv, sp500.bv], label=["rv" "bv"])
-savefig("volatility.png")
+plot(sp500.Date, sp500.rets, tickfontsize=5, legend=false)
+#savefig("returns.png")
+plot(sp500.Date, [sp500.rv, sp500.bv], tickfontsize=5, label=["rv" "bv"])
+#savefig("volatility.png")
 
