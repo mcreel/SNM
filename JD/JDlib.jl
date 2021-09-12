@@ -97,7 +97,7 @@ end
     nojump[1:2] .= true
     # jump stats 
     jumpsize = mean(RV[jump]) - mean(BV[jump])
-    jumpsize2 = log.(std(rets[jump]) .+ 1.0) - log.(std(rets[nojump]) .+ 1.0) # limit outliers
+    jumpsize2 = std(rets[jump]) - std(rets[nojump])
     njumps = mean(jump[3:end])
     # ρ
     X = [ones(n-1) BV[2:end] BV[1:end-1]]
@@ -105,21 +105,21 @@ end
     βrets = X\y
     ϵrets = y-X*βrets
     σrets = std(ϵrets)
-    κrets = std(log.(ϵrets.^2.0))
+    κrets = std(ϵrets.^2.0)
     # normal volatility: κ, α and σ
     X = [ones(n-2) BV[1:end-2] BV[2:end-1]]
     y = BV[3:end]
     βvol = X\y
     ϵvol = y-X*βvol
     σvol = std(ϵvol)
-    κvol = std(log.(ϵvol.^2.0))  # limit outliers
+    κvol = std(ϵvol.^2.0)
     # jump size
     X = [ones(n) jump BV jump.*BV]
     y = RV
     βjump = X\y
     ϵjump = y-X*βjump
     σjump = std(ϵjump)
-    κjump = std(log.(ϵjump.^2.0))
+    κjump = std(ϵjump.^2.0)
     # jump frequency
     qs = quantile(abs.(rets),[0.5, 0.9])
     qs2 = quantile(RV,[0.5, 0.9])
@@ -157,8 +157,8 @@ function TrueParameters()
 end
 
 function PriorSupport()
-    lb = [-0.05, 0.001, -6.0, 0.5, -0.99, -0.02,  2.0, -0.02]
-    ub = [0.05,  0.2, -2.0, 1.5,  -0.5, 0.05, 5.0, 0.05]
+    lb = [-0.1, 0.001, -6.0, 0.5, -0.99, -0.02,  2.0, -0.02]
+    ub = [0.1,  0.2, -2.0, 1.5,  -0.5, 0.05, 5.0, 0.05]
     lb,ub
 end    
 
