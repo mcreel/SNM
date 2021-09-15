@@ -1,5 +1,10 @@
-using Econometrics, DelimitedFiles, Plots
+using Econometrics, DelimitedFiles, StatsPlots, MCMCChains
+
 chain = readdlm("chain")
+chn = Chains(chain,["μ", "κ","α","σ","ρ","λ0","λ1","τ"])
+display(chn)
+plot(chn)
+savefig("chain.png")
 
 p = npdensity(chain[:,1])
 plot!(p, legend=false)
