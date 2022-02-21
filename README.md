@@ -1,9 +1,9 @@
 # SNM
 
 This archive contains the code for the examples reported in the paper "Inference
-Using Simulated Neural Moments", Econometrics 2021, 9(4), 35; https://doi.org/10.3390/econometrics9040035
+Using Simulated Neural Moments", Econometrics 2021, 9(4), 35; https://doi.org/10.3390/econometrics9040035  In Releases, you can find the exact code which was used in the paper.
 
-There is a registered Julia package [SimulatedNeuralMoments.jl](https://github.com/mcreel/SimulatedNeuralMoments.jl) which allows convenient use of the methods. The code in the master branch of this archive uses the master branch of this package for the examples.
+There is a registered Julia package [SimulatedNeuralMoments.jl](https://github.com/mcreel/SimulatedNeuralMoments.jl) which allows convenient use of the methods. The code in the master branch of this archive uses v0.30 of the SimulatedNeuralMoments package for the examples. However, the current version of SimulatedNeuralMoments.jl will no longer work to run the examples here. 
 
 Here's the abstract of the paper:
 ![abstract](abstract.png)
