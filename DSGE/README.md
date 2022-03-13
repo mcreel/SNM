@@ -53,22 +53,12 @@ Doing 500 Monte Carlo replications, by running ```mpirun -np 21 julia --project 
 ### First, for the fixed weight matrix option: ###
 ![CIs](mcresults.png)
 
-Some of these coverage values are statistically significantly different from what is expected for truly accurate confidence intervals, but most are not, and the departures from correct coverage are not large.
-
-The Monte Carlo means, medians, and standard deviations are:
-![rmses](mcresults2.png)
-So, the estimator has extremely low bias, and thus, RMSE is essentially the same as the
-std. dev.
+Some of these coverage values are statistically significantly different from what is expected for truly accurate confidence intervals, but most are not, and the departures from correct coverage are not large. The Monte Carlo means, medians, and standard deviations are in the second panel. We see that the estimator has extremely low bias, and thus, RMSE is essentially the same as the std. dev.
 
 ### Second, for the CUE weight matrix option: ###
 ![CUECIs](mcresultsCUE.png)
 
-These coverage results are improved, and in all cases are not significantly different from correct.
-
-The Monte Carlo means, medians, and standard deviations are:
-![CUErmses](mcresults2CUE.png)
-
-These are very similar to the above results for the two-step version.
+These coverage results are improved, and in all cases are not significantly different from correct. Means, medians, and standard deviations are very similar to the above results for the two-step version.
 
 In conclusion, the CUE and two-step versions obtain the same results for bias and RMSE.
 The CUE version gives entirely reliable confidence intervals. The CIs from the two-step
