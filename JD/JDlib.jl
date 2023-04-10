@@ -1,5 +1,7 @@
 using DifferentialEquations, Statistics, Random
 
+isweekday(d::Int)::Bool = (d % 7) % 6 != 0
+
 function Diffusion(μ,κ,α,σ,ρ,u0,tspan)
     f = function (du,u,p,t)
         du[1] = μ # drift in log prices
@@ -17,66 +19,63 @@ end
 
 @views function JDmodel(θ, burnin, rndseed=1234)
     Random.seed!(rndseed)
-    TradingDays = burnin+1000 # the sample is 1000 days, also need initial burnin and burnin between samples
-    Days = TradingDays + Int(TradingDays/5*2) # add weekends
-    MinPerDay = 1440 # minutes per day
-    MinPerTic = 10 # minutes between tics, lower for better accuracy
-    tics = Int(MinPerDay/MinPerTic) # number of tics in day
-    dt = 1/tics # divisions per day
-    closing = Int(round(6.5*60/MinPerTic)) # tic at closing
-    # solve the diffusion
-    μ, κ, α, σ, ρ, λ0, λ1, τ = θ
-    u0 = [μ; α]
-    prob = Diffusion(μ, κ, α, σ, ρ, u0, (0.0,Days))
-    ## jump in log price
-    rate(u,p,t) = λ0.*(λ0>0.0) # the prior allows for negative rate, to allow an accumulation at zero
-    # jump is random sign times  λ1 times current st. dev.
-    affect1!(integrator) = (integrator.u[1] = integrator.u[1].+rand([-1.0,1.0]).*λ1.*exp(integrator.u[2]./2.0))
-    jump = ConstantRateJump(rate,affect1!)
-    jump_prob = JumpProblem(prob,Direct(), jump)
-    # do the simulation
-    sol = solve(jump_prob,SRIW1(), dt=dt, adaptive=false, seed=rndseed)
-    # get log price, with measurement error
-    lnPs = [sol(t)[1] .+ τ.*randn()   for t in dt:dt:Days]
-    # get log price at end of trading days. We will compute lag, so loose first
-    lnPtrading = zeros(TradingDays+1)
-    RV = zeros(TradingDays+1)
-    BV = zeros(TradingDays+1)
-    DayofWeek = 0 # counter for day of week
-    TradingDay = 0 # counter for trading days
-    Day = 0
-    lnPlag = 0.0
-    @inbounds while TradingDay < TradingDays
-        Day +=1
-        DayofWeek +=1
-        # set day of week, and record if it's a trading day
-        if DayofWeek<6
-            TradingDay +=1 # advance trading day
-            # compute realized measures
-            t1 = 0.0
-            t2 = 0.0
-            for tic = 1:closing
-                lnP = lnPs[(Day-1)*tics+tic]
-                ret = lnP - lnPlag 
-                lnPlag = lnP # update lag, this is inter-day for the first
-                t2 = t1 # one lag
-                t1 = abs(ret) # current
-                # RV measures
-                if tic > 1
-                    RV[TradingDay] += ret*ret
-                    BV[TradingDay] += t1*t2
-                end
-            end    
-            lnPtrading[TradingDay] = lnPs[(Day-1)*tics+closing]
-        end
-        if DayofWeek==7 # restart the week if Sunday
-            DayofWeek = 0
-        end
+    trading_days = 1000
+    days = round(Int, 1.4 * (trading_days + burnin)) # Add weekends (x + x/5*2 = 1.4x)
+    min_per_day = 1_440 # Minutes per day
+    min_per_tic = 10 # Minutes between tics, lower for better accuracy
+    tics = round(Int, min_per_day / min_per_tic) # Number of tics per day
+    dt = 1/tics # Divisions per day
+    closing = round(Int, 390 / min_per_tic) # Tic at closing (390 = 6.5 * 60)
+
+    # Solve the diffusion
+    μ, κ, α, σ, ρ, λ₀, λ₁, τ = θ
+    τ = τ*(τ>0)  
+    u₀ = [μ; α]
+    prob = Diffusion(μ, κ, α, σ, ρ, u₀, (0., days))
+    λ₀⁺ = max(0, λ₀) # The prior allows for negative rate, to allow an accumulation at zero
+
+    # # Jump in log price
+    rate(u, p, t) = λ₀⁺
+
+
+    # Jump is random sign time λ₁ times current std. dev.
+    function affect!(integrator)
+        integrator.u[1] = integrator.u[1] + rand([-1., 1.]) * λ₁ * exp(integrator.u[2] / 2)
+        nothing
     end
-    rets = lnPtrading[burnin+1:burnin+1000] .- lnPtrading[burnin:burnin+1000-1] # inter-day returns
-    RV = RV[burnin+1:burnin+1000]
-    BV = (pi/2.0) .* BV[burnin+1:burnin+1000]
-    [rets RV BV]
+
+    jump = ConstantRateJump(rate, affect!)
+    jump_prob = JumpProblem(prob, Direct(), jump)
+
+    # Do the simulation
+    sol = solve(jump_prob, SRIW1(), dt=dt, adaptive=false)
+
+    # Get log price, with measurement error 
+    # Trick: we only need very few log prices, 39 per trading day, use smart filtering
+    lnPs = (
+        [sol(t)[1] + τ * randn() for t ∈ Iterators.take(p, closing)]
+        for (_, p) ∈ Iterators.drop(
+            Iterators.filter(
+                x -> isweekday(x[1]), 
+                enumerate(Iterators.partition(dt:dt:days, tics))), 
+            burnin - 1)
+    )
+
+    # Get log price at end of trading days We will compute lag, so lose first
+    lnP_trading = zeros(Float64, trading_days + 1)
+    rv = zeros(Float64, trading_days + 1)
+    bv = zeros(Float64, trading_days + 1) 
+
+    p₋₁ = 0.
+    @inbounds for (t, p) ∈ enumerate(lnPs)
+        r = abs.(diff([p₋₁; p]))
+        bv[t] = dot(r[2:end], r[1:end-1])
+        rv[t] = dot(r[2:end], r[2:end])
+        p₋₁ = p[end]
+        lnP_trading[t] = p[end]
+    end
+    
+    [diff(lnP_trading) rv[2:end] π/2 .* bv[2:end]]
 end
 
 # auxstats, using simulated data
@@ -105,21 +104,21 @@ end
     βrets = X\y
     ϵrets = y-X*βrets
     σrets = std(ϵrets)
-    κrets = std(ϵrets.^2.0)
+    κrets = std(log.(ϵrets.^2.0))
     # normal volatility: κ, α and σ
     X = [ones(n-2) BV[1:end-2] BV[2:end-1]]
     y = BV[3:end]
     βvol = X\y
     ϵvol = y-X*βvol
     σvol = std(ϵvol)
-    κvol = std(ϵvol.^2.0)
+    κvol = std(log.(ϵvol.^2.0))
     # jump size
     X = [ones(n) jump BV jump.*BV]
     y = RV
     βjump = X\y
     ϵjump = y-X*βjump
     σjump = std(ϵjump)
-    κjump = std(ϵjump.^2.0)
+    κjump = std(log.(ϵjump.^2.0))
     # jump frequency
     qs = quantile(abs.(rets),[0.5, 0.9])
     qs2 = quantile(RV,[0.5, 0.9])
@@ -157,8 +156,8 @@ function TrueParameters()
 end
 
 function PriorSupport()
-    lb = [-0.1, 0.001, -6.0, 0.5, -0.99, -0.02,  2.0, -0.02]
-    ub = [0.1,  0.2, -2.0, 1.5,  -0.5, 0.05, 5.0, 0.05]
+    lb = [-.05, .02, -10.0,  0.1, -.99,  -0.02,  3., -.02] 
+    ub = [ .05, .30,   0.,   4.0, -.50,  .05,    6.,  .05]
     lb,ub
 end    
 
@@ -168,10 +167,10 @@ function InSupport(θ)
     all(θ .>= lb) & all(θ .<= ub)
 end
 
-# prior checks that we're in the bounds, and that the unconditional std. dev. of log vol is not too high
-# returns 1 if this is true, zero otherwise. Value is not important, as it's constant
-function Prior(θ)
-    InSupport(θ) ? 1.0 : 0.0
+
+lb, ub = PriorSupport() # need these in Prior
+macro Prior()
+    return :( arraydist([Uniform(lb[i], ub[i]) for i = 1:size(lb,1)]) )
 end
 
 function PriorDraw()
