@@ -168,10 +168,9 @@ function InSupport(θ)
 end
 
 
-lb, ub = PriorSupport() # need these in Prior
-macro Prior()
-    return :( arraydist([Uniform(lb[i], ub[i]) for i = 1:size(lb,1)]) )
-end
+function Prior(θ)
+    InSupport(θ) ? 1. : 0.
+end    
 
 function PriorDraw()
     lb, ub = PriorSupport()
