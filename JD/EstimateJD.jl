@@ -21,22 +21,27 @@ model = SNMmodel("SPY JD", n, lb, ub, InSupport, Prior, PriorDraw, auxstat)
 # train the net, and save it and the transformation info
 nnmodel, nninfo = MakeNeuralMoments(model, TrainTestSize=TrainTestSize, Epochs=Epochs)
 @save "neuralmodel.bson" nnmodel nninfo  # use this line to save the trained neural net 
-#  @load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
+@load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
 
 # define the neural moments using the data
 θnn = NeuralMoments(auxstat(y), model, nnmodel, nninfo)[:]
-
+@show θnn
 # settings
 names = ["μ","κ","α","σ","ρ","λ₀","λ₁","τ"]
 S = 50
-covreps = 500
+covreps = 1000
 length = 1000
 burnin = 100
 verbosity = 1 # show results every X draws
-tuning = 1.0
+tuning = 0.5
 
 # define the proposal
 junk, Σp = mΣ(θnn, covreps, model, nnmodel, nninfo)
+while !isposdef(Σp)
+    for i = 1:size(Σp,1)
+        Σp[i,i] += 1e-5
+    end
+end    
 proposal(θ) = rand(MvNormal(θ, tuning*Σp))
 
 # define the logL

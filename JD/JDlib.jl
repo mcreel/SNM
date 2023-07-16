@@ -104,21 +104,21 @@ end
     βrets = X\y
     ϵrets = y-X*βrets
     σrets = std(ϵrets)
-    κrets = std(log.(ϵrets.^2.0))
+    κrets = std(abs.(ϵrets))
     # normal volatility: κ, α and σ
     X = [ones(n-2) BV[1:end-2] BV[2:end-1]]
     y = BV[3:end]
     βvol = X\y
     ϵvol = y-X*βvol
     σvol = std(ϵvol)
-    κvol = std(log.(ϵvol.^2.0))
+    κvol = std(abs.(ϵvol))
     # jump size
     X = [ones(n) jump BV jump.*BV]
     y = RV
     βjump = X\y
     ϵjump = y-X*βjump
     σjump = std(ϵjump)
-    κjump = std(log.(ϵjump.^2.0))
+    κjump = std(abs.(ϵjump))
     # jump frequency
     qs = quantile(abs.(rets),[0.5, 0.9])
     qs2 = quantile(RV,[0.5, 0.9])
