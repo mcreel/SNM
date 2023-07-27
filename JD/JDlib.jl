@@ -83,12 +83,16 @@ end
     auxstat.(JDmodel(θ, 50, rand(1:Int64(1e12))) for i = 1:reps)
 end
 
+# checks that statistics are in limits (first is mean rets, second mean log RV, third mean log BV
+function GoodData(z)
+    abs.(z[1]) < 1.  && z[2] < 50. && z[3] < 50.
+end    
 # auxstats, given data
 @views function auxstat(data)
     rets = data[:,1]
     RV = log.(data[:,2])
     BV = log.(data[:,3])
-    jump = RV .> (1.5 .* BV)
+    jump = RV .> (1.1 .* BV)
     nojump = jump .== false
     n = size(data,1)
     # ensure variation
@@ -123,7 +127,13 @@ end
     qs = quantile(abs.(rets),[0.5, 0.9])
     qs2 = quantile(RV,[0.5, 0.9])
     qs3 = quantile(BV,[0.5, 0.9])
-    return sqrt(n)*vcat(βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps)
+
+    c = vec(triu(cov([rets RV BV]),1))
+    c = c[c .!= 0.]
+    c2 = vec(triu(cov([rets[2:end] RV[1:end-1] BV[1:end-1]]),1))
+    c2 = c2[c2 .!= 0.]
+    return vcat(mean(rets), mean(RV), mean(BV), std(rets), βrets, βvol, βjump,σrets, σvol, σjump,κrets, κvol, κjump, mean(RV) - mean(BV), jumpsize, jumpsize2, qs[2]/qs[1], qs2[2]/qs2[1], qs3[2]./qs3[1], qs2 ./ qs3, njumps, c, c2)
+    # if bad data, include a NaN
     # brets 1:3
     # bvol 4:6
     # bjump 7:10
@@ -156,8 +166,8 @@ function TrueParameters()
 end
 
 function PriorSupport()
-    lb = [-.05, .02, -10.0,  0.1, -.99,  -0.02,  3., -.02] 
-    ub = [ .05, .30,   0.,   4.0, -.50,  .05,    6.,  .05]
+    lb = [-.05, .01, -6,  0.1, -.99,  -0.02,  2., -.02] 
+    ub = [ .05, .30,   0.,   4.0, -.50,  .10,   6.,  .2]
     lb,ub
 end    
 
