@@ -1,3 +1,5 @@
+This is currently being updated, and will be more informative some time in September
+
 This directory holds an example of estimation of the jump diffusion model 
 ![model](https://github.com/mcreel/SNM/blob/master/JD/model.png)
 
