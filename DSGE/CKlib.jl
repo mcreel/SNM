@@ -12,7 +12,7 @@ function dgp(θ, dsge, reps, rndseed=1234)
     solution = solve_model(dsge, scheme)
     burnin = 200
     nobs = 160
-    data = simulate(solution, ss[1:3], reps*(burnin+nobs); rndseed = rndseed)
+    data = simulate(solution, ss[1:3], reps*(burnin+nobs); seed = rndseed)
     # the next returns reps data sets, in an array of arrays
     data = [data[4:8, (nobs+burnin)*i-(nobs+burnin)+1+burnin:i*(nobs+burnin)]' for i = 1:reps]
 end
