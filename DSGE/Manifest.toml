@@ -1460,8 +1460,6 @@ version = "0.9.4"
 [[deps.SimulatedNeuralMoments]]
 deps = ["BSON", "DelimitedFiles", "Distributions", "Flux", "LinearAlgebra", "MCMCChains", "Printf", "Random", "Statistics", "StatsBase", "StatsPlots", "Test"]
 git-tree-sha1 = "3b4087bee417a283794d97df1e7a55113931ec04"
-repo-rev = "main"
-repo-url = "/home/michael/git/SimulatedNeuralMoments.jl"
 uuid = "43b7c8c0-5622-45b8-90a3-338fc50d2232"
 version = "2.0.2"
 
