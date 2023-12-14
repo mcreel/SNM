@@ -163,9 +163,9 @@ version = "0.5.1"
 
 [[deps.ChainRules]]
 deps = ["Adapt", "ChainRulesCore", "Compat", "Distributed", "GPUArraysCore", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "SparseInverseSubset", "Statistics", "StructArrays", "SuiteSparse"]
-git-tree-sha1 = "006cc7170be3e0fa02ccac6d4164a1eee1fc8c27"
+git-tree-sha1 = "0aa0a3dd7b9bacbbadf1932ccbdfa938985c5561"
 uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-version = "1.58.0"
+version = "1.58.1"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -1459,9 +1459,9 @@ version = "0.9.4"
 
 [[deps.SimulatedNeuralMoments]]
 deps = ["BSON", "DelimitedFiles", "Distributions", "Flux", "LinearAlgebra", "MCMCChains", "Printf", "Random", "Statistics", "StatsBase", "StatsPlots", "Test"]
-git-tree-sha1 = "3b4087bee417a283794d97df1e7a55113931ec04"
+git-tree-sha1 = "c4946dc556a299b7de0586f8691d203ef084e2a1"
 uuid = "43b7c8c0-5622-45b8-90a3-338fc50d2232"
-version = "2.0.2"
+version = "3.0.0"
 
 [[deps.SmolyakApprox]]
 deps = ["ChebyshevApprox", "LinearAlgebra", "ThreadPools"]

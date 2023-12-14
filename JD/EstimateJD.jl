@@ -63,9 +63,8 @@ acceptance = mean(chain[:,end])
 
 # update proposal until acceptance rate is good
 while acceptance < 0.2 || acceptance > 0.3
-    Σp = cov(chain[:,1:end-2])
-    acceptance < 0.2 ? tuning =0.75 : nothing
-    acceptance > 0.3 ? tuning =1.5 : nothing
+    acceptance < 0.2 ? tuning *= 0.75 : nothing
+    acceptance > 0.3 ? tuning *= 1.5 : nothing
     proposal(θ) = rand(MvNormal(θ, tuning*Σp))
     start = vec(mean(chain[:,1:end-2],dims=1))
     chain = mcmc(start, tuninglength, lnL, model, nnmodel, nninfo, proposal, burnin, verbosity)

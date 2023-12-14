@@ -128,6 +128,10 @@ function InSupport(θ)
     all(θ .>= lb) & all(θ .<= ub)
 end
 
+function GoodData(θ)
+    true
+end
+
 function Prior(θ)
     InSupport(θ) ? 1.0 : 0.0
 end    
