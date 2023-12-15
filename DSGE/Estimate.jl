@@ -16,27 +16,37 @@ using BSON:@load
 
 ## get the things to define the structure for the model
 include("CKlib.jl") # contains the functions for the DSGE model
-
-## DATA: draw a sample at the design parameters, from the prior, or use the official "real" data
-# Use this for a random true parameter vector
-θtrue = PriorDraw()
-data = dgp(PriorDraw(), dsge, 1)[1]
-# use this for the "official" sample used in the notes
-# θtrue = TrueParameters()
-# data = readdlm("dsgedata.txt")
+@load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
 
 ## fill in the structure that defines the model
-n = size(data,1)
+n = 160
 lb, ub = PriorSupport()
 model = SNMmodel("DSGE example", n, lb, ub, GoodData, InSupport, Prior, PriorDraw, auxstat)
 
-#= 
-# UNCOMMENT this block to see training
+
+## see how the NN estimator works with some random parameter draws
+for i = 1:10
+# generate some date and define the neural moments using the data
+θtrue = PriorDraw()
+data = dgp(θtrue, dsge, 1, rand(1:Int64(1e10)))[1]
+θnn = NeuralMoments(auxstat(data), model, nnmodel, nninfo)[:]
+pretty_table([θtrue θnn],header = (["θtrue", "θnn"]))
+end
+
+## Now, let's move on to Bayesian MSM: choose your data
+# Use this for a random true parameter vector
+θtrue = PriorDraw()
+data = dgp(θtrue, dsge, 1)[1]
+# use this for the "official" sample used in the notes
+# data = readdlm("dsgedata.txt")
+
+#=
+# UNCOMMENT this block to see training of the net, using a small sample
+#
 # train the net, and save it and the transformation info
 TrainTestSize = 10000
 Epochs = 1000
 nnmodel, nninfo, params, stats, transf_stats = MakeNeuralMoments(model, TrainTestSize=TrainTestSize, Epochs=Epochs)
-# @save "neuralmodel.bson" nnmodel nninfo # use this line to save the trained neural net 
 # examine the transformed stats to ensure that outliers
 # have been controlled. We want to see some distance between the whiskers.
 @info "checking the transformed statistics for outliers"
@@ -46,13 +56,10 @@ for i = 1:size(transf_stats,2)
 end
 =#
 
-## load the pre-trained net
-@load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
-
-## define the neural moments using the data
+## get the NN estimate from the data, using the trained net
 θnn = NeuralMoments(auxstat(data), model, nnmodel, nninfo)[:]
-pretty_table([θtrue θnn],header = (["θtrue", "θnn"]))
-# settings
+
+## settings for MCMC
 S = 100
 covreps = 1000
 tuninglength = 500
