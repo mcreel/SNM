@@ -128,8 +128,10 @@ function InSupport(θ)
     all(θ .>= lb) & all(θ .<= ub)
 end
 
-function GoodData(θ)
-    true
+# in ausxtats, bad data is coded with all zeros for stats.
+# so, here, data is good if that is not the case
+function GoodData(z)
+    !all(z .== 0.0)
 end
 
 function Prior(θ)
