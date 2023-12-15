@@ -35,10 +35,10 @@ end
 
 ## Now, let's move on to Bayesian MSM: choose your data
 # Use this for a random true parameter vector
-θtrue = PriorDraw()
-data = dgp(θtrue, dsge, 1)[1]
+# θtrue = PriorDraw()
+# data = dgp(θtrue, dsge, 1)[1]
 # use this for the "official" sample used in the notes
-# data = readdlm("dsgedata.txt")
+data = readdlm("dsgedata.txt")
 
 #=
 # UNCOMMENT this block to see training of the net, using a small sample
@@ -103,6 +103,6 @@ chain = mcmc(start, finallength, lnL, model, nnmodel, nninfo, proposal, burnin, 
 chn = Chains(chain[:,1:end-2], ["β", "γ", "ρ₁", "σ₁", "ρ₂", "σ₂", "nss"])
 plot(chn)
 savefig("chain.png")
-display(chn)
 pretty_table([θtrue θnn mean(chain[:,1:end-2],dims=1)[:]], header = (["θtrue", "θnn", "θmcmc"]))
-@save "MCMC_results.bson" chain tuning Σp acceptance
+display(chn)
+
