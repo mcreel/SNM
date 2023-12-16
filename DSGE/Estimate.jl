@@ -1,13 +1,5 @@
-#= 
+# Start julia as "julia --proj -t auto" to use threads
 
-This is written to be used interactively, with VScode, to explain the
-methods, step by step. For good performance, it is better to wrap 
-everything into a function. See the example in the JD directory for
-how to do that.
-
-Start julia as "julia --proj -t auto" to use threads
-
-=#
 
 using SimulatedNeuralMoments, Flux, SolveDSGE, MCMCChains
 using Distributions, StatsPlots, DelimitedFiles, PrettyTables
@@ -16,6 +8,9 @@ using BSON:@load
 
 ## get the things to define the structure for the model
 include("CKlib.jl") # contains the functions for the DSGE model
+
+function main()
+
 @load "neuralmodel.bson" nnmodel nninfo # use this to load a trained net
 
 ## fill in the structure that defines the model
@@ -38,6 +33,7 @@ end
 # θtrue = PriorDraw()
 # data = dgp(θtrue, dsge, 1)[1]
 # use this for the "official" sample used in the notes
+θtrue = TrueParameters()
 data = readdlm("dsgedata.txt")
 
 #=
@@ -86,7 +82,6 @@ acceptance = mean(chain[:,end])
 
 ## update proposal until acceptance rate is good
 while acceptance < 0.2 || acceptance > 0.3
-    global tuning, chain, acceptance, start
     acceptance < 0.2 ? tuning *= 0.75 : nothing
     acceptance > 0.3 ? tuning *= 1.5 : nothing
     proposal(θ) = rand(MvNormal(θ, tuning*Σp))
@@ -106,3 +101,5 @@ savefig("chain.png")
 pretty_table([θtrue θnn mean(chain[:,1:end-2],dims=1)[:]], header = (["θtrue", "θnn", "θmcmc"]))
 display(chn)
 
+end
+main()
